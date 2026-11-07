@@ -7,13 +7,14 @@ export function LangToggle({ lang }: { lang: "en" | "th" }) {
   return (
     <button
       type="button"
-      className="rounded-full border border-white/40 px-3 py-1 text-sm font-medium"
+      aria-label={next === "th" ? "เปลี่ยนเป็นภาษาไทย" : "Switch to English"}
+      className="h-8 rounded-full bg-fill px-3 text-[15px] font-medium text-label transition active:scale-95"
       onClick={() => {
         document.cookie = `lang=${next};path=/;max-age=31536000;samesite=lax`;
         router.refresh();
       }}
     >
-      {next === "th" ? "ภาษาไทย" : "English"}
+      {next === "th" ? "ไทย" : "EN"}
     </button>
   );
 }

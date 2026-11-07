@@ -5,6 +5,7 @@ import { DogPhoto } from "@/components/DogPhoto";
 import { Map, type Pin } from "@/components/Map";
 import { LocationField } from "@/components/LocationField";
 import { PhotoInput } from "@/components/PhotoInput";
+import { Check, Tag, UpDown } from "@/components/Icons";
 import { getDog, dogSightings, dogTags } from "@/lib/data";
 import { updateDog, deleteDog, volunteerSighting, retireTag } from "../../../actions";
 import { fmtDateTime } from "@/lib/dates";
@@ -36,111 +37,115 @@ export default async function DogAdmin({ params, searchParams }: PageProps<"/adm
     pins.push({ lat: dog.homeLat, lng: dog.homeLng, label: "Home", kind: "home" });
 
   return (
-    <div className="space-y-6">
-      {saved && <p className="rounded-lg bg-emerald-50 px-3 py-2 text-emerald-800">Saved ✓</p>}
+    <div className="pt-8">
+      {saved && (
+        <p className="toast glass fixed top-[calc(env(safe-area-inset-top)+64px)] left-1/2 z-40 flex -translate-x-1/2 items-center gap-1.5 rounded-full px-4 py-2 text-[15px] font-semibold">
+          <Check className="h-4 w-4 text-ok" /> Saved
+        </p>
+      )}
 
-      <div className="flex items-center gap-4">
-        <DogPhoto photoId={dog.photoId} alt={dog.name} className="h-20 w-20 shrink-0 rounded-2xl" />
-        <div className="flex-1">
-          <h1 className="text-2xl font-bold">{dog.name}</h1>
-          <p className="text-stone-600">{dog.area}</p>
-        </div>
+      <div className="flex flex-col items-center text-center">
+        <DogPhoto photoId={dog.photoId} alt={dog.name} className="h-28 w-28 rounded-full" />
+        <h1 className="large-title mt-4">{dog.name}</h1>
+        {dog.area && <p className="mt-1 text-[17px] text-label-2">{dog.area}</p>}
         {activeTag && (
-          <Link href={`/d/${activeTag.code}`} className="btn-ghost text-sm">
-            Public page ↗
+          <Link href={`/d/${activeTag.code}`} className="btn-tinted mt-4 h-9 px-4 text-[15px]">
+            View public page
           </Link>
         )}
       </div>
 
-      <section className="card">
-        <h2 className="mb-2 font-semibold">Tags</h2>
-        {tagList.length === 0 && (
-          <p className="text-stone-600">
-            No tag yet. Scan a blank tag while logged in, or enter its code on the{" "}
-            <Link href="/admin/tags" className="underline">
-              Tags
-            </Link>{" "}
-            page.
-          </p>
-        )}
-        <ul className="space-y-1">
+      <section className="mt-8">
+        <h2 className="section-header">Tags</h2>
+        <div className="inset-group">
           {tagList.map((t) => (
-            <li key={t.code} className="flex items-center gap-3">
-              <span className={`font-mono text-lg ${t.retired ? "text-stone-400 line-through" : ""}`}>{t.code}</span>
-              <span className="text-sm text-stone-500">{t.assignedAt && fmtDateTime(t.assignedAt)}</span>
+            <div key={t.code} className="cell cell-icon">
+              <span className={`icon-tile ${t.retired ? "bg-label-3" : "bg-brand"}`}>
+                <Tag className="h-[18px] w-[18px]" />
+              </span>
+              <span className={`font-mono tracking-[0.15em] ${t.retired ? "text-label-3 line-through" : ""}`}>{t.code}</span>
+              <span className="flex-1 text-[15px] text-label-2">{t.assignedAt && fmtDateTime(t.assignedAt)}</span>
               {!t.retired && (
-                <form action={retireTag.bind(null, t.code)} className="ml-auto">
-                  <button className="text-sm text-stone-500 underline">Lost / retire</button>
+                <form action={retireTag.bind(null, t.code)}>
+                  <button className="text-[15px] text-bad">Lost</button>
                 </form>
               )}
-            </li>
+            </div>
           ))}
-        </ul>
+          {tagList.length === 0 && <p className="cell text-label-2">No tag yet</p>}
+        </div>
+        {tagList.length === 0 && (
+          <p className="section-footer">Scan a blank tag while signed in, or open it from the Tags tab.</p>
+        )}
       </section>
 
-      <section className="card space-y-3">
-        <h2 className="font-semibold">Log a sighting</h2>
-        <form action={volunteerSighting.bind(null, dog.id)} className="space-y-3">
+      <form action={volunteerSighting.bind(null, dog.id)} className="mt-8">
+        <h2 className="section-header">Log a sighting</h2>
+        <div className="inset-group">
           <LocationField labels={gps} auto={false} />
-          <div className="grid grid-cols-[1fr_auto] gap-2">
-            <input name="note" placeholder="Note (fed, wound healing, …)" className="input" />
-            <select name="condition" className="input">
-              <option value="ok">ok</option>
-              <option value="injured">injured</option>
-              <option value="sick">sick</option>
-              <option value="lost">lost</option>
-              <option value="other">other</option>
+          <PhotoInput label="Add photo" />
+          <label className="cell">
+            <span className="flex-1">Condition</span>
+            <select name="condition" className="cursor-pointer appearance-none bg-transparent text-right text-[17px] text-label-2 outline-none">
+              <option value="ok">OK</option>
+              <option value="injured">Injured</option>
+              <option value="sick">Sick</option>
+              <option value="lost">Lost</option>
+              <option value="other">Other</option>
             </select>
+            <UpDown className="-ml-1 h-4 w-4 text-label-3" />
+          </label>
+          <div className="cell">
+            <input name="note" placeholder="Note — fed, wound healing…" className="cell-input" />
           </div>
-          <PhotoInput label="Photo (optional)" />
-          <button className="btn-brand w-full">Save sighting</button>
-        </form>
-      </section>
+        </div>
+        <button className="btn-tinted mt-3 w-full">Save sighting</button>
+      </form>
 
-      {pins.length > 0 && <Map pins={pins} />}
-
-      {seen.length > 0 && (
-        <section className="card">
-          <h2 className="mb-2 font-semibold">History</h2>
-          <ul className="divide-y divide-stone-100">
-            {seen.map((s) => (
-              <li key={s.id} className="flex gap-3 py-2">
-                {s.photoId && <DogPhoto photoId={s.photoId} alt="" className="h-14 w-14 shrink-0 rounded-lg" />}
-                <div className="text-sm">
-                  <p>
-                    <span className="font-medium">{fmtDateTime(s.createdAt)}</span> ·{" "}
-                    <span className={s.condition === "ok" ? "" : "font-semibold text-red-600"}>{s.condition}</span> ·{" "}
-                    <span className="text-stone-500">{s.source}</span>
-                    {s.lat !== null && (
-                      <>
-                        {" · "}
-                        <a className="underline" href={`https://maps.google.com/?q=${s.lat},${s.lng}`}>
-                          map
-                        </a>
-                      </>
-                    )}
-                  </p>
-                  {s.note && <p className="text-stone-700">{s.note}</p>}
-                  {s.contact && <p className="text-stone-500">Contact: {s.contact}</p>}
-                </div>
-              </li>
-            ))}
-          </ul>
+      {pins.length > 0 && (
+        <section className="mt-8">
+          <h2 className="section-header">Where it&apos;s been</h2>
+          <Map pins={pins} />
         </section>
       )}
 
-      <section>
-        <h2 className="mb-2 text-lg font-semibold">Edit details</h2>
-        <DogForm dog={dog} action={updateDog.bind(null, dog.id)} submit="Save changes" />
-      </section>
+      {seen.length > 0 && (
+        <section className="mt-8">
+          <h2 className="section-header">History</h2>
+          <div className="inset-group">
+            {seen.map((s) => (
+              <div key={s.id} className="cell items-start py-3">
+                {s.photoId && <DogPhoto photoId={s.photoId} alt="" className="h-12 w-12 shrink-0 rounded-[10px]" />}
+                <div className="min-w-0 flex-1 text-[15px]">
+                  <p className="flex flex-wrap items-baseline gap-x-2">
+                    <span className="font-semibold">{fmtDateTime(s.createdAt)}</span>
+                    <span className={s.condition === "ok" ? "text-label-2" : "font-semibold text-bad"}>{s.condition}</span>
+                    <span className="text-label-3">{s.source}</span>
+                    {s.lat !== null && (
+                      <a className="ml-auto text-link" href={`https://maps.google.com/?q=${s.lat},${s.lng}`}>
+                        Map
+                      </a>
+                    )}
+                  </p>
+                  {s.note && <p className="mt-0.5">{s.note}</p>}
+                  {s.contact && <p className="text-label-2">{s.contact}</p>}
+                </div>
+              </div>
+            ))}
+          </div>
+        </section>
+      )}
 
-      <details className="text-sm text-stone-500">
-        <summary>Delete this dog</summary>
-        <p className="my-2">
-          Removes the dog and its history. Use status “deceased” or “adopted” instead if you want to keep the record.
+      <h2 className="mt-12 px-1 text-[22px] font-bold tracking-tight">Details</h2>
+      <DogForm dog={dog} action={updateDog.bind(null, dog.id)} submit="Save changes" />
+
+      <details className="mt-6">
+        <summary className="cursor-pointer px-4 text-[15px] text-label-2">Delete this dog…</summary>
+        <p className="section-footer">
+          Removes the dog and its history. Set status to “deceased” or “adopted” instead to keep the record.
         </p>
-        <form action={deleteDog.bind(null, dog.id)}>
-          <button className="btn border border-red-300 text-red-700">Delete permanently</button>
+        <form action={deleteDog.bind(null, dog.id)} className="mt-2">
+          <button className="btn-gray w-full text-bad">Delete permanently</button>
         </form>
       </details>
     </div>

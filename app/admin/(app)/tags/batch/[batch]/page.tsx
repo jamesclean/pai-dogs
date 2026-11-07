@@ -13,25 +13,25 @@ export default async function BatchPage({ params }: PageProps<"/admin/tags/batch
 
   return (
     <div>
-      <div className="mb-5 space-y-3 print:hidden">
-        <h1 className="text-2xl font-bold">Batch {batch}</h1>
-        <p className="text-stone-600">
+      <div className="mb-8 space-y-4 pt-8 print:hidden">
+        <h1 className="large-title">{batch}</h1>
+        <p className="text-[17px] leading-relaxed text-label-2">
           {list.length} codes. Each QR is {modules}×{modules} modules and opens{" "}
-          <span className="font-mono text-sm">{tagUrl(list[0].code)}</span>. Engrave it at least 18 mm wide
+          <span className="font-mono text-[15px] text-label">{tagUrl(list[0].code)}</span>. Engrave it at least 18 mm wide
           (≈{(18 / (modules + 2)).toFixed(2)} mm per dot) with the code printed underneath.
         </p>
-        <div className="flex flex-wrap gap-2">
-          <a href={`/admin/tags-csv/${encodeURIComponent(batch)}`} className="btn-brand">
+        <div className="flex gap-2">
+          <a href={`/admin/tags-csv/${encodeURIComponent(batch)}`} className="btn-brand flex-1">
             Download CSV for engraver
           </a>
           <PrintButton />
         </div>
       </div>
-      <div className="grid grid-cols-4 gap-3 sm:grid-cols-6 print:grid-cols-6">
+      <div className="inset-group grid grid-cols-3 gap-x-4 gap-y-5 p-5 sm:grid-cols-5 print:grid-cols-6 print:rounded-none print:p-0">
         {list.map((t, i) => (
           <figure key={t.code} className="break-inside-avoid text-center">
-            <div className="aspect-square" dangerouslySetInnerHTML={{ __html: svgs[i] }} />
-            <figcaption className={`font-mono text-xs tracking-widest ${t.dogId ? "text-stone-400" : ""}`}>
+            <div className="aspect-square overflow-hidden rounded-[6px] bg-white" dangerouslySetInnerHTML={{ __html: svgs[i] }} />
+            <figcaption className={`mt-1.5 font-mono text-[12px] tracking-[0.2em] ${t.dogId ? "text-label-3" : "text-label-2"}`}>
               {t.code}
             </figcaption>
           </figure>

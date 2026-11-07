@@ -10,7 +10,7 @@ export type Pin = {
   kind?: "home" | "ok" | "alert" | "latest";
 };
 
-const COLORS = { home: "#1c1917", ok: "#ff4f00", alert: "#dc2626", latest: "#ff4f00" };
+const COLORS = { home: "#1d1d1f", ok: "#ff4f00", alert: "#ff3b30", latest: "#ff4f00" };
 const PAI = { lat: 19.3588, lng: 98.4405 };
 
 export function Map({ pins, className = "h-80" }: { pins: Pin[]; className?: string }) {
@@ -49,5 +49,5 @@ export function Map({ pins, className = "h-80" }: { pins: Pin[]; className?: str
     };
   }, [pins]);
 
-  return <div ref={el} className={`z-0 w-full overflow-hidden rounded-2xl border border-stone-200 ${className}`} />;
+  return <div ref={el} className={`z-0 w-full overflow-hidden rounded-[14px] bg-surface-2 ${className}`} />;
 }

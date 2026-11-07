@@ -15,13 +15,19 @@ export const metadata: Metadata = {
   description: "Community dogs of Pai, Thailand",
 };
 
-export const viewport: Viewport = { themeColor: "#ff4f00" };
+export const viewport: Viewport = {
+  viewportFit: "cover",
+  themeColor: [
+    { media: "(prefers-color-scheme: light)", color: "#f2f2f7" },
+    { media: "(prefers-color-scheme: dark)", color: "#000000" },
+  ],
+};
 
 export default async function RootLayout({ children }: LayoutProps<"/">) {
   const lang = await getLang();
   return (
     <html lang={lang} className={`${sans.variable} h-full antialiased`}>
-      <body className="min-h-full flex flex-col font-sans">{children}</body>
+      <body className="flex min-h-full flex-col font-sans">{children}</body>
     </html>
   );
 }

@@ -4,6 +4,7 @@ import { count, desc, sql } from "drizzle-orm";
 import { db, tags } from "@/db";
 import { createBatch } from "../../actions";
 import { normalizeCode } from "@/lib/codes";
+import { Chevron, Search } from "@/components/Icons";
 
 async function findTag(form: FormData) {
   "use server";
@@ -17,53 +18,54 @@ export default async function TagsPage() {
       batch: tags.batch,
       total: count(),
       used: sql<number>`count(${tags.dogId})::int`,
-      created: sql<string>`min(${tags.createdAt})`,
     })
     .from(tags)
     .groupBy(tags.batch)
     .orderBy(desc(sql`min(${tags.createdAt})`));
 
   return (
-    <div className="space-y-6">
-      <section className="card">
-        <h2 className="font-semibold">Link a tag by code</h2>
-        <form action={findTag} className="mt-3 flex gap-2">
-          <input name="code" placeholder="K7M2X" className="input font-mono uppercase tracking-widest" autoCapitalize="characters" />
-          <button className="btn-brand">Open</button>
-        </form>
-        <p className="mt-2 text-sm text-stone-500">
-          Or just scan a blank tag with your phone while logged in. It offers to link it.
-        </p>
-      </section>
+    <>
+      <h1 className="large-title pt-8 pb-4">Tags</h1>
 
-      <section className="card">
-        <h2 className="font-semibold">Make a new batch of tag codes</h2>
-        <p className="mt-1 text-sm text-stone-600">
-          Generates unique codes, then gives you a CSV and print sheet to send to the engraver.
-        </p>
-        <form action={createBatch} className="mt-3 grid grid-cols-[1fr_7rem_auto] gap-2">
-          <input name="name" placeholder="Batch name, e.g. 2026-11-first100" className="input" />
-          <input name="count" type="number" min={1} max={500} defaultValue={100} className="input" />
-          <button className="btn-brand">Create</button>
-        </form>
-      </section>
+      <form action={findTag}>
+        <label className="field flex items-center gap-2 py-0">
+          <Search className="h-[18px] w-[18px] shrink-0 text-label-2" />
+          <input name="code" placeholder="Open a tag by code" autoCapitalize="characters" className="cell-input h-11 font-mono uppercase tracking-[0.2em] placeholder:font-sans placeholder:normal-case placeholder:tracking-normal" />
+        </label>
+      </form>
+      <p className="section-footer">Or scan a blank tag with your phone camera while signed in.</p>
 
-      <section>
-        <h2 className="mb-2 font-semibold">Batches</h2>
-        <ul className="divide-y divide-stone-200 overflow-hidden rounded-2xl border border-stone-200 bg-white">
+      <form action={createBatch} className="mt-8">
+        <h2 className="section-header">New batch</h2>
+        <div className="inset-group">
+          <label className="cell">
+            <span className="w-32 shrink-0">Name</span>
+            <input name="name" placeholder="2026-11-first100" className="cell-input text-right" />
+          </label>
+          <label className="cell">
+            <span className="flex-1">How many</span>
+            <input name="count" type="number" inputMode="numeric" min={1} max={500} defaultValue={100} className="cell-input w-20 flex-none text-right" />
+          </label>
+        </div>
+        <p className="section-footer">Makes unique codes plus a CSV and print sheet for the engraver.</p>
+        <button className="btn-tinted mt-3 w-full">Create batch</button>
+      </form>
+
+      <section className="mt-8">
+        <h2 className="section-header">Batches</h2>
+        <div className="inset-group">
           {batches.map((b) => (
-            <li key={b.batch}>
-              <Link href={`/admin/tags/batch/${encodeURIComponent(b.batch)}`} className="flex justify-between p-3 hover:bg-stone-50">
-                <span className="font-medium">{b.batch}</span>
-                <span className="text-stone-500">
-                  {b.used}/{b.total} on dogs
-                </span>
-              </Link>
-            </li>
+            <Link key={b.batch} href={`/admin/tags/batch/${encodeURIComponent(b.batch)}`} className="cell active:bg-fill">
+              <span className="flex-1">{b.batch}</span>
+              <span className="text-label-2">
+                {b.used} of {b.total} used
+              </span>
+              <Chevron className="h-4 w-4 text-label-3" />
+            </Link>
           ))}
-          {batches.length === 0 && <li className="p-3 text-stone-500">No tags yet.</li>}
-        </ul>
+          {batches.length === 0 && <p className="cell text-label-2">No tags yet</p>}
+        </div>
       </section>
-    </div>
+    </>
   );
 }

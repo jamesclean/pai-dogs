@@ -1,8 +1,10 @@
 "use client";
 import { useEffect, useState } from "react";
+import { Pin } from "./Icons";
 
 type Labels = { useLocation: string; locating: string; located: string; locationFailed: string };
 
+// Renders as a list cell; place inside an .inset-group.
 export function LocationField({ labels, auto = true }: { labels: Labels; auto?: boolean }) {
   const [state, setState] = useState<"idle" | "locating" | "ok" | "failed">("idle");
   const [pos, setPos] = useState<GeolocationCoordinates | null>(null);
@@ -25,25 +27,29 @@ export function LocationField({ labels, auto = true }: { labels: Labels; auto?: 
     if (auto) locate();
   }, [auto]);
 
+  const tile = state === "ok" ? "bg-ok" : state === "failed" ? "bg-warn" : "bg-link";
+
   return (
-    <div>
+    <button
+      type="button"
+      onClick={locate}
+      disabled={state === "locating"}
+      className="cell cell-icon w-full text-left active:bg-fill"
+    >
       <input type="hidden" name="lat" value={pos?.latitude ?? ""} />
       <input type="hidden" name="lng" value={pos?.longitude ?? ""} />
       <input type="hidden" name="accuracy" value={pos?.accuracy ?? ""} />
-      {state === "ok" ? (
-        <p className="rounded-lg bg-emerald-50 px-3 py-2.5 text-sm text-emerald-800">
-          📍 {labels.located} (±{Math.round(pos!.accuracy)} m)
-        </p>
-      ) : state === "locating" ? (
-        <p className="rounded-lg bg-stone-100 px-3 py-2.5 text-sm text-stone-600">{labels.locating}</p>
-      ) : (
-        <>
-          <button type="button" onClick={locate} className="btn-ghost w-full">
-            📍 {labels.useLocation}
-          </button>
-          {state === "failed" && <p className="mt-1 text-sm text-amber-700">{labels.locationFailed}</p>}
-        </>
+      <span className={`icon-tile ${tile}`}>
+        <Pin className="h-[18px] w-[18px]" />
+      </span>
+      <span className="flex-1">
+        {state === "ok" ? labels.located : state === "locating" ? labels.locating : labels.useLocation}
+        {state === "failed" && <span className="block text-[13px] text-label-2">{labels.locationFailed}</span>}
+      </span>
+      {state === "ok" && <span className="text-[15px] text-label-2">±{Math.round(pos!.accuracy)} m</span>}
+      {state === "locating" && (
+        <span className="h-4 w-4 animate-spin rounded-full border-2 border-label-3 border-t-transparent" />
       )}
-    </div>
+    </button>
   );
 }

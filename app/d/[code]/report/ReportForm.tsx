@@ -4,6 +4,7 @@ import Link from "next/link";
 import { submitReport, type ReportState } from "./actions";
 import { PhotoInput } from "@/components/PhotoInput";
 import { LocationField } from "@/components/LocationField";
+import { Check, Heart } from "@/components/Icons";
 import type { Dict } from "@/lib/i18n";
 
 const CONDITIONS = ["ok", "injured", "sick", "lost", "other"] as const;
@@ -15,59 +16,57 @@ export function ReportForm({ code, s, initial }: { code: string; s: Dict; initia
 
   if (state.ok)
     return (
-      <div className="card text-center">
-        <p className="text-4xl">🧡</p>
-        <p className="mt-2 text-lg font-semibold">{s.thanks}</p>
-        <Link href={`/d/${code}`} className="btn-ghost mt-4 w-full">
+      <div className="flex flex-col items-center pt-16 text-center">
+        <span className="flex h-20 w-20 items-center justify-center rounded-full bg-brand-soft text-brand">
+          <Heart className="h-10 w-10" />
+        </span>
+        <p className="mt-6 text-[22px] font-semibold tracking-tight">{s.thanks}</p>
+        <Link href={`/d/${code}`} className="btn-gray mt-8 w-full">
           {s.back}
         </Link>
       </div>
     );
 
   return (
-    <form action={action} className="space-y-5">
-      <fieldset>
-        <legend className="label">{s.condition}</legend>
-        <div className="grid grid-cols-2 gap-2">
-          {CONDITIONS.map((c) => (
-            <label
-              key={c}
-              className="flex cursor-pointer items-center gap-2 rounded-lg border border-stone-300 bg-white px-3 py-3 has-checked:border-brand has-checked:bg-brand-soft"
-            >
-              <input type="radio" name="condition" value={c} defaultChecked={c === initial} className="accent-brand" />
-              {s[`c_${c}`]}
-            </label>
-          ))}
-        </div>
-      </fieldset>
+    <form action={action}>
+      <h2 className="section-header">{s.condition}</h2>
+      <div className="inset-group">
+        {CONDITIONS.map((c) => (
+          <label key={c} className="cell cursor-pointer active:bg-fill">
+            <input type="radio" name="condition" value={c} defaultChecked={c === initial} className="peer sr-only" />
+            <span className="flex-1">{s[`c_${c}`]}</span>
+            <Check className="invisible h-5 w-5 text-brand peer-checked:visible" />
+          </label>
+        ))}
+      </div>
 
-      <div>
-        <span className="label">{s.location}</span>
+      <div className="inset-group mt-8">
         <LocationField labels={s} />
+        <PhotoInput label={s.photo} />
       </div>
 
-      <PhotoInput label={s.photo} />
-
-      <div>
-        <label className="label" htmlFor="note">
-          {s.note}
-        </label>
-        <textarea id="note" name="note" rows={3} className="input" />
+      <h2 className="section-header mt-8">{s.note}</h2>
+      <div className="inset-group">
+        <textarea name="note" rows={3} className="cell-input block w-full px-4 py-3" />
       </div>
 
-      <div>
-        <label className="label" htmlFor="contact">
-          {s.yourContact}
-        </label>
-        <input id="contact" name="contact" className="input" autoComplete="tel" />
+      <h2 className="section-header mt-8">{s.yourContact}</h2>
+      <div className="inset-group">
+        <div className="cell">
+          <input name="contact" className="cell-input" autoComplete="tel" placeholder="LINE / 08x-xxx-xxxx" />
+        </div>
       </div>
 
       <input name="website" tabIndex={-1} autoComplete="off" className="hidden" aria-hidden />
+      {state.error && <p className="section-footer text-bad">{state.error}</p>}
 
-      {state.error && <p className="text-red-600">{state.error}</p>}
-      <button className="btn-brand w-full py-4 text-lg" disabled={pending}>
-        {pending ? s.sending : s.send}
-      </button>
+      <div className="sticky bottom-0 z-20 -mx-4 mt-8 px-4 pb-[max(env(safe-area-inset-bottom),16px)]">
+        <div className="glass mx-auto max-w-xl rounded-[32px] p-2">
+          <button className="btn-brand w-full" disabled={pending}>
+            {pending ? s.sending : s.send}
+          </button>
+        </div>
+      </div>
     </form>
   );
 }

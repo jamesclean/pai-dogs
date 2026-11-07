@@ -4,7 +4,7 @@ export function DogPhoto({ photoId, alt, className = "" }: { photoId: number | n
   if (!photoId)
     return (
       <div className={`flex items-center justify-center bg-brand-soft text-brand ${className}`}>
-        <Paw className="h-1/3 w-1/3" />
+        <Paw className="h-1/3 w-1/3 opacity-80" />
       </div>
     );
   // eslint-disable-next-line @next/next/no-img-element

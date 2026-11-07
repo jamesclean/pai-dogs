@@ -7,9 +7,9 @@ export default async function NotFound() {
   const s = t(lang);
   return (
     <PublicShell lang={lang}>
-      <div className="card text-center">
-        <p className="text-stone-700">{s.unknownCode}</p>
-        <Link href="/" className="btn-brand mt-4">
+      <div className="pt-20 text-center">
+        <p className="text-[17px] text-label-2">{s.unknownCode}</p>
+        <Link href="/" className="btn-tinted mt-6">
           {s.typeCode}
         </Link>
       </div>

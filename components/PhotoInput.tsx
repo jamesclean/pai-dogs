@@ -1,5 +1,6 @@
 "use client";
 import { useRef, useState } from "react";
+import { Camera } from "./Icons";
 
 // Resizes in the browser before upload: phone photos are 3–8 MB, rural 4G in
 // Pai is slow, and we store photos in Postgres. 1280px JPEG ≈ 150 KB.
@@ -16,43 +17,43 @@ async function resize(file: File, max = 1280): Promise<File> {
   return new File([blob], "photo.jpg", { type: "image/jpeg" });
 }
 
+// Renders as a list cell; place inside an .inset-group.
 export function PhotoInput({ name = "photo", label }: { name?: string; label: string }) {
   const hidden = useRef<HTMLInputElement>(null);
   const [preview, setPreview] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
 
   return (
-    <div>
-      <span className="label">{label}</span>
-      <label className="flex cursor-pointer items-center gap-3 rounded-lg border border-dashed border-stone-300 bg-white p-3">
-        {preview ? (
-          // eslint-disable-next-line @next/next/no-img-element
-          <img src={preview} alt="" className="h-16 w-16 rounded-md object-cover" />
-        ) : (
-          <span className="flex h-16 w-16 items-center justify-center rounded-md bg-stone-100 text-2xl">📷</span>
-        )}
-        <span className="text-sm text-stone-600">{busy ? "…" : preview ? "✓" : "+"}</span>
-        <input
-          type="file"
-          accept="image/*"
-          className="sr-only"
-          onChange={async (e) => {
-            const f = e.target.files?.[0];
-            if (!f || !hidden.current) return;
-            setBusy(true);
-            try {
-              const small = await resize(f);
-              const dt = new DataTransfer();
-              dt.items.add(small);
-              hidden.current.files = dt.files;
-              setPreview(URL.createObjectURL(small));
-            } finally {
-              setBusy(false);
-            }
-          }}
-        />
-      </label>
+    <label className="cell cell-icon cursor-pointer active:bg-fill">
+      <span className="icon-tile bg-label-2">
+        <Camera className="h-[18px] w-[18px]" />
+      </span>
+      <span className="flex-1">{label}</span>
+      {busy && <span className="text-label-2">…</span>}
+      {preview && (
+        // eslint-disable-next-line @next/next/no-img-element
+        <img src={preview} alt="" className="-my-1 h-11 w-11 rounded-[10px] object-cover" />
+      )}
+      <input
+        type="file"
+        accept="image/*"
+        className="sr-only"
+        onChange={async (e) => {
+          const f = e.target.files?.[0];
+          if (!f || !hidden.current) return;
+          setBusy(true);
+          try {
+            const small = await resize(f);
+            const dt = new DataTransfer();
+            dt.items.add(small);
+            hidden.current.files = dt.files;
+            setPreview(URL.createObjectURL(small));
+          } finally {
+            setBusy(false);
+          }
+        }}
+      />
       <input ref={hidden} type="file" name={name} className="hidden" />
-    </div>
+    </label>
   );
 }

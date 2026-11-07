@@ -1,8 +1,8 @@
 import Link from "next/link";
-import { requireAdmin, endSession } from "@/lib/auth";
 import { redirect } from "next/navigation";
+import { requireAdmin, endSession } from "@/lib/auth";
 import { Paw } from "@/components/PublicShell";
-import { config } from "@/lib/config";
+import { AdminNav } from "@/components/AdminNav";
 
 async function logout() {
   "use server";
@@ -14,21 +14,18 @@ export default async function AdminLayout({ children }: LayoutProps<"/admin">) {
   await requireAdmin();
   return (
     <>
-      <header className="bg-stone-900 text-white">
-        <div className="mx-auto flex max-w-3xl items-center gap-4 px-4 py-3 text-sm">
-          <Link href="/admin" className="flex items-center gap-2 font-bold">
-            <Paw className="h-5 w-5 text-brand" /> {config.programName}
+      <header className="glass sticky top-0 z-30 pt-[env(safe-area-inset-top)]">
+        <div className="mx-auto grid h-[52px] max-w-3xl grid-cols-[1fr_auto_1fr] items-center px-4">
+          <Link href="/" aria-label="Public site">
+            <Paw className="h-[22px] w-[22px] text-brand" />
           </Link>
-          <nav className="flex flex-1 gap-4">
-            <Link href="/admin">Dogs</Link>
-            <Link href="/admin/tags">Tags</Link>
-          </nav>
-          <form action={logout}>
-            <button className="text-stone-400">Log out</button>
+          <AdminNav />
+          <form action={logout} className="justify-self-end">
+            <button className="text-[17px] text-brand">Log out</button>
           </form>
         </div>
       </header>
-      <main className="mx-auto w-full max-w-3xl flex-1 px-4 py-5">{children}</main>
+      <main className="mx-auto w-full max-w-3xl flex-1 px-4 pb-16">{children}</main>
     </>
   );
 }
