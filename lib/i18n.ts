@@ -1,0 +1,127 @@
+import "server-only";
+import { cookies, headers } from "next/headers";
+
+export type Lang = "en" | "th";
+
+export async function getLang(): Promise<Lang> {
+  const c = (await cookies()).get("lang")?.value;
+  if (c === "en" || c === "th") return c;
+  const accept = (await headers()).get("accept-language") ?? "";
+  return accept.toLowerCase().startsWith("th") ? "th" : "en";
+}
+
+// Thai strings should be checked by a native speaker before launch.
+const dict = {
+  en: {
+    tagline: "Community dogs of Pai, cared for by locals and volunteers.",
+    homeIntro:
+      "Dogs wearing an orange collar are part of our program. They are vaccinated, sterilized, and someone in the neighbourhood looks after them.",
+    homeScan: "Found a dog with an orange collar? Scan the QR tag on the collar.",
+    typeCode: "Or type the code from the tag",
+    go: "Go",
+    dogsInProgram: "dogs in the program",
+    communityDog: "Community dog",
+    communityDogBody: "This dog lives here and is looked after. Please don't take it away.",
+    missing: "MISSING — please report where you saw this dog",
+    adopted: "Adopted",
+    deceased: "In memory",
+    male: "Male",
+    female: "Female",
+    unknown: "Unknown sex",
+    friendly: "Friendly",
+    shy: "Shy — give space",
+    careful: "Careful — don't touch",
+    lives: "Lives around",
+    sterilized: "Sterilized",
+    notSterilized: "Not sterilized yet",
+    rabies: "Rabies vaccine",
+    rabiesDue: "Rabies vaccine due",
+    noRabies: "No rabies vaccine recorded",
+    caredBy: "Cared for by",
+    contactLine: "Message on LINE",
+    reportBtn: "I saw this dog",
+    reportInjured: "This dog needs help",
+    tagNotLinked: "This tag isn't linked to a dog yet.",
+    unknownCode: "We couldn't find that tag code.",
+    reportTitle: "Report this dog",
+    condition: "How is the dog?",
+    c_ok: "Looks fine",
+    c_injured: "Injured",
+    c_sick: "Looks sick",
+    c_lost: "Seems lost / far from home",
+    c_other: "Other",
+    note: "Anything else? (optional)",
+    photo: "Photo (optional)",
+    yourContact: "Your LINE or phone, if we may contact you (optional)",
+    location: "Location",
+    useLocation: "Share my location",
+    locating: "Finding your location…",
+    located: "Location added",
+    locationFailed: "Couldn't get location — please describe where in the note",
+    send: "Send",
+    sending: "Sending…",
+    thanks: "Thank you! The volunteers have been notified.",
+    back: "Back to the dog",
+    contactProgram: "Contact the program",
+    since: "since",
+  },
+  th: {
+    tagline: "หมาชุมชนของปาย ดูแลโดยคนในพื้นที่และอาสาสมัคร",
+    homeIntro:
+      "หมาที่ใส่ปลอกคอสีส้มอยู่ในโครงการของเรา ได้รับวัคซีน ทำหมันแล้ว และมีคนในชุมชนคอยดูแล",
+    homeScan: "เจอหมาใส่ปลอกคอสีส้ม? สแกน QR บนปลอกคอได้เลย",
+    typeCode: "หรือพิมพ์รหัสบนป้าย",
+    go: "ไป",
+    dogsInProgram: "ตัวในโครงการ",
+    communityDog: "หมาชุมชน",
+    communityDogBody: "หมาตัวนี้อาศัยอยู่ที่นี่และมีคนดูแล กรุณาอย่าพาไป",
+    missing: "หายตัวไป — ถ้าเห็นกรุณาแจ้งเรา",
+    adopted: "มีบ้านแล้ว",
+    deceased: "ระลึกถึง",
+    male: "ตัวผู้",
+    female: "ตัวเมีย",
+    unknown: "ไม่ทราบเพศ",
+    friendly: "เป็นมิตร",
+    shy: "ขี้อาย — ให้พื้นที่",
+    careful: "ระวัง — อย่าจับ",
+    lives: "อยู่แถว",
+    sterilized: "ทำหมันแล้ว",
+    notSterilized: "ยังไม่ได้ทำหมัน",
+    rabies: "วัคซีนพิษสุนัขบ้า",
+    rabiesDue: "ถึงกำหนดฉีดวัคซีนพิษสุนัขบ้า",
+    noRabies: "ยังไม่มีบันทึกวัคซีนพิษสุนัขบ้า",
+    caredBy: "ผู้ดูแล",
+    contactLine: "ติดต่อทาง LINE",
+    reportBtn: "ฉันเห็นหมาตัวนี้",
+    reportInjured: "หมาตัวนี้ต้องการความช่วยเหลือ",
+    tagNotLinked: "ป้ายนี้ยังไม่ได้ผูกกับหมาตัวไหน",
+    unknownCode: "ไม่พบรหัสป้ายนี้",
+    reportTitle: "แจ้งเรื่องหมาตัวนี้",
+    condition: "หมาเป็นอย่างไรบ้าง?",
+    c_ok: "ดูปกติดี",
+    c_injured: "บาดเจ็บ",
+    c_sick: "ดูป่วย",
+    c_lost: "ดูเหมือนหลงทาง / ไกลจากบ้าน",
+    c_other: "อื่น ๆ",
+    note: "รายละเอียดเพิ่มเติม (ไม่บังคับ)",
+    photo: "รูปภาพ (ไม่บังคับ)",
+    yourContact: "LINE หรือเบอร์โทรของคุณ ถ้าให้เราติดต่อกลับได้ (ไม่บังคับ)",
+    location: "ตำแหน่ง",
+    useLocation: "แชร์ตำแหน่งของฉัน",
+    locating: "กำลังหาตำแหน่ง…",
+    located: "เพิ่มตำแหน่งแล้ว",
+    locationFailed: "หาตำแหน่งไม่ได้ — กรุณาบอกสถานที่ในช่องรายละเอียด",
+    send: "ส่ง",
+    sending: "กำลังส่ง…",
+    thanks: "ขอบคุณ! เราแจ้งอาสาสมัครแล้ว",
+    back: "กลับไปหน้าหมา",
+    contactProgram: "ติดต่อโครงการ",
+    since: "เมื่อ",
+  },
+} as const;
+
+export type Dict = { [K in keyof (typeof dict)["en"]]: string };
+
+export function t(lang: Lang): Dict {
+  return dict[lang];
+}
