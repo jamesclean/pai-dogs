@@ -76,7 +76,8 @@ export const sightings = pgTable(
       .notNull()
       .references(() => dogs.id, { onDelete: "cascade" }),
     tagCode: text("tag_code"),
-    source: text("source", { enum: ["public", "volunteer"] }).notNull().default("public"),
+    // "scan" is a passive sighting: someone opened the tag page and shared their location.
+    source: text("source", { enum: ["public", "volunteer", "scan"] }).notNull().default("public"),
     condition: text("condition", { enum: ["ok", "injured", "sick", "lost", "other"] })
       .notNull()
       .default("ok"),
@@ -92,6 +93,38 @@ export const sightings = pgTable(
   (t) => [index("sightings_dog_idx").on(t.dogId, t.createdAt)],
 );
 
+// A dog someone spotted without an orange collar. Volunteers turn these into
+// dogs (dogId is set once they do).
+export const newDogReports = pgTable(
+  "new_dog_reports",
+  {
+    id: serial("id").primaryKey(),
+    note: text("note").notNull().default(""),
+    contact: text("contact").notNull().default(""),
+    lat: doublePrecision("lat"),
+    lng: doublePrecision("lng"),
+    accuracy: doublePrecision("accuracy"),
+    photoId: integer("photo_id").references(() => photos.id, { onDelete: "set null" }),
+    reviewed: boolean("reviewed").notNull().default(false),
+    dogId: integer("dog_id").references(() => dogs.id, { onDelete: "set null" }),
+    createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+  },
+  (t) => [index("new_dog_reports_reviewed_idx").on(t.reviewed, t.createdAt)],
+);
+
+// One row per public submission, keyed by a salted hash of the IP (never the
+// IP itself). Used to rate-limit reports, scans and sign-in attempts.
+export const rateHits = pgTable(
+  "rate_hits",
+  {
+    id: serial("id").primaryKey(),
+    key: text("key").notNull(),
+    at: timestamp("at", { withTimezone: true }).notNull().defaultNow(),
+  },
+  (t) => [index("rate_hits_key_idx").on(t.key, t.at)],
+);
+
 export type Dog = typeof dogs.$inferSelect;
+export type NewDogReport = typeof newDogReports.$inferSelect;
 export type Sighting = typeof sightings.$inferSelect;
 export type Tag = typeof tags.$inferSelect;

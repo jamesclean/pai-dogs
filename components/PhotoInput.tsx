@@ -1,6 +1,6 @@
 "use client";
 import { useRef, useState } from "react";
-import { Camera } from "./Icons";
+import { Camera, Chevron } from "./Icons";
 
 // Resizes in the browser before upload: phone photos are 3–8 MB, rural 4G in
 // Pai is slow, and we store photos in Postgres. 1280px JPEG ≈ 150 KB.
@@ -17,23 +17,24 @@ async function resize(file: File, max = 1280): Promise<File> {
   return new File([blob], "photo.jpg", { type: "image/jpeg" });
 }
 
-// Renders as a list cell; place inside an .inset-group.
-export function PhotoInput({ name = "photo", label }: { name?: string; label: string }) {
+// "row" sits inside a .card-rows; "large" is the big picker on Add a new dog.
+export function PhotoInput({
+  name = "photo",
+  label,
+  changeLabel,
+  variant = "row",
+}: {
+  name?: string;
+  label: string;
+  changeLabel?: string;
+  variant?: "row" | "large";
+}) {
   const hidden = useRef<HTMLInputElement>(null);
   const [preview, setPreview] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
 
-  return (
-    <label className="cell cell-icon cursor-pointer active:bg-fill">
-      <span className="icon-tile bg-label-2">
-        <Camera className="h-[18px] w-[18px]" />
-      </span>
-      <span className="flex-1">{label}</span>
-      {busy && <span className="text-label-2">…</span>}
-      {preview && (
-        // eslint-disable-next-line @next/next/no-img-element
-        <img src={preview} alt="" className="-my-1 h-11 w-11 rounded-[10px] object-cover" />
-      )}
+  const picker = (
+    <>
       <input
         type="file"
         accept="image/*"
@@ -54,6 +55,41 @@ export function PhotoInput({ name = "photo", label }: { name?: string; label: st
         }}
       />
       <input ref={hidden} type="file" name={name} className="hidden" />
+    </>
+  );
+
+  if (variant === "large")
+    return (
+      <label className="relative flex h-[200px] cursor-pointer flex-col items-center justify-center gap-2.5 overflow-hidden rounded-[24px] border border-sep bg-surface">
+        {preview ? (
+          <>
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img src={preview} alt="" className="absolute inset-0 h-full w-full object-cover" />
+            <span className="chip absolute bottom-3 left-3">{changeLabel ?? label}</span>
+          </>
+        ) : (
+          <>
+            <span className="tile h-[52px] w-[52px] rounded-full bg-surface-raised shadow-control">
+              <Camera className="h-6 w-6" />
+            </span>
+            <span className="text-callout">{busy ? "…" : label}</span>
+          </>
+        )}
+        {picker}
+      </label>
+    );
+
+  return (
+    <label className="row cursor-pointer">
+      <Camera className="h-[22px] w-[22px] shrink-0" />
+      <span className="flex-1 text-callout">{busy ? "…" : preview && changeLabel ? changeLabel : label}</span>
+      {preview ? (
+        // eslint-disable-next-line @next/next/no-img-element
+        <img src={preview} alt="" className="-my-1 h-10 w-10 rounded-[10px] object-cover" />
+      ) : (
+        <Chevron className="h-4 w-4 text-label-3" />
+      )}
+      {picker}
     </label>
   );
 }

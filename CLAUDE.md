@@ -36,31 +36,19 @@ See README.md for features and deployment, SOURCING.md for tag and collar suppli
   LINE Notify is dead, so don't suggest it.
 - Next 16 with `cacheComponents: false`: every page is dynamic on purpose.
 
-## Design direction (in progress)
+## Design
 
-The current UI is an iOS-native re-skin: glass bars, large titles, inset grouped
-lists, system font, automatic dark mode. Colours are semantic tokens in
-`app/globals.css` (bg, surface, label, label-2, sep, fill, brand…). Components
-only use those names, never raw colours.
-
-**Next step:** James wants it to match his reference **App screens** in Figma
-(World ID–like: white, minimal, lots of whitespace). He also likes the white
-work in his Verifast One file.
-- References: https://www.figma.com/design/jYLDF4OWbACbl1cO4KkTLO/Pai-Dogs?node-id=0-1
-  ("the App screens are 100% what I'm after")
-- Build the Pai Dogs screens in Figma here: https://www.figma.com/design/jYLDF4OWbACbl1cO4KkTLO/Pai-Dogs?node-id=1-13201
-- Verifast One (work account, may not be readable from his personal Figma login):
-  https://www.figma.com/design/Kk25AP5gvE75caQ4JL3PsQ/Verifast-One?node-id=7814-8854
-
-Plan: read the references with the Figma read tools (`get_screenshot`,
-`get_design_context`, `get_variable_defs`), extract tokens (type scale,
-colours, radii, spacing, shadows), build the screens in node 1-13201, and
-once James signs off, port the tokens into `app/globals.css` and adjust
-components.
-
-Screens: public dog page (light + dark), report form, report sent, home,
-volunteer login, admin dashboard (inbox + map + list), dog detail/editor,
-tags list, tag link, batch print sheet.
+The UI follows the Pai Dogs Figma file (World ID–style: white, minimal, lots of whitespace):
+https://www.figma.com/design/jYLDF4OWbACbl1cO4KkTLO/Pai-Dogs?node-id=1-13201
+- Kit section holds the variables (Light/Dark), text styles, components and icons.
+  `app/globals.css` mirrors those variables one-to-one; components only use the token names.
+- Light and Dark screen sets, plus "New features" sections (scan sighting, add a new dog,
+  browse, look up). The sponsor (PromptPay) designs there are parked: don't build them yet.
+- Type: Geist + IBM Plex Sans Thai. Icons: Hugeicons stroke rounded, 1.5 stroke.
+- Main buttons are black (inverse). Orange is for the collar/brand only.
+- No decorative dots (in chips, labels or lists). History timeline dots and map pins are fine.
+- Copy follows James's house rules (`~/.claude/skills/copy-refinement`): verb + noun buttons,
+  labels not questions, • between facts, sentence case, no em dashes.
 
 ## Status
 
@@ -77,7 +65,8 @@ tags list, tag link, batch print sheet.
 cp .env.example .env.local   # DATABASE_URL, ADMIN_PASSWORD, SESSION_SECRET, SITE_URL
 npm install && npm run db:migrate
 npm run build && npm start
-node scripts/e2e.mjs /tmp/pai-e2e   # full public + volunteer flow in headless iPhones
+npx playwright install chromium   # once
+npm run e2e -- /tmp/pai-e2e         # full public + volunteer flow in headless iPhones
 ```
 
 In the cloud container, Postgres 16 is installed:

@@ -8,9 +8,9 @@ export default async function NotFound() {
   return (
     <PublicShell lang={lang}>
       <div className="pt-20 text-center">
-        <p className="text-[17px] text-label-2">{s.unknownCode}</p>
-        <Link href="/" className="btn-tinted mt-6">
-          {s.typeCode}
+        <p className="text-body text-label-2">{s.unknownCode}</p>
+        <Link href="/lookup" className="btn-secondary mt-6">
+          {s.lookUp}
         </Link>
       </div>
     </PublicShell>

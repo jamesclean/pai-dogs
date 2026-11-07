@@ -1,10 +1,11 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import type { Metadata } from "next";
-import { PublicShell, BAR_HEIGHT } from "@/components/PublicShell";
+import { PublicShell } from "@/components/PublicShell";
 import { DogPhoto } from "@/components/DogPhoto";
-import { Check, Bang, Pin, Person, Bubble, Chevron, Heart } from "@/components/Icons";
-import { getLang, t } from "@/lib/i18n";
+import { ScanCard } from "@/components/ScanCard";
+import { Alert, Eye, Paw, Pin, Shield, Syringe } from "@/components/Icons";
+import { getLang, t, fill } from "@/lib/i18n";
 import { getTag } from "@/lib/data";
 import { isAdmin } from "@/lib/auth";
 import { fmtDate, rabiesCurrent } from "@/lib/dates";
@@ -29,10 +30,10 @@ export default async function DogByTag({ params }: PageProps<"/d/[code]">) {
     return (
       <PublicShell lang={lang}>
         <div className="pt-16 text-center">
-          <p className="font-mono text-[28px] tracking-[0.25em]">{tag.code}</p>
-          <p className="mt-3 text-[17px] text-label-2">{s.tagNotLinked}</p>
+          <p className="font-mono text-[40px] leading-[44px] font-medium tracking-[8px]">{tag.code}</p>
+          <p className="mt-3 text-body text-label-2">{s.tagNotLinked}</p>
           {admin && (
-            <Link href={`/admin/tags/${tag.code}`} className="btn-brand mt-8 w-full">
+            <Link href={`/admin/tags/${tag.code}`} className="btn-primary mt-8 w-full">
               Link this tag to a dog
             </Link>
           )}
@@ -43,140 +44,150 @@ export default async function DogByTag({ params }: PageProps<"/d/[code]">) {
 
   const rabiesOk = rabiesCurrent(dog.rabiesVaccinatedOn);
   const contactLine = dog.caretakerLine || config.contactLine;
-  const statusLabel = dog.status === "community" || dog.status === "missing" ? s.communityDog : s[dog.status];
+  const statusLabel =
+    dog.status === "missing" ? s.missingLabel : dog.status === "community" ? s.communityDog : s[dog.status];
 
   const bottomBar =
     dog.status === "deceased" ? undefined : (
       <>
-        <Link href={`/d/${tag.code}/report?c=injured`} className="btn-gray flex-1 px-3 text-bad">
-          {s.needsHelp}
+        <Link href={`/d/${tag.code}/report?c=injured`} className="btn-danger flex-1">
+          {s.getHelp}
         </Link>
-        <Link href={`/d/${tag.code}/report`} className="btn-brand flex-1 px-3">
-          {s.reportBtn}
+        <Link href={`/d/${tag.code}/report`} className="btn-primary flex-1">
+          {s.sawDog}
         </Link>
       </>
     );
 
   return (
     <PublicShell lang={lang} bottomBar={bottomBar}>
-      {/* Full-bleed photo that runs up under the glass bar. */}
-      <div
-        className="relative -mx-4 sm:mx-0 sm:mt-4"
-        style={{ marginTop: `calc(-${BAR_HEIGHT}px - env(safe-area-inset-top))` }}
-      >
-        <DogPhoto photoId={dog.photoId} alt={dog.name} className="aspect-[4/5] w-full sm:rounded-[28px]" />
-        <div className="absolute inset-x-0 bottom-0 h-40 bg-gradient-to-t from-black/55 to-transparent sm:rounded-b-[28px]" />
-        <div className="absolute inset-x-0 bottom-0 px-5 pb-5 text-white">
-          <span className="glass mb-3 inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-[13px] font-semibold text-label">
-            <span className="h-2 w-2 rounded-full bg-brand" />
-            {statusLabel}
-          </span>
-          <h1 className="large-title text-[44px]">{dog.name}</h1>
-          <p className="mt-1 text-[17px] text-white/85">
-            {s[dog.sex]} · {s[dog.temperament]}
-          </p>
-        </div>
+      <div className="relative overflow-hidden rounded-[28px] border border-sep shadow-card">
+        <DogPhoto photoId={dog.photoId} alt={dog.name} className="aspect-[358/430] w-full" />
+        <span className={`chip absolute top-4 left-4 ${dog.status === "missing" ? "text-bad" : ""}`}>
+          {dog.status === "missing" ? <Alert className="h-4 w-4" /> : <Paw className="h-4 w-4" />}
+          {statusLabel}
+        </span>
       </div>
 
+      {dog.status !== "deceased" && (
+        <ScanCard
+          code={tag.code}
+          labels={{
+            title: fill(s.scanTitle, { name: dog.name }),
+            body: s.scanBody,
+            share: s.shareLocation,
+            notNow: s.notNow,
+            done: s.scanDone,
+          }}
+        />
+      )}
+
+      <h1 className="mt-5 text-display">{dog.name}</h1>
+      <p className="mt-1 text-subhead text-label-2">
+        {s[dog.sex]} • {s[dog.temperament]}
+      </p>
+
       {dog.status === "missing" && (
-        <div className="mt-5 flex items-center gap-3 rounded-[14px] bg-bad px-4 py-3.5 font-semibold text-white">
-          <Bang className="h-5 w-5 shrink-0" />
-          {s.missing}
-        </div>
+        <p className="mt-4 rounded-[20px] bg-bad-soft px-4 py-3.5 text-callout text-bad">{s.missing}</p>
       )}
+      {dog.status === "community" && <p className="mt-4 text-body">{s.communityDogBody}</p>}
 
-      {dog.status === "community" && (
-        <p className="mt-6 text-[17px] leading-relaxed text-label-2">{s.communityDogBody}</p>
-      )}
-
-      <div className="inset-group mt-6">
-        <div className={`cell cell-icon`}>
-          <StatusTile ok={dog.sterilized} />
-          <div className="flex-1">
-            <p>{dog.sterilized ? s.sterilized : s.notSterilized}</p>
-            {dog.sterilized && dog.sterilizedOn && (
-              <p className="text-[15px] text-label-2">{fmtDate(dog.sterilizedOn, lang)}</p>
-            )}
-          </div>
-        </div>
-        <div className="cell cell-icon">
-          <StatusTile ok={rabiesOk} />
-          <div className="flex-1">
-            <p>{dog.rabiesVaccinatedOn ? (rabiesOk ? s.rabies : s.rabiesDue) : s.noRabies}</p>
-            {dog.rabiesVaccinatedOn && (
-              <p className="text-[15px] text-label-2">{fmtDate(dog.rabiesVaccinatedOn, lang)}</p>
-            )}
-          </div>
-        </div>
+      <div className="card-rows mt-6">
+        <HealthRow
+          Icon={Shield}
+          title={s.sterilization}
+          sub={dog.sterilized && dog.sterilizedOn ? fmtDate(dog.sterilizedOn, lang) : undefined}
+          pill={dog.sterilized ? [s.done, "ok"] : [s.notYet, "warn"]}
+        />
+        <HealthRow
+          Icon={Syringe}
+          title={s.rabiesVaccine}
+          sub={dog.rabiesVaccinatedOn ? fmtDate(dog.rabiesVaccinatedOn, lang) : undefined}
+          pill={dog.rabiesVaccinatedOn ? (rabiesOk ? [s.upToDate, "ok"] : [s.due, "warn"]) : [s.notRecorded, "warn"]}
+        />
       </div>
 
       {(dog.area || dog.description) && (
-        <div className="inset-group mt-6">
-          {dog.area && (
-            <div className="cell cell-icon">
-              <span className="icon-tile bg-link">
-                <Pin className="h-[18px] w-[18px]" />
-              </span>
-              <div className="flex-1">
-                <p className="text-[13px] text-label-2">{s.lives}</p>
-                <p>{dog.area}</p>
-              </div>
-            </div>
-          )}
-          {dog.description && (
-            <div className="cell cell-icon">
-              <span className="icon-tile bg-brand">
-                <Heart className="h-[18px] w-[18px]" />
-              </span>
-              <p className="flex-1">{dog.description}</p>
-            </div>
-          )}
+        <div className="mt-3">
+          {dog.area && <InfoRow Icon={Pin} title={dog.area} sub={s.livesAround} />}
+          {dog.description && <InfoRow Icon={Eye} title={dog.description} sub={s.looksLike} />}
         </div>
       )}
 
       {dog.publicNotes && (
-        <p className="mt-6 px-1 text-[17px] leading-relaxed whitespace-pre-line">{dog.publicNotes}</p>
+        <p className="mt-2 rounded-[20px] bg-brand-soft px-4 py-3.5 text-subhead whitespace-pre-line">{dog.publicNotes}</p>
       )}
 
       {(dog.caretakerName || contactLine) && (
         <section className="mt-8">
-          <h2 className="section-header">{s.caredBy}</h2>
-          <div className="inset-group">
-            {dog.caretakerName && (
-              <div className="cell cell-icon">
-                <span className="icon-tile bg-label-2">
-                  <Person className="h-[18px] w-[18px]" />
-                </span>
-                <p className="flex-1">{dog.caretakerName}</p>
-              </div>
-            )}
+          <h2 className="text-section">{s.caredBy}</h2>
+          <div className="row mt-1">
+            <span className="tile h-11 w-11 rounded-full bg-fill text-footnote font-medium text-label-2">
+              {initials(dog.caretakerName || config.programName)}
+            </span>
+            <p className="min-w-0 flex-1 text-callout">{dog.caretakerName || config.programName}</p>
             {contactLine && (
-              <a href={lineUrl(contactLine)} className="cell cell-icon active:bg-fill">
-                <span className="icon-tile bg-[#06C755]">
-                  <Bubble className="h-[18px] w-[18px]" />
-                </span>
-                <span className="flex-1">{s.contactLine}</span>
-                <Chevron className="h-4 w-4 text-label-3" />
+              <a href={lineUrl(contactLine)} className="btn-outline btn-sm">
+                {s.messageOnLine}
               </a>
             )}
           </div>
         </section>
       )}
 
-      <p className="mt-10 text-center font-mono text-[12px] tracking-[0.3em] text-label-3">{tag.code}</p>
-      {admin && (
-        <Link href={`/admin/dogs/${dog.id}`} className="mt-2 block text-center text-[15px] text-link">
-          Edit (volunteer)
-        </Link>
-      )}
+      <div className="mt-10 text-center">
+        <p className="text-caption text-label-3">{s.tag}</p>
+        <p className="mt-1 text-code text-label-3">{tag.code}</p>
+        {admin && (
+          <Link href={`/admin/dogs/${dog.id}`} className="mt-3 inline-block text-subhead text-link">
+            Edit dog
+          </Link>
+        )}
+      </div>
     </PublicShell>
   );
 }
 
-function StatusTile({ ok }: { ok: boolean }) {
+function initials(name: string) {
+  return name
+    .split(/\s+/)
+    .filter(Boolean)
+    .slice(0, 2)
+    .map((w) => w[0]?.toUpperCase())
+    .join("");
+}
+
+function HealthRow({
+  Icon,
+  title,
+  sub,
+  pill,
+}: {
+  Icon: (p: { className?: string }) => React.ReactNode;
+  title: string;
+  sub?: string;
+  pill: [string, "ok" | "warn"];
+}) {
   return (
-    <span className={`icon-tile ${ok ? "bg-ok" : "bg-warn"}`}>
-      {ok ? <Check className="h-[17px] w-[17px]" /> : <Bang className="h-[17px] w-[17px]" />}
-    </span>
+    <div className="row">
+      <Icon className="h-[22px] w-[22px] shrink-0" />
+      <div className="min-w-0 flex-1">
+        <p className="text-callout">{title}</p>
+        {sub && <p className="text-footnote text-label-2">{sub}</p>}
+      </div>
+      <span className={`pill ${pill[1] === "ok" ? "bg-ok-soft text-ok" : "bg-warn-soft text-warn"}`}>{pill[0]}</span>
+    </div>
+  );
+}
+
+function InfoRow({ Icon, title, sub }: { Icon: (p: { className?: string }) => React.ReactNode; title: string; sub: string }) {
+  return (
+    <div className="row">
+      <Icon className="h-[22px] w-[22px] shrink-0" />
+      <div className="min-w-0 flex-1">
+        <p className="text-callout">{title}</p>
+        <p className="text-footnote text-label-2">{sub}</p>
+      </div>
+    </div>
   );
 }

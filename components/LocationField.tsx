@@ -2,9 +2,9 @@
 import { useEffect, useState } from "react";
 import { Pin } from "./Icons";
 
-type Labels = { useLocation: string; locating: string; located: string; locationFailed: string };
+type Labels = { yourLocation: string; shareYourLocation: string; locating: string; added: string; locationFailed: string };
 
-// Renders as a list cell; place inside an .inset-group.
+// A row inside a .card-rows. Posts lat/lng/accuracy as hidden inputs.
 export function LocationField({ labels, auto = true }: { labels: Labels; auto?: boolean }) {
   const [state, setState] = useState<"idle" | "locating" | "ok" | "failed">("idle");
   const [pos, setPos] = useState<GeolocationCoordinates | null>(null);
@@ -27,26 +27,19 @@ export function LocationField({ labels, auto = true }: { labels: Labels; auto?: 
     if (auto) locate();
   }, [auto]);
 
-  const tile = state === "ok" ? "bg-ok" : state === "failed" ? "bg-warn" : "bg-link";
-
   return (
-    <button
-      type="button"
-      onClick={locate}
-      disabled={state === "locating"}
-      className="cell cell-icon w-full text-left active:bg-fill"
-    >
+    <button type="button" onClick={locate} disabled={state === "locating"} className="row w-full text-left">
       <input type="hidden" name="lat" value={pos?.latitude ?? ""} />
       <input type="hidden" name="lng" value={pos?.longitude ?? ""} />
       <input type="hidden" name="accuracy" value={pos?.accuracy ?? ""} />
-      <span className={`icon-tile ${tile}`}>
-        <Pin className="h-[18px] w-[18px]" />
+      <Pin className="h-[22px] w-[22px] shrink-0" />
+      <span className="min-w-0 flex-1">
+        <span className="block text-callout">
+          {state === "ok" ? labels.yourLocation : state === "locating" ? labels.locating : labels.shareYourLocation}
+        </span>
+        {state === "failed" && <span className="block text-footnote text-label-2">{labels.locationFailed}</span>}
       </span>
-      <span className="flex-1">
-        {state === "ok" ? labels.located : state === "locating" ? labels.locating : labels.useLocation}
-        {state === "failed" && <span className="block text-[13px] text-label-2">{labels.locationFailed}</span>}
-      </span>
-      {state === "ok" && <span className="text-[15px] text-label-2">±{Math.round(pos!.accuracy)} m</span>}
+      {state === "ok" && <span className="pill bg-ok-soft text-ok">{labels.added}</span>}
       {state === "locating" && (
         <span className="h-4 w-4 animate-spin rounded-full border-2 border-label-3 border-t-transparent" />
       )}

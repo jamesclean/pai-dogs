@@ -1,9 +1,7 @@
-import Link from "next/link";
 import { notFound } from "next/navigation";
 import { PublicShell } from "@/components/PublicShell";
 import { DogPhoto } from "@/components/DogPhoto";
-import { ChevronLeft } from "@/components/Icons";
-import { getLang, t } from "@/lib/i18n";
+import { getLang, t, fill } from "@/lib/i18n";
 import { getTag } from "@/lib/data";
 import { ReportForm } from "./ReportForm";
 
@@ -16,20 +14,28 @@ export default async function ReportPage({ params, searchParams }: PageProps<"/d
   const s = t(lang);
   const row = await getTag(code);
   if (!row?.dog) notFound();
+  const { dog, tag } = row;
 
   return (
-    <PublicShell lang={lang}>
-      <div>
-        <Link href={`/d/${row.tag.code}`} className="-ml-1.5 mt-3 inline-flex items-center gap-0.5 text-[17px] text-brand">
-          <ChevronLeft className="h-5 w-5" />
-          {row.dog.name}
-        </Link>
-        <div className="mt-4 mb-8 flex items-center gap-4">
-          <DogPhoto photoId={row.dog.photoId} alt={row.dog.name} className="h-16 w-16 rounded-full" />
-          <h1 className="large-title">{s.reportTitle}</h1>
+    <PublicShell lang={lang} back={{ href: `/d/${tag.code}`, label: dog.name }}>
+      <div className="flex items-center gap-3">
+        <DogPhoto photoId={dog.photoId} alt="" className="h-12 w-12 rounded-[14px]" />
+        <div className="min-w-0">
+          <p className="text-callout">{dog.name}</p>
+          <p className="truncate text-footnote text-label-2">
+            {s.tag} {tag.code}
+            {dog.area && ` • ${dog.area}`}
+          </p>
         </div>
-        <ReportForm code={row.tag.code} s={s} initial={typeof c === "string" ? c : "ok"} />
       </div>
+      <h1 className="mt-6 text-title">{fill(s.howIs, { name: dog.name })}</h1>
+      <ReportForm
+        code={tag.code}
+        photoId={dog.photoId}
+        s={s}
+        backLabel={fill(s.backTo, { name: dog.name })}
+        initial={typeof c === "string" ? c : "ok"}
+      />
     </PublicShell>
   );
 }

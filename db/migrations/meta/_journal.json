@@ -8,6 +8,20 @@
       "when": 1794066129488,
       "tag": "0000_init",
       "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "7",
+      "when": 1794085133624,
+      "tag": "0001_new_dog_reports",
+      "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1794086116358,
+      "tag": "0002_rate_hits",
+      "breakpoints": true
     }
   ]
 }
