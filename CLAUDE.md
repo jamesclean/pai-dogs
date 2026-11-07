@@ -52,11 +52,10 @@ https://www.figma.com/design/jYLDF4OWbACbl1cO4KkTLO/Pai-Dogs?node-id=1-13201
 
 ## Status
 
-- Code: https://github.com/jamesclean/pai-dogs. `main` is the old iOS re-skin.
-  The redesign + new features are on branch `redesign-and-new-features`, committed
-  locally but **not pushed**: this Mac's git/gh login is James's Verifast work account
-  (`jamesmcpherson-vf`), which can't push to `jamesclean/pai-dogs`. Once he signs in as
-  `jamesclean` (`gh auth login`), push over HTTPS and open the PR. Don't touch his credentials.
+- Code: https://github.com/jamesclean/pai-dogs. `main` is the old iOS re-skin. The redesign +
+  new features are in PR #1 (`redesign-and-new-features`). Push over HTTPS as `jamesclean`
+  (`git push https://github.com/jamesclean/pai-dogs.git <branch>`): the SSH key on James's Mac
+  is his Verifast work account and can't push here. Don't touch his credentials.
 - Not deployed. Deploy plan: Supabase (Postgres) + Vercel, not created yet. When James sends
   the connection string, run `npm run db:migrate` (migrations 0000–0002).
 - Before launch: native Thai check of `lib/i18n.ts` and `app/privacy/page.tsx`;
