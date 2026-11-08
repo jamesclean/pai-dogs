@@ -6,6 +6,8 @@ import { adoptionQuestions, db, dogs, photos, tags, sightings, newDogReports, ty
 import { requireAdmin } from "@/lib/auth";
 import { savePhoto } from "@/lib/photos";
 import { newCode, normalizeCode } from "@/lib/codes";
+import { getDog } from "@/lib/data";
+import { DOG_GROUPS } from "@/lib/dog-groups";
 
 function str(f: FormData, k: string, max = 500) {
   return String(f.get(k) ?? "").trim().slice(0, max);
@@ -50,8 +52,6 @@ function dogFields(f: FormData) {
     name: str(f, "name", 80) || "Unnamed",
     sex: pick(str(f, "sex"), ["male", "female", "unknown"] as const, "unknown"),
     temperament: pick(str(f, "temperament"), ["friendly", "shy", "careful"] as const, "friendly"),
-    status: pick(str(f, "status"), ["community", "missing", "deceased"] as const, "community"),
-    homeStatus: (["has_home", "ask_adoption"] as const).find((v) => v === str(f, "homeStatus")) ?? null,
     description: str(f, "description"),
     area: str(f, "area", 200),
     homeLat: numOrNull(f, "lat"),
@@ -71,6 +71,7 @@ function dogFields(f: FormData) {
 export async function createDog(form: FormData) {
   await requireAdmin();
   const fields = dogFields(form);
+  const group = pick(str(form, "group"), DOG_GROUPS, "community");
   // Made from a "new dog" report: reuse its photo and spot unless replaced.
   const reportId = Number(form.get("report"));
   const [report] = Number.isInteger(reportId) && reportId > 0
@@ -83,7 +84,12 @@ export async function createDog(form: FormData) {
   }
   const [dog] = await db
     .insert(dogs)
-    .values({ ...fields, photoId })
+    .values({
+      ...fields,
+      photoId,
+      status: group === "memory" ? "deceased" : "community",
+      homeStatus: group === "home" ? "has_home" : group === "community" && form.get("adoption") === "on" ? "ask_adoption" : null,
+    })
     .returning({ id: dogs.id });
   if (report) {
     await db.update(newDogReports).set({ reviewed: true, dogId: dog.id }).where(eq(newDogReports.id, report.id));
@@ -116,9 +122,36 @@ export async function updateDog(id: number, form: FormData) {
   await requireAdmin();
   const photoId = await savePhoto(form.get("photo"));
   const fields = dogFields(form);
+  const current = await getDog(id);
+  if (!current) redirect("/admin");
   await db
     .update(dogs)
-    .set({ ...fields, ...(photoId ? { photoId } : {}), updatedAt: new Date() })
+    .set({
+      ...fields,
+      ...(photoId ? { photoId } : {}),
+      status: current.status === "deceased" ? "deceased" : form.get("missing") === "on" ? "missing" : "community",
+      homeStatus: current.homeStatus === "has_home" ? "has_home" : form.get("adoption") === "on" ? "ask_adoption" : null,
+      updatedAt: new Date(),
+    })
+    .where(eq(dogs.id, id));
+  revalidatePath("/", "layout");
+  redirect(savedUrl(id));
+}
+
+// The switcher at the top of a dog's page. Saves straight away.
+export async function setDogGroup(id: number, form: FormData) {
+  await requireAdmin();
+  const dog = await getDog(id);
+  if (!dog) redirect("/admin");
+  const group = pick(str(form, "group"), DOG_GROUPS, "community");
+  const alive = dog.status === "deceased" ? "community" : dog.status;
+  await db
+    .update(dogs)
+    .set({
+      status: group === "memory" ? "deceased" : alive,
+      homeStatus: group === "home" ? "has_home" : dog.homeStatus === "has_home" ? null : dog.homeStatus,
+      updatedAt: new Date(),
+    })
     .where(eq(dogs.id, id));
   revalidatePath("/", "layout");
   redirect(savedUrl(id));

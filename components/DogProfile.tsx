@@ -2,7 +2,7 @@ import Link from "next/link";
 import { PublicShell } from "./PublicShell";
 import { DogPhoto } from "./DogPhoto";
 import { ScanCard } from "./ScanCard";
-import { Alert, Chevron, Eye, Flower, Heart, Paw, Pin, Shield, Syringe } from "./Icons";
+import { Alert, Chevron, Eye, Flower, HasFamily, Heart, Pin, Shield, StreetDog, Syringe } from "./Icons";
 import { getLang, t, fill } from "@/lib/i18n";
 import { isAdmin } from "@/lib/auth";
 import { fmtDate, rabiesCurrent } from "@/lib/dates";
@@ -24,7 +24,7 @@ export async function DogProfile({ dog, tagCode, scanned = false }: { dog: Dog; 
       : dog.status === "deceased"
         ? s.deceased
         : dog.homeStatus === "has_home"
-          ? s.hasHome
+          ? s.hasFamily
           : dog.homeStatus === "ask_adoption"
             ? s.askAdoption
             : s.communityDog;
@@ -55,8 +55,10 @@ export async function DogProfile({ dog, tagCode, scanned = false }: { dog: Dog; 
             <Alert className="h-4 w-4" />
           ) : dog.status === "deceased" ? (
             <Flower className="h-4 w-4" />
+          ) : dog.homeStatus === "has_home" ? (
+            <HasFamily className="h-4 w-4" />
           ) : (
-            <Paw className="h-4 w-4" />
+            <StreetDog className="h-4 w-4" />
           )}
           {statusLabel}
         </span>

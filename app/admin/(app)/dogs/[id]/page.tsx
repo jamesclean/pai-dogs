@@ -10,7 +10,9 @@ import { DeleteEntryButton } from "@/components/DeleteEntryButton";
 import { SavedToast } from "@/components/SavedToast";
 import { AdminNavRow } from "@/components/AdminHeader";
 import { Heart, Tag, UpDown } from "@/components/Icons";
-import { updateDog, deleteDog, deleteSighting, retireTag, volunteerSighting, markReviewed, markAdoptionDone } from "../../../actions";
+import { updateDog, deleteDog, deleteSighting, retireTag, setDogGroup, volunteerSighting, markReviewed, markAdoptionDone } from "../../../actions";
+import { GROUP_ICONS, GROUP_TRACK, groupItemClass } from "@/components/DogGroups";
+import { DOG_GROUPS, GROUP_LABELS, groupOf } from "@/lib/dog-groups";
 import { fmtDate, fmtDateTime, rabiesCurrent } from "@/lib/dates";
 
 const gps = {
@@ -29,9 +31,6 @@ const CONDITION: Record<string, string> = {
   other: "Other",
 };
 const SOURCE: Record<string, string> = { public: "Public report", volunteer: "Volunteer", scan: "Tag scan" };
-const STATUS: Record<string, string> = { community: "Community dog", missing: "Missing", deceased: "In memory" };
-const HOME: Record<string, string> = { has_home: "Has a home", ask_adoption: "Ask about adoption" };
-
 export default async function DogAdmin({ params, searchParams }: PageProps<"/admin/dogs/[id]">) {
   const id = Number((await params).id);
   const { saved } = await searchParams;
@@ -52,6 +51,7 @@ export default async function DogAdmin({ params, searchParams }: PageProps<"/adm
     pins.push({ lat: dog.homeLat, lng: dog.homeLng, label: "Home", kind: "home" });
 
   const rabiesOk = rabiesCurrent(dog.rabiesVaccinatedOn);
+  const group = groupOf(dog);
 
   return (
     <>
@@ -66,10 +66,23 @@ export default async function DogAdmin({ params, searchParams }: PageProps<"/adm
         }
       />
 
-      <div className="flex flex-col items-center pt-2 text-center">
+      <form action={setDogGroup.bind(null, dog.id)} aria-label="Situation" className={`${GROUP_TRACK} mt-1`}>
+        {DOG_GROUPS.map((g) => {
+          const Icon = GROUP_ICONS[g];
+          const active = g === group;
+          return (
+            <button key={g} name="group" value={g} aria-pressed={active} className={groupItemClass(active)}>
+              <Icon className="h-4 w-4 shrink-0" />
+              {GROUP_LABELS[g]}
+            </button>
+          );
+        })}
+      </form>
+
+      <div className="mt-5 flex flex-col items-center text-center">
         <DogPhoto photoId={dog.photoId} alt={dog.name} className="h-[104px] w-[104px] rounded-full" />
         <h1 className="mt-4 text-display">{dog.name}</h1>
-        <p className="mt-1 text-subhead text-label-2">{[dog.area, STATUS[dog.status], dog.homeStatus && HOME[dog.homeStatus]].filter(Boolean).join(" • ")}</p>
+        <p className="mt-1 text-subhead text-label-2">{[dog.area, dog.status === "missing" && "Missing", dog.homeStatus === "ask_adoption" && "Ask about adoption"].filter(Boolean).join(" • ")}</p>
         <div className="mt-3.5 flex flex-wrap justify-center gap-1.5">
           <span className={`pill ${dog.sterilized ? "bg-ok-soft text-ok" : "bg-warn-soft text-warn"}`}>
             {dog.sterilized ? "Sterilized" : "Not sterilized"}
