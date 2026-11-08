@@ -16,7 +16,7 @@ export default async function Home() {
   ];
 
   return (
-    <PublicShell lang={lang} adminLabel={s.adminSignIn}>
+    <PublicShell lang={lang} adminLabel={s.logInToAdmin}>
       <section className="relative h-[300px] overflow-hidden rounded-[28px] bg-map shadow-card">
         <HeroMap />
         <div className="absolute inset-x-0 bottom-0 h-[200px] bg-linear-to-t from-surface from-45% to-transparent" />
@@ -35,10 +35,7 @@ export default async function Home() {
           <span className="tile h-10 w-10 shrink-0 rounded-[12px] bg-surface-raised text-brand">
             <Megaphone className="h-[22px] w-[22px]" />
           </span>
-          <span className="min-w-0 flex-1">
-            <span className="block text-section">{s.reportDog}</span>
-            <span className="mt-0.5 block text-footnote text-label-2">{s.reportDogSub}</span>
-          </span>
+          <span className="min-w-0 flex-1 text-section">{s.reportDog}</span>
           <Chevron className="h-4 w-4 shrink-0 text-label-3" />
         </Link>
         {tasks.map(({ href, Icon, title, sub }) => (

@@ -93,6 +93,8 @@ await q.waitForSelector("text=Report sent");
 log("report sent");
 // Report a dog in trouble (unknown dog, no photo needed)
 await q.goto(B + "/report");
+log("nothing preselected:", !(await q.isChecked("input[value=injured]")));
+await q.click("label:has(input[value=injured])");
 log("vet row on injured:", await q.isVisible("a[href='tel:0804111985']"));
 await q.fill("textarea[name=note]", "Black, white paws, near the hospital");
 await q.fill("input[name=contact]", "LINE @mai");

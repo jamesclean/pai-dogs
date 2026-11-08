@@ -100,10 +100,10 @@ export default async function AdminHome({ searchParams }: PageProps<"/admin">) {
         title="Dogs"
         right={
           <div className="flex gap-2">
-            <SignOutButton />
             <Link href="/admin/dogs/new" aria-label="Add dog" className="circle-btn">
               <Plus className="h-5 w-5" />
             </Link>
+            <SignOutButton />
           </div>
         }
       />

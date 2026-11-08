@@ -8,7 +8,7 @@ report a sighting or an injury.
 ## What's in it
 
 **Public (Thai / English, picks from the phone's language)**
-- `/`: home with Report a dog in trouble, Meet our dogs and Look up a dog. Admin sign in is in the footer.
+- `/`: home with Report a dog in trouble, Meet our dogs and Look up a dog. The admin login is the icon at the top right.
 - `/d/K7M2X`: dog page reached from the tag. Shows a missing banner if the dog is marked missing.
   A card asks once to "Add Mali to the map": if the person shares their location, the scan
   becomes a quiet sighting on the volunteers' map (no inbox item, at most one per dog every 5 minutes).
