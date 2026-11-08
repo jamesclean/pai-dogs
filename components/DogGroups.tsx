@@ -15,6 +15,3 @@ const ITEM =
 export function groupItemClass(active: boolean, extra = "") {
   return `${ITEM} ${active ? "bg-surface-raised text-label shadow-control" : "text-label-2"} ${extra}`;
 }
-
-// For a radio inside the label, where the selected state comes from CSS.
-export const GROUP_RADIO_ITEM = `${ITEM} cursor-pointer text-label-2 has-[:checked]:bg-surface-raised has-[:checked]:text-label has-[:checked]:shadow-control`;
