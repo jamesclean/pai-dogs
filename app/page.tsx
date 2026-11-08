@@ -16,7 +16,7 @@ export default async function Home() {
   ];
 
   return (
-    <PublicShell lang={lang} volunteerLabel={s.volunteer}>
+    <PublicShell lang={lang} adminLabel={s.adminSignIn}>
       <section className="relative h-[300px] overflow-hidden rounded-[28px] bg-map shadow-card">
         <HeroMap />
         <div className="absolute inset-x-0 bottom-0 h-[200px] bg-linear-to-t from-surface from-45% to-transparent" />
