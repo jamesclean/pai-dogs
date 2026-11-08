@@ -3,7 +3,7 @@ import { config } from "@/lib/config";
 import { LangToggle } from "./LangToggle";
 import { HeaderGlass } from "./HeaderGlass";
 import { RevealTitle } from "./RevealTitle";
-import { ChevronLeft, Paw } from "./Icons";
+import { ChevronLeft, Login, Paw } from "./Icons";
 import type { Lang } from "@/lib/i18n";
 
 export { Paw };
@@ -38,7 +38,7 @@ export function PublicShell({
   back,
   title,
   revealTitle = false,
-  volunteerLabel,
+  adminLabel,
 }: {
   lang: Lang;
   children: React.ReactNode;
@@ -46,7 +46,7 @@ export function PublicShell({
   back?: { href: string; label: string };
   title?: string;
   revealTitle?: boolean;
-  volunteerLabel?: string;
+  adminLabel?: string;
 }) {
   return (
     <>
@@ -72,15 +72,13 @@ export function PublicShell({
         {children}
         <footer className="mt-12 flex flex-col items-center gap-1.5 text-footnote text-label-3">
           <LangToggle lang={lang} />
-          <div className="flex justify-center gap-1.5">
-            <Link href="/privacy">{lang === "th" ? "ความเป็นส่วนตัว" : "Privacy"}</Link>
-            {volunteerLabel && (
-              <>
-                <span aria-hidden>•</span>
-                <Link href="/admin">{volunteerLabel}</Link>
-              </>
-            )}
-          </div>
+          {adminLabel && (
+            <Link href="/admin" className="inline-flex items-center gap-1.5 py-1 text-label-2">
+              <Login className="h-4 w-4" />
+              {adminLabel}
+            </Link>
+          )}
+          <Link href="/privacy">{lang === "th" ? "ความเป็นส่วนตัว" : "Privacy"}</Link>
         </footer>
       </main>
       {bottomBar && <BottomBar>{bottomBar}</BottomBar>}
