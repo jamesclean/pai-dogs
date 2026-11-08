@@ -4,7 +4,6 @@ import { count, desc, sql } from "drizzle-orm";
 import { db, tags } from "@/db";
 import { createBatch } from "../../actions";
 import { normalizeCode } from "@/lib/codes";
-import { endSession } from "@/lib/auth";
 import { AdminHeader } from "@/components/AdminHeader";
 import { Chevron, Search } from "@/components/Icons";
 
@@ -12,12 +11,6 @@ async function findTag(form: FormData) {
   "use server";
   const code = normalizeCode(String(form.get("code") ?? ""));
   if (code) redirect(`/admin/tags/${code}`);
-}
-
-async function signOut() {
-  "use server";
-  await endSession();
-  redirect("/");
 }
 
 export default async function TagsPage() {
@@ -97,10 +90,6 @@ export default async function TagsPage() {
           {batches.length === 0 && <p className="py-3 text-subhead text-label-2">No tags yet</p>}
         </div>
       </section>
-
-      <form action={signOut} className="mt-10 text-center">
-        <button className="text-subhead text-label-2">Sign out</button>
-      </form>
     </>
   );
 }
