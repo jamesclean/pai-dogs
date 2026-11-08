@@ -4,7 +4,7 @@ import { LocationField } from "./LocationField";
 
 const gps = {
   yourLocation: "Home location set",
-  shareYourLocation: "Set home location here",
+  shareYourLocation: "Mark this location as home",
   locating: "Getting GPS…",
   added: "Added",
   locationFailed: "GPS failed. Describe the area instead.",

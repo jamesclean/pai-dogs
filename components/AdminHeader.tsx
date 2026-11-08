@@ -1,4 +1,16 @@
+import { signOut } from "@/app/admin/actions";
 import { BackButton } from "./PublicShell";
+import { Logout } from "./Icons";
+
+export function SignOutButton() {
+  return (
+    <form action={signOut}>
+      <button aria-label="Sign out" className="circle-btn">
+        <Logout className="h-5 w-5" />
+      </button>
+    </form>
+  );
+}
 
 // Title on the left, one action on the right; or a back button row.
 export function AdminHeader({ title, right }: { title: string; right?: React.ReactNode }) {

@@ -2,7 +2,7 @@ import Link from "next/link";
 import { desc, eq, ilike, or, sql } from "drizzle-orm";
 import { db, dogs, sightings, tags, newDogReports, adoptionQuestions } from "@/db";
 import { DogPhoto } from "@/components/DogPhoto";
-import { AdminHeader } from "@/components/AdminHeader";
+import { AdminHeader, SignOutButton } from "@/components/AdminHeader";
 import { Map, type Pin } from "@/components/Map";
 import { Chevron, Heart, Megaphone, Pin as PinIcon, Plus, Search } from "@/components/Icons";
 import { markAdoptionDone, markReviewed } from "../actions";
@@ -99,9 +99,12 @@ export default async function AdminHome({ searchParams }: PageProps<"/admin">) {
       <AdminHeader
         title="Dogs"
         right={
-          <Link href="/admin/dogs/new" aria-label="Add dog" className="circle-btn">
-            <Plus className="h-5 w-5" />
-          </Link>
+          <div className="flex gap-2">
+            <SignOutButton />
+            <Link href="/admin/dogs/new" aria-label="Add dog" className="circle-btn">
+              <Plus className="h-5 w-5" />
+            </Link>
+          </div>
         }
       />
 
