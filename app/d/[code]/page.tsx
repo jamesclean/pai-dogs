@@ -61,7 +61,7 @@ export default async function DogByTag({ params }: PageProps<"/d/[code]">) {
 
   return (
     <PublicShell lang={lang} bottomBar={bottomBar}>
-      <div className="relative overflow-hidden rounded-[28px] border border-sep shadow-card">
+      <div className="relative overflow-hidden rounded-[28px] shadow-card">
         <DogPhoto photoId={dog.photoId} alt={dog.name} className="aspect-[358/430] w-full" />
         <span className={`chip absolute top-4 left-4 ${dog.status === "missing" ? "text-bad" : ""}`}>
           {dog.status === "missing" ? <Alert className="h-4 w-4" /> : <Paw className="h-4 w-4" />}

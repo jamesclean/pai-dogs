@@ -60,7 +60,7 @@ export function PhotoInput({
 
   if (variant === "large")
     return (
-      <label className="relative flex h-[200px] cursor-pointer flex-col items-center justify-center gap-2.5 overflow-hidden rounded-[24px] border border-sep bg-surface">
+      <label className="relative flex h-[200px] cursor-pointer flex-col items-center justify-center gap-2.5 overflow-hidden rounded-[24px] bg-surface">
         {preview ? (
           <>
             {/* eslint-disable-next-line @next/next/no-img-element */}

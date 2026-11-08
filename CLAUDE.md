@@ -47,6 +47,8 @@ https://www.figma.com/design/jYLDF4OWbACbl1cO4KkTLO/Pai-Dogs?node-id=1-13201
 - Type: Geist + IBM Plex Sans Thai. Icons: Hugeicons stroke rounded, 1.5 stroke.
 - Main buttons are black (inverse). Orange is for the collar/brand only.
 - No decorative dots (in chips, labels or lists). History timeline dots and map pins are fine.
+- Image cards (photos, maps, the steel tag, the photo picker) have no border, Apple style.
+  List and form cards keep their 1px `sep` border; removing it everywhere feels too nested.
 - Copy follows James's house rules (`~/.claude/skills/copy-refinement`): verb + noun buttons,
   labels not questions, • between facts, sentence case, no em dashes.
 

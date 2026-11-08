@@ -69,5 +69,5 @@ export function Map({ pins, className = "h-56" }: { pins: Pin[]; className?: str
     };
   }, [pins]);
 
-  return <div ref={el} className={`isolate z-0 w-full overflow-hidden rounded-[20px] border border-sep bg-map ${className}`} />;
+  return <div ref={el} className={`isolate z-0 w-full overflow-hidden rounded-[20px] bg-map ${className}`} />;
 }

@@ -19,7 +19,7 @@ export default async function Home() {
 
   return (
     <PublicShell lang={lang}>
-      <section className="relative h-[300px] overflow-hidden rounded-[28px] border border-sep bg-map shadow-card">
+      <section className="relative h-[300px] overflow-hidden rounded-[28px] bg-map shadow-card">
         <HeroMap />
         <div className="absolute inset-x-0 bottom-0 h-[200px] bg-linear-to-t from-surface from-45% to-transparent" />
         <span className="chip absolute top-4 left-4">
