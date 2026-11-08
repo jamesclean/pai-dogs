@@ -1,8 +1,8 @@
 "use server";
 import { redirect } from "next/navigation";
 import { revalidatePath } from "next/cache";
-import { and, eq, isNull } from "drizzle-orm";
-import { adoptionQuestions, db, dogs, tags, sightings, newDogReports, type NewDogReport } from "@/db";
+import { and, eq, isNull, sql } from "drizzle-orm";
+import { adoptionQuestions, db, dogs, photos, tags, sightings, newDogReports, type NewDogReport } from "@/db";
 import { requireAdmin } from "@/lib/auth";
 import { savePhoto } from "@/lib/photos";
 import { newCode, normalizeCode } from "@/lib/codes";
@@ -38,6 +38,11 @@ function sightingFromReport(report: NewDogReport, dogId: number) {
     reviewed: report.condition === "ok",
     createdAt: report.createdAt,
   };
+}
+
+// A fresh value each time, so the Saved toast plays on every save.
+function savedUrl(dogId: number) {
+  return `/admin/dogs/${dogId}?saved=${Date.now()}`;
 }
 
 function dogFields(f: FormData) {
@@ -104,7 +109,7 @@ export async function createDog(form: FormData) {
     });
   }
   revalidatePath("/admin", "layout");
-  redirect(`/admin/dogs/${dog.id}?saved=1`);
+  redirect(savedUrl(dog.id));
 }
 
 export async function updateDog(id: number, form: FormData) {
@@ -116,7 +121,7 @@ export async function updateDog(id: number, form: FormData) {
     .set({ ...fields, ...(photoId ? { photoId } : {}), updatedAt: new Date() })
     .where(eq(dogs.id, id));
   revalidatePath("/", "layout");
-  redirect(`/admin/dogs/${id}?saved=1`);
+  redirect(savedUrl(id));
 }
 
 export async function deleteDog(id: number) {
@@ -162,7 +167,26 @@ export async function matchReport(reportId: number, dogId: number) {
     if (report) await tx.insert(sightings).values(sightingFromReport(report, dogId));
   });
   revalidatePath("/admin", "layout");
-  redirect(`/admin/dogs/${dogId}?saved=1`);
+  redirect(savedUrl(dogId));
+}
+
+// Removes a history entry and its map pin. Its photo goes too, unless the dog
+// or another entry still uses it.
+export async function deleteSighting(sightingId: number) {
+  await requireAdmin();
+  await db.transaction(async (tx) => {
+    const [gone] = await tx.delete(sightings).where(eq(sightings.id, sightingId)).returning({ photoId: sightings.photoId });
+    if (!gone?.photoId) return;
+    await tx.delete(photos).where(
+      and(
+        eq(photos.id, gone.photoId),
+        sql`not exists (select 1 from ${dogs} where ${dogs.photoId} = ${photos.id})`,
+        sql`not exists (select 1 from ${sightings} where ${sightings.photoId} = ${photos.id})`,
+        sql`not exists (select 1 from ${newDogReports} where ${newDogReports.photoId} = ${photos.id})`,
+      ),
+    );
+  });
+  revalidatePath("/admin", "layout");
 }
 
 export async function markAdoptionDone(questionId: number) {
@@ -185,7 +209,7 @@ export async function linkTag(code: string, form: FormData) {
     .update(tags)
     .set({ dogId, assignedAt: new Date(), retired: false })
     .where(eq(tags.code, normalizeCode(code)));
-  redirect(`/admin/dogs/${dogId}?saved=1`);
+  redirect(savedUrl(dogId));
 }
 
 export async function retireTag(code: string) {
