@@ -53,16 +53,16 @@ await p.fill("textarea[name=publicNotes]", "Loves chicken. Sleeps outside the 7-
 await p.setInputFiles("input[type=file]:not([name])", DOG);
 await p.waitForSelector("label img");
 await p.click("button:has-text('Add dog')");
-await p.waitForURL(/dogs\/\d+\?saved=1/);
+await p.waitForURL(/dogs\/\d+\?saved=/);
 const dogUrl = p.url().split("?")[0];
 log("dog created", dogUrl);
 // second dog without tag, to test linking an existing dog
 await p.goto(B + "/admin/dogs/new");
 await p.fill("input[name=name]", "Lucky"); await p.fill("input[name=area]", "Pai bridge");
-await p.click("button:has-text('Add dog')"); await p.waitForURL(/saved=1/);
+await p.click("button:has-text('Add dog')"); await p.waitForURL(/saved=/);
 await p.goto(B + "/admin/tags/" + codes[1].toLowerCase());
 await p.selectOption("select[name=dogId]", { label: "Lucky • Pai bridge" });
-await p.click("text=Link tag"); await p.waitForURL(/saved=1/);
+await p.click("text=Link tag"); await p.waitForURL(/saved=/);
 log("lucky tag linked:", await p.isVisible(`text=${codes[1]}`));
 
 // Tourist / local, Thai phone, not logged in
@@ -128,7 +128,7 @@ await p.waitForURL(/dogs\/new\?report=/);
 await p.fill("input[name=name]", "Khao");
 await p.screenshot({ path: S + "/shots/admin-new-from-report.png", fullPage: true });
 await p.click("button:has-text('Add dog')");
-await p.waitForURL(/dogs\/\d+\?saved=1/);
+await p.waitForURL(/dogs\/\d+\?saved=/);
 log("dog from report:", await p.isVisible("h1:has-text('Khao')"));
 // The report joined Khao's history and is still open, because it was urgent.
 await p.click("button:has-text('Mark done')"); await p.waitForTimeout(800);

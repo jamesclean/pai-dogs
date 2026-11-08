@@ -1,17 +1,9 @@
 import type { Dog } from "@/db";
 import { PhotoInput } from "./PhotoInput";
-import { LocationField } from "./LocationField";
+import { HomeLocation } from "./HomeLocation";
 import { Switch } from "./Switch";
 import { BottomBar } from "./PublicShell";
 import { UpDown } from "./Icons";
-
-const gps = {
-  yourLocation: "Home location set",
-  shareYourLocation: "Set home location",
-  locating: "Getting GPS…",
-  added: "Added",
-  locationFailed: "GPS failed. Describe the area instead.",
-};
 
 export type DogPrefill = Partial<Pick<Dog, "description" | "homeLat" | "homeLng" | "area">>;
 
@@ -73,18 +65,7 @@ export function DogForm({
 
       <Section title="Location" footer="Usually found at shows on the public page. GPS stays private.">
         <Text label="Usually found at" name="area" defaultValue={dog?.area ?? prefill?.area} placeholder="7-Eleven, Walking Street" />
-        {homeLat != null ? (
-          <div className="row">
-            <input type="hidden" name="lat" defaultValue={homeLat} />
-            <input type="hidden" name="lng" defaultValue={homeLng ?? ""} />
-            <span className="flex-1 text-callout">GPS</span>
-            <span className="text-subhead text-label-2">
-              {homeLat.toFixed(4)}, {homeLng?.toFixed(4)}
-            </span>
-          </div>
-        ) : (
-          <LocationField labels={gps} auto={false} />
-        )}
+        <HomeLocation lat={homeLat} lng={homeLng} />
       </Section>
 
       <Section title="Health">

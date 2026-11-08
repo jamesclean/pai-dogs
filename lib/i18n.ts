@@ -16,6 +16,7 @@ const dict = {
   en: {
     tagline: "Community dogs of Pai, cared for by locals and volunteers",
     dogsCount: "{n} dogs",
+    oneDog: "1 dog",
     browseDogs: "Browse dogs",
     browseSub: "{n} in Pai",
     lookUp: "Look up a dog",
@@ -33,6 +34,7 @@ const dict = {
     orType: "Or type the code",
     codePlaceholder: "K7M2X",
     findDog: "Find dog",
+    community: "Community",
     communityDog: "Community dog",
     communityDogBody: "This dog lives here and is looked after. Please don't take it away.",
     missing: "Missing. Please report where you saw this dog.",
@@ -106,6 +108,7 @@ const dict = {
   th: {
     tagline: "หมาชุมชนของปาย ดูแลโดยคนในพื้นที่และอาสาสมัคร",
     dogsCount: "{n} ตัว",
+    oneDog: "1 ตัว",
     browseDogs: "ดูหมาทั้งหมด",
     browseSub: "{n} ตัวในปาย",
     lookUp: "ค้นหาหมา",
@@ -123,6 +126,7 @@ const dict = {
     orType: "หรือพิมพ์รหัส",
     codePlaceholder: "K7M2X",
     findDog: "ค้นหา",
+    community: "หมาชุมชน",
     communityDog: "หมาชุมชน",
     communityDogBody: "หมาตัวนี้อาศัยอยู่ที่นี่และมีคนดูแล กรุณาอย่าพาไป",
     missing: "หายตัวไป ถ้าเห็นกรุณาแจ้งเรา",

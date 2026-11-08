@@ -22,7 +22,7 @@ export default async function Home() {
         <div className="absolute inset-x-0 bottom-0 h-[200px] bg-linear-to-t from-surface from-45% to-transparent" />
         <span className="chip absolute top-4 left-4">
           <Paw className="h-4 w-4" />
-          {fill(s.dogsCount, { n })}
+          {n === 1 ? s.oneDog : fill(s.dogsCount, { n })}
         </span>
         <h1 className="absolute inset-x-5 bottom-5 text-title text-balance">{s.tagline}</h1>
       </section>

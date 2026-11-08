@@ -2,7 +2,7 @@ import Link from "next/link";
 import { PublicShell } from "./PublicShell";
 import { DogPhoto } from "./DogPhoto";
 import { ScanCard } from "./ScanCard";
-import { Alert, Chevron, Eye, Heart, Paw, Pin, Shield, Syringe } from "./Icons";
+import { Alert, Chevron, Eye, Flower, Heart, Paw, Pin, Shield, Syringe } from "./Icons";
 import { getLang, t, fill } from "@/lib/i18n";
 import { isAdmin } from "@/lib/auth";
 import { fmtDate, rabiesCurrent } from "@/lib/dates";
@@ -29,6 +29,9 @@ export async function DogProfile({ dog, tagCode, scanned = false }: { dog: Dog; 
             ? s.askAdoption
             : s.communityDog;
 
+  // "Usually found at" and health only make sense for a living dog.
+  const area = dog.status === "deceased" ? "" : dog.area;
+
   const reportHref = `/dogs/${dog.id}/report`;
   const tagQuery = scanned && tagCode ? `tag=${tagCode}` : "";
   const bottomBar =
@@ -48,7 +51,13 @@ export async function DogProfile({ dog, tagCode, scanned = false }: { dog: Dog; 
       <div className="relative overflow-hidden rounded-[28px] shadow-card">
         <DogPhoto photoId={dog.photoId} alt={dog.name} className="aspect-[358/430] w-full" />
         <span className={`chip absolute top-4 left-4 ${dog.status === "missing" ? "text-bad" : ""}`}>
-          {dog.status === "missing" ? <Alert className="h-4 w-4" /> : <Paw className="h-4 w-4" />}
+          {dog.status === "missing" ? (
+            <Alert className="h-4 w-4" />
+          ) : dog.status === "deceased" ? (
+            <Flower className="h-4 w-4" />
+          ) : (
+            <Paw className="h-4 w-4" />
+          )}
           {statusLabel}
         </span>
         {dog.status === "missing" && (
@@ -88,24 +97,26 @@ export async function DogProfile({ dog, tagCode, scanned = false }: { dog: Dog; 
         />
       )}
 
-      <div className="card-rows mt-6">
-        <HealthRow
-          Icon={Shield}
-          title={s.sterilization}
-          sub={dog.sterilized && dog.sterilizedOn ? fmtDate(dog.sterilizedOn, lang) : undefined}
-          pill={dog.sterilized ? [s.done, "ok"] : [s.notYet, "warn"]}
-        />
-        <HealthRow
-          Icon={Syringe}
-          title={s.rabiesVaccine}
-          sub={dog.rabiesVaccinatedOn ? fmtDate(dog.rabiesVaccinatedOn, lang) : undefined}
-          pill={dog.rabiesVaccinatedOn ? (rabiesOk ? [s.upToDate, "ok"] : [s.due, "warn"]) : [s.notRecorded, "warn"]}
-        />
-      </div>
+      {dog.status !== "deceased" && (
+        <div className="card-rows mt-6">
+          <HealthRow
+            Icon={Shield}
+            title={s.sterilization}
+            sub={dog.sterilized && dog.sterilizedOn ? fmtDate(dog.sterilizedOn, lang) : undefined}
+            pill={dog.sterilized ? [s.done, "ok"] : [s.notYet, "warn"]}
+          />
+          <HealthRow
+            Icon={Syringe}
+            title={s.rabiesVaccine}
+            sub={dog.rabiesVaccinatedOn ? fmtDate(dog.rabiesVaccinatedOn, lang) : undefined}
+            pill={dog.rabiesVaccinatedOn ? (rabiesOk ? [s.upToDate, "ok"] : [s.due, "warn"]) : [s.notRecorded, "warn"]}
+          />
+        </div>
+      )}
 
-      {(dog.area || dog.description) && (
+      {(area || dog.description) && (
         <div className="mt-3">
-          {dog.area && <InfoRow Icon={Pin} title={dog.area} sub={s.usuallyFoundAt} />}
+          {area && <InfoRow Icon={Pin} title={area} sub={s.usuallyFoundAt} />}
           {dog.description && <InfoRow Icon={Eye} title={dog.description} sub={s.looksLike} />}
         </div>
       )}

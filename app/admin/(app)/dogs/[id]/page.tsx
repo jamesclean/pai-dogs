@@ -6,14 +6,16 @@ import { DogForm } from "@/components/DogForm";
 import { Map, type Pin } from "@/components/Map";
 import { LocationField } from "@/components/LocationField";
 import { PhotoInput } from "@/components/PhotoInput";
+import { DeleteEntryButton } from "@/components/DeleteEntryButton";
+import { SavedToast } from "@/components/SavedToast";
 import { AdminNavRow } from "@/components/AdminHeader";
-import { Check, Heart, Tag, UpDown } from "@/components/Icons";
-import { updateDog, deleteDog, retireTag, volunteerSighting, markReviewed, markAdoptionDone } from "../../../actions";
+import { Heart, Tag, UpDown } from "@/components/Icons";
+import { updateDog, deleteDog, deleteSighting, retireTag, volunteerSighting, markReviewed, markAdoptionDone } from "../../../actions";
 import { fmtDate, fmtDateTime, rabiesCurrent } from "@/lib/dates";
 
 const gps = {
   yourLocation: "Location added",
-  shareYourLocation: "Add location",
+  shareYourLocation: "Add location here",
   locating: "Getting GPS…",
   added: "Added",
   locationFailed: "GPS failed",
@@ -53,11 +55,7 @@ export default async function DogAdmin({ params, searchParams }: PageProps<"/adm
 
   return (
     <>
-      {saved && (
-        <p className="toast fixed top-[calc(env(safe-area-inset-top)+16px)] left-1/2 z-40 flex -translate-x-1/2 items-center gap-1.5 rounded-full bg-inverse px-4 py-2 text-callout text-on-inverse shadow-float">
-          <Check className="h-4 w-4" /> Saved
-        </p>
-      )}
+      {typeof saved === "string" && <SavedToast key={saved} />}
 
       <AdminNavRow
         back={{ href: "/admin", label: "Dogs" }}
@@ -166,17 +164,20 @@ export default async function DogAdmin({ params, searchParams }: PageProps<"/adm
                 <span className={`mt-1.5 h-2 w-2 shrink-0 rounded-full ${s.condition === "ok" ? "bg-label-3" : "bg-bad"}`} />
                 {s.photoId && <DogPhoto photoId={s.photoId} alt="" className="h-11 w-11 shrink-0 rounded-[10px]" />}
                 <div className="min-w-0 flex-1">
-                  <p className="flex flex-wrap items-baseline gap-x-2">
+                  <div className="flex flex-wrap items-baseline gap-x-2">
                     <span className="text-callout">{fmtDateTime(s.createdAt)}</span>
                     <span className={`text-footnote ${s.condition === "ok" ? "text-label-2" : "text-bad"}`}>
                       {CONDITION[s.condition]}
                     </span>
                     {s.lat !== null && (
-                      <a className="ml-auto text-footnote text-link" href={`https://maps.google.com/?q=${s.lat},${s.lng}`}>
+                      <a className="text-footnote text-link" href={`https://maps.google.com/?q=${s.lat},${s.lng}`}>
                         Map
                       </a>
                     )}
-                  </p>
+                    <span className="ml-auto">
+                      <DeleteEntryButton action={deleteSighting.bind(null, s.id)} />
+                    </span>
+                  </div>
                   <p className="text-footnote text-label-2">
                     {[SOURCE[s.source], s.note, s.contact].filter(Boolean).join(" • ")}
                   </p>
