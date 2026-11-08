@@ -1,20 +1,27 @@
 import Link from "next/link";
 import { desc, eq, ilike, or, sql } from "drizzle-orm";
-import { db, dogs, sightings, tags, newDogReports } from "@/db";
+import { db, dogs, sightings, tags, newDogReports, adoptionQuestions } from "@/db";
 import { DogPhoto } from "@/components/DogPhoto";
 import { AdminHeader } from "@/components/AdminHeader";
 import { Map, type Pin } from "@/components/Map";
-import { Chevron, Megaphone, Pin as PinIcon, Plus, Search } from "@/components/Icons";
-import { markReviewed } from "../actions";
+import { Chevron, Heart, Megaphone, Pin as PinIcon, Plus, Search } from "@/components/Icons";
+import { markAdoptionDone, markReviewed } from "../actions";
 import { fmtDateTime, rabiesCurrent } from "@/lib/dates";
+import { CONDITION } from "@/lib/conditions";
 
-const CONDITION: Record<string, [string, string] | null> = {
-  ok: null,
-  injured: ["Injured", "bg-bad-soft text-bad"],
-  sick: ["Looks sick", "bg-bad-soft text-bad"],
-  lost: ["Seems lost", "bg-warn-soft text-warn"],
-  other: ["Other", "bg-fill text-label-2"],
-};
+function ConditionLabel({ condition }: { condition: string }) {
+  const c = CONDITION[condition];
+  return c ? <span className={`pill ${c[1]}`}>{c[0]}</span> : <span className="text-footnote text-label-2">Looks fine</span>;
+}
+
+function MapLink({ lat, lng }: { lat: number | null; lng: number | null }) {
+  if (lat === null) return null;
+  return (
+    <a className="text-link" href={`https://maps.google.com/?q=${lat},${lng}`}>
+      • Map
+    </a>
+  );
+}
 
 export default async function AdminHome({ searchParams }: PageProps<"/admin">) {
   const { q } = await searchParams;
@@ -54,7 +61,16 @@ export default async function AdminHome({ searchParams }: PageProps<"/admin">) {
     .orderBy(desc(newDogReports.createdAt))
     .limit(30);
 
+  const questions = await db
+    .select({ q: adoptionQuestions, name: dogs.name, dogPhoto: dogs.photoId })
+    .from(adoptionQuestions)
+    .innerJoin(dogs, eq(dogs.id, adoptionQuestions.dogId))
+    .where(eq(adoptionQuestions.reviewed, false))
+    .orderBy(desc(adoptionQuestions.createdAt))
+    .limit(30);
+
   const inbox = [
+    ...questions.map((r) => ({ kind: "adoption" as const, at: r.q.createdAt, r })),
     ...newDogs.map((r) => ({ kind: "new" as const, at: r.createdAt, r })),
     ...reports.map((r) => ({ kind: "sighting" as const, at: r.s.createdAt, r })),
   ].sort((a, b) => b.at.getTime() - a.at.getTime());
@@ -75,7 +91,7 @@ export default async function AdminHome({ searchParams }: PageProps<"/admin">) {
     })),
     ...newDogs
       .filter((r) => r.lat !== null && r.lng !== null)
-      .map((r) => ({ lat: r.lat!, lng: r.lng!, label: "New dog", href: `/admin/dogs/new?report=${r.id}`, kind: "newdog" as const })),
+      .map((r) => ({ lat: r.lat!, lng: r.lng!, label: "New report", href: `/admin/dogs/new?report=${r.id}`, kind: "newdog" as const })),
   ];
 
   return (
@@ -104,7 +120,32 @@ export default async function AdminHome({ searchParams }: PageProps<"/admin">) {
           </div>
           <div className="mt-1 divide-y divide-sep">
             {inbox.map((item) =>
-              item.kind === "new" ? (
+              item.kind === "adoption" ? (
+                <div key={`a${item.r.q.id}`} className="flex items-start gap-3 py-3">
+                  {item.r.dogPhoto ? (
+                    <DogPhoto photoId={item.r.dogPhoto} alt="" className="h-11 w-11 shrink-0 rounded-[12px]" />
+                  ) : (
+                    <span className="tile h-11 w-11 rounded-[12px] bg-fill text-label-2">
+                      <Heart className="h-5 w-5" />
+                    </span>
+                  )}
+                  <div className="min-w-0 flex-1">
+                    <p className="flex flex-wrap items-center gap-2">
+                      <Link href={`/admin/dogs/${item.r.q.dogId}`} className="text-callout">
+                        {item.r.name}
+                      </Link>
+                      <span className="pill bg-fill text-label-2">Adoption question</span>
+                    </p>
+                    {item.r.q.note && <p className="mt-0.5 text-footnote">{item.r.q.note}</p>}
+                    <p className="mt-0.5 text-footnote text-label-3">
+                      {fmtDateTime(item.r.q.createdAt)} • {item.r.q.contact}
+                    </p>
+                  </div>
+                  <form action={markAdoptionDone.bind(null, item.r.q.id)}>
+                    <button className="btn-outline btn-sm">Mark done</button>
+                  </form>
+                </div>
+              ) : item.kind === "new" ? (
                 <div key={`n${item.r.id}`} className="flex items-start gap-3 py-3">
                   {item.r.photoId ? (
                     <DogPhoto photoId={item.r.photoId} alt="" className="h-11 w-11 shrink-0 rounded-[12px]" />
@@ -114,18 +155,24 @@ export default async function AdminHome({ searchParams }: PageProps<"/admin">) {
                     </span>
                   )}
                   <div className="min-w-0 flex-1">
-                    <p className="flex items-center gap-2">
-                      <span className="text-callout">New dog</span>
-                      <span className="pill bg-warn-soft text-warn">No collar</span>
+                    <p className="flex flex-wrap items-center gap-2">
+                      <span className="text-callout">New report</span>
+                      <ConditionLabel condition={item.r.condition} />
                     </p>
                     {item.r.note && <p className="mt-0.5 text-footnote">{item.r.note}</p>}
-                    <p className="mt-0.5 text-footnote text-label-3">
-                      {[fmtDateTime(item.r.createdAt), item.r.contact].filter(Boolean).join(" • ")}
+                    <p className="mt-0.5 flex flex-wrap gap-x-1 text-footnote text-label-3">
+                      <span>{[fmtDateTime(item.r.createdAt), item.r.contact].filter(Boolean).join(" • ")}</span>
+                      <MapLink lat={item.r.lat} lng={item.r.lng} />
                     </p>
+                    <div className="mt-2 flex gap-2">
+                      <Link href={`/admin/dogs/new?report=${item.r.id}`} className="btn-primary btn-sm">
+                        Add dog
+                      </Link>
+                      <Link href={`/admin/reports/${item.r.id}/match`} className="btn-outline btn-sm">
+                        Match to a dog
+                      </Link>
+                    </div>
                   </div>
-                  <Link href={`/admin/dogs/new?report=${item.r.id}`} className="btn-primary btn-sm">
-                    Add dog
-                  </Link>
                 </div>
               ) : (
                 <div key={`s${item.r.s.id}`} className="flex items-start gap-3 py-3">
@@ -145,22 +192,12 @@ export default async function AdminHome({ searchParams }: PageProps<"/admin">) {
                       <Link href={`/admin/dogs/${item.r.s.dogId}`} className="text-callout">
                         {item.r.name}
                       </Link>
-                      {CONDITION[item.r.s.condition] ? (
-                        <span className={`pill ${CONDITION[item.r.s.condition]![1]}`}>
-                          {CONDITION[item.r.s.condition]![0]}
-                        </span>
-                      ) : (
-                        <span className="text-footnote text-label-2">Looks fine</span>
-                      )}
+                      <ConditionLabel condition={item.r.s.condition} />
                     </p>
                     {item.r.s.note && <p className="mt-0.5 text-footnote">{item.r.s.note}</p>}
                     <p className="mt-0.5 flex flex-wrap gap-x-1 text-footnote text-label-3">
                       <span>{[fmtDateTime(item.r.s.createdAt), item.r.s.contact].filter(Boolean).join(" • ")}</span>
-                      {item.r.s.lat !== null && (
-                        <a className="text-link" href={`https://maps.google.com/?q=${item.r.s.lat},${item.r.s.lng}`}>
-                          • Map
-                        </a>
-                      )}
+                      <MapLink lat={item.r.s.lat} lng={item.r.s.lng} />
                     </p>
                   </div>
                   <form action={markReviewed.bind(null, item.r.s.id)}>
@@ -195,12 +232,10 @@ export default async function AdminHome({ searchParams }: PageProps<"/admin">) {
                   <p className="flex items-center gap-2">
                     <span className="truncate text-callout">{dog.name}</span>
                     {dog.status === "missing" && <span className="pill bg-bad-soft text-bad">Missing</span>}
-                    {(dog.status === "adopted" || dog.status === "deceased") && (
-                      <span className="pill bg-fill text-label-2">{dog.status === "adopted" ? "Adopted" : "In memory"}</span>
-                    )}
+                    {dog.status === "deceased" && <span className="pill bg-fill text-label-2">In memory</span>}
                   </p>
                   <p className={`truncate text-footnote ${flags.length ? "text-warn" : "text-label-2"}`}>
-                    {flags.length ? flags.join(" • ") : dog.area || "No area yet"}
+                    {flags.length ? flags.join(" • ") : dog.area || "No location yet"}
                   </p>
                 </div>
                 <div className="text-right">

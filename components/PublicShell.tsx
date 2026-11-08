@@ -1,6 +1,8 @@
 import Link from "next/link";
 import { config } from "@/lib/config";
 import { LangToggle } from "./LangToggle";
+import { HeaderFade } from "./HeaderFade";
+import { RevealTitle } from "./RevealTitle";
 import { ChevronLeft, Paw } from "./Icons";
 import type { Lang } from "@/lib/i18n";
 
@@ -25,31 +27,60 @@ export function BackButton({ href, label }: { href: string; label: string }) {
   );
 }
 
-// White page, logo or back button on the left, language on the right.
+// White page. With `back`, a bar with the back button and page title floats on
+// top as you scroll; otherwise the logo sits at the top. `titleFrom` is for a page
+// with its own large title: the bar shows the title once that element scrolls away.
 // `bottomBar` floats over the content with a fade, like the Figma screens.
 export function PublicShell({
   lang,
   children,
   bottomBar,
   back,
+  title,
+  titleFrom,
+  volunteerLabel,
 }: {
   lang: Lang;
   children: React.ReactNode;
   bottomBar?: React.ReactNode;
   back?: { href: string; label: string };
+  title?: string;
+  titleFrom?: string;
+  volunteerLabel?: string;
 }) {
   return (
     <>
-      <header className="mx-auto flex w-full max-w-xl items-center justify-between px-4 pt-[max(env(safe-area-inset-top),12px)] pb-4">
-        {back ? <BackButton {...back} /> : <Logo />}
-        <LangToggle lang={lang} />
-      </header>
+      {back ? (
+        <header className="sticky top-0 z-30">
+          <HeaderFade />
+          <div className="mx-auto grid w-full max-w-xl grid-cols-[40px_minmax(0,1fr)_40px] items-center gap-2 px-4 pt-[max(env(safe-area-inset-top),12px)] pb-4">
+            <BackButton {...back} />
+            {title &&
+              (titleFrom ? (
+                <RevealTitle targetId={titleFrom}>{title}</RevealTitle>
+              ) : (
+                <h1 className="truncate text-center text-section">{title}</h1>
+              ))}
+          </div>
+        </header>
+      ) : (
+        <header className="mx-auto w-full max-w-xl px-4 pt-[max(env(safe-area-inset-top),12px)] pb-4">
+          <Logo />
+        </header>
+      )}
       <main className={`mx-auto w-full max-w-xl flex-1 px-4 ${bottomBar ? "pb-36" : "pb-8"}`}>
         {children}
-        <footer className="mt-12 text-center">
-          <Link href="/privacy" className="text-footnote text-label-3">
-            {lang === "th" ? "ความเป็นส่วนตัว" : "Privacy"}
-          </Link>
+        <footer className="mt-12 flex flex-col items-center gap-1.5 text-footnote text-label-3">
+          <LangToggle lang={lang} />
+          <div className="flex justify-center gap-1.5">
+            <Link href="/privacy">{lang === "th" ? "ความเป็นส่วนตัว" : "Privacy"}</Link>
+            {volunteerLabel && (
+              <>
+                <span aria-hidden>•</span>
+                <Link href="/admin">{volunteerLabel}</Link>
+              </>
+            )}
+          </div>
         </footer>
       </main>
       {bottomBar && <BottomBar>{bottomBar}</BottomBar>}

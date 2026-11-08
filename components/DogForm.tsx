@@ -59,14 +59,20 @@ export function DogForm({
             label="Status"
             name="status"
             value={dog.status}
-            options={[["community", "Community"], ["missing", "Missing"], ["adopted", "Adopted"], ["deceased", "In memory"]]}
+            options={[["community", "Community"], ["missing", "Missing"], ["deceased", "In memory"]]}
           />
         )}
+        <Select
+          label="Home status"
+          name="homeStatus"
+          value={dog?.homeStatus ?? ""}
+          options={[["", "Not set"], ["has_home", "Has a home"], ["ask_adoption", "Ask about adoption"]]}
+        />
         <Text label="Looks like" name="description" defaultValue={dog?.description ?? prefill?.description} placeholder="Tan, white chest" />
       </Section>
 
-      <Section title="Home" footer="Area shows on the public page. GPS stays private.">
-        <Text label="Area" name="area" defaultValue={dog?.area ?? prefill?.area} placeholder="Walking Street" />
+      <Section title="Location" footer="Usually found at shows on the public page. GPS stays private.">
+        <Text label="Usually found at" name="area" defaultValue={dog?.area ?? prefill?.area} placeholder="7-Eleven, Walking Street" />
         {homeLat != null ? (
           <div className="row">
             <input type="hidden" name="lat" defaultValue={homeLat} />
@@ -101,7 +107,7 @@ export function DogForm({
         <h2 className="text-section">Notes</h2>
         <label className="mt-2 block">
           <span className="field-label">Public note</span>
-          <textarea name="publicNotes" defaultValue={dog?.publicNotes} rows={3} placeholder="Shown on the tag page" className="field py-3.5" />
+          <textarea name="publicNotes" defaultValue={dog?.publicNotes} rows={3} placeholder="Shown on the dog page" className="field py-3.5" />
         </label>
         <label className="mt-4 block">
           <span className="field-label">Private note</span>

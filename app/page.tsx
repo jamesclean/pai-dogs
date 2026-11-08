@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { PublicShell } from "@/components/PublicShell";
-import { Chat, Lock, Megaphone, Paw, Phone, Qr } from "@/components/Icons";
+import { Chat, Chevron, Megaphone, Paw, Phone, Qr } from "@/components/Icons";
 import { getLang, t, fill } from "@/lib/i18n";
 import { activeDogCount } from "@/lib/data";
 import { config, lineUrl } from "@/lib/config";
@@ -13,12 +13,10 @@ export default async function Home() {
   const tasks = [
     { href: "/dogs", Icon: Paw, title: s.browseDogs, sub: fill(s.browseSub, { n }) },
     { href: "/lookup", Icon: Qr, title: s.lookUp, sub: s.lookUpSub },
-    { href: "/add", Icon: Megaphone, title: s.addDog, sub: s.addDogSub, accent: true },
-    { href: "/admin", Icon: Lock, title: s.volunteer, sub: s.volunteerSub },
   ];
 
   return (
-    <PublicShell lang={lang}>
+    <PublicShell lang={lang} volunteerLabel={s.volunteer}>
       <section className="relative h-[300px] overflow-hidden rounded-[28px] bg-map shadow-card">
         <HeroMap />
         <div className="absolute inset-x-0 bottom-0 h-[200px] bg-linear-to-t from-surface from-45% to-transparent" />
@@ -30,17 +28,26 @@ export default async function Home() {
       </section>
 
       <nav className="mt-3 grid grid-cols-2 gap-2.5">
-        {tasks.map(({ href, Icon, title, sub, accent }) => (
+        <Link
+          href="/report"
+          className="col-span-2 flex items-center gap-3.5 rounded-[24px] bg-brand-soft p-4 transition active:scale-[0.98]"
+        >
+          <span className="tile h-10 w-10 shrink-0 rounded-[12px] bg-surface-raised text-brand">
+            <Megaphone className="h-[22px] w-[22px]" />
+          </span>
+          <span className="min-w-0 flex-1">
+            <span className="block text-section">{s.reportDog}</span>
+            <span className="mt-0.5 block text-footnote text-label-2">{s.reportDogSub}</span>
+          </span>
+          <Chevron className="h-4 w-4 shrink-0 text-label-3" />
+        </Link>
+        {tasks.map(({ href, Icon, title, sub }) => (
           <Link
             key={href}
             href={href}
-            className={`flex min-h-[150px] flex-col justify-between rounded-[24px] p-4 transition active:scale-[0.98] ${
-              accent ? "bg-brand-soft" : "card"
-            }`}
+            className="card flex min-h-[150px] flex-col justify-between rounded-[24px] p-4 transition active:scale-[0.98]"
           >
-            <span
-              className={`tile h-10 w-10 rounded-[12px] bg-surface-raised ${accent ? "text-brand" : "border border-sep"}`}
-            >
+            <span className="tile h-10 w-10 rounded-[12px] border border-sep bg-surface-raised">
               <Icon className="h-[22px] w-[22px]" />
             </span>
             <span>

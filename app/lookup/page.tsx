@@ -16,9 +16,8 @@ export default async function LookUp() {
   const lang = await getLang();
   const s = t(lang);
   return (
-    <PublicShell lang={lang} back={{ href: "/", label: s.back }}>
-      <h1 className="text-title">{s.lookUp}</h1>
-      <div className="card mt-5 flex items-center gap-3.5 px-4 py-3.5">
+    <PublicShell lang={lang} back={{ href: "/", label: s.back }} title={s.lookUp}>
+      <div className="card flex items-center gap-3.5 px-4 py-3.5">
         <span className="tile h-11 w-11 rounded-[14px] border border-sep bg-surface-raised">
           <Qr className="h-[22px] w-[22px]" />
         </span>

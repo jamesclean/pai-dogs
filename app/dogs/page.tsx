@@ -15,9 +15,8 @@ export default async function BrowseDogs({ searchParams }: PageProps<"/dogs">) {
   const list = await publicDogs(query);
 
   return (
-    <PublicShell lang={lang} back={{ href: "/", label: s.back }}>
-      <h1 className="text-title">{s.dogsOfPai}</h1>
-      <p className="mt-1 text-subhead text-label-2">{fill(s.dogsCount, { n: list.length })}</p>
+    <PublicShell lang={lang} back={{ href: "/", label: s.back }} title={s.dogsOfPai}>
+      <p className="text-subhead text-label-2">{fill(s.dogsCount, { n: list.length })}</p>
 
       <form className="mt-4">
         <label className="search">
@@ -27,25 +26,19 @@ export default async function BrowseDogs({ searchParams }: PageProps<"/dogs">) {
       </form>
 
       <div className="mt-5 grid grid-cols-2 gap-x-2.5 gap-y-5 sm:grid-cols-3">
-        {list.map((d) => {
-          const body = (
-            <>
-              <DogPhoto photoId={d.photoId} alt={d.name} className="aspect-square w-full rounded-[20px]" />
-              <span className="mt-2 flex items-center gap-1.5 px-0.5">
-                <span className="truncate text-callout">{d.name}</span>
-                {d.status === "missing" && <span className="pill bg-bad-soft text-bad">{s.missingLabel}</span>}
-              </span>
-              {d.area && <span className="block truncate px-0.5 text-footnote text-label-2">{d.area}</span>}
-            </>
-          );
-          return d.tagCode ? (
-            <Link key={d.id} href={`/d/${d.tagCode}`} className="block transition active:scale-[0.98]">
-              {body}
-            </Link>
-          ) : (
-            <div key={d.id}>{body}</div>
-          );
-        })}
+        {list.map((d) => (
+          <Link key={d.id} href={`/dogs/${d.id}`} className="block transition active:scale-[0.98]">
+            <DogPhoto photoId={d.photoId} alt={d.name} className="aspect-square w-full rounded-[20px]" />
+            <span className="mt-2 flex items-center gap-1.5 px-0.5">
+              <span className="truncate text-callout">{d.name}</span>
+              {d.status === "missing" && <span className="pill bg-bad-soft text-bad">{s.missingLabel}</span>}
+            </span>
+            {d.area && <span className="block truncate px-0.5 text-footnote text-label-2">{d.area}</span>}
+            {d.homeStatus === "ask_adoption" && (
+              <span className="block truncate px-0.5 text-footnote text-label-2">{s.askAdoption}</span>
+            )}
+          </Link>
+        ))}
       </div>
       {list.length === 0 && <p className="mt-10 text-center text-subhead text-label-2">{s.noDogsFound}</p>}
     </PublicShell>

@@ -12,10 +12,12 @@ report a sighting or an injury.
 - `/d/K7M2X`: dog page reached from the tag. Shows a missing banner if the dog is marked missing.
   A card asks once to "Add Mali to the map": if the person shares their location, the scan
   becomes a quiet sighting on the volunteers' map (no inbox item, at most one per dog every 5 minutes).
-- `/d/K7M2X/report`: "I saw this dog" / "Get help" form with GPS, photo and an optional contact.
+- `/dogs/12`: every dog's public page, with or without a tag.
+- `/dogs/12/report`: "I saw this dog" / "Get help" form with GPS, photo and an optional contact.
+- `/dogs/12/adopt`: "Ask about adoption" form, for dogs marked that way.
 - `/dogs`: every community and missing dog, with photo and area. No GPS is shown publicly.
 - `/lookup`: scan instructions, plus a box to type a tag code if the QR is scratched.
-- `/add`: "Add a new dog" for a dog without an orange collar: photo, location, description.
+- `/report`: "Report a dog in trouble" when you don't know which dog it is. Volunteers add it or match it to a dog in the records.
 
 **Volunteers (`/admin`, one shared password)**
 - Inbox of public reports and new-dog reports. Mark reports done; turn a new-dog report into a dog with "Add dog" (photo and GPS carry over).
@@ -24,7 +26,7 @@ report a sighting or an injury.
 - Tags: generate a batch of unique codes, then download a CSV for the engraver or print a QR sheet.
 - Scan a blank tag while signed in and it offers "Add new dog" or a replacement tag for an existing dog.
 
-Optional Telegram alerts go to a volunteer group on every public report and new-dog report.
+Reports wait in the Dogs tab, with a count on the tab. There are no outside alerts.
 
 ## How tags work
 
