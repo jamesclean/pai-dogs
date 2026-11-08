@@ -65,11 +65,7 @@ export default async function DogAdmin({ params, searchParams }: PageProps<"/adm
         }
       />
 
-      <div className="card-rows mt-1">
-        <SituationSelect form={DOG_FORM_ID} value={group} />
-      </div>
-
-      <div className="mt-5 flex flex-col items-center text-center">
+      <div className="flex flex-col items-center pt-2 text-center">
         <DogPhoto photoId={dog.photoId} alt={dog.name} className="h-[104px] w-[104px] rounded-full" />
         <h1 className="mt-4 text-display">{dog.name}</h1>
         <p className="mt-1 text-subhead text-label-2">{[dog.area, dog.status === "missing" && "Missing", dog.homeStatus === "ask_adoption" && "Ask about adoption"].filter(Boolean).join(" • ")}</p>
@@ -82,6 +78,10 @@ export default async function DogAdmin({ params, searchParams }: PageProps<"/adm
           </span>
           {latestAlert && <span className="pill bg-bad-soft text-bad">{CONDITION[latestAlert.condition]}</span>}
         </div>
+      </div>
+
+      <div className="card-rows mt-7">
+        <SituationSelect form={DOG_FORM_ID} value={group} />
       </div>
 
       <section className="mt-7">
