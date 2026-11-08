@@ -25,14 +25,14 @@ export function ReportForm({
 }: {
   action: (prev: ReportState, form: FormData) => Promise<ReportState>;
   s: Dict;
-  initial: string;
+  initial?: string;
   notePlaceholder: string;
   back: { href: string; label: string };
   photoId?: number | null;
   vet: Vet;
 }) {
   const [state, action, pending] = useActionState<ReportState, FormData>(submit, { ok: false });
-  const [condition, setCondition] = useState(CONDITIONS.find((c) => c === initial) ?? "ok");
+  const [condition, setCondition] = useState(CONDITIONS.find((c) => c === initial));
   // The photo they took, shown again on the "Report sent" sheet of an unknown dog.
   const [preview, setPreview] = useState<string | null>(null);
   const urgent = condition === "injured" || condition === "sick";
@@ -50,7 +50,7 @@ export function ReportForm({
       <div className="card-rows">
         {CONDITIONS.map((c) => (
           <label key={c} className="row cursor-pointer">
-            <input type="radio" name="condition" value={c} defaultChecked={c === condition} className="peer sr-only" />
+            <input type="radio" name="condition" value={c} required defaultChecked={c === initial} className="peer sr-only" />
             <span className="flex-1 text-body">{s[`c_${c}`]}</span>
             <span className="tile h-6 w-6 rounded-full border-[1.5px] border-label-3 text-on-inverse peer-checked:border-inverse peer-checked:bg-inverse peer-focus-visible:ring-2 peer-focus-visible:ring-brand [&>svg]:invisible peer-checked:[&>svg]:visible">
               <Check className="h-3.5 w-3.5" />
