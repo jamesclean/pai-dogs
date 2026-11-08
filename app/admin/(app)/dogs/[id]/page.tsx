@@ -16,7 +16,7 @@ import { fmtDate, fmtDateTime, rabiesCurrent } from "@/lib/dates";
 
 const gps = {
   yourLocation: "Location added",
-  shareYourLocation: "Add location here",
+  shareYourLocation: "Mark this location",
   locating: "Getting GPS…",
   added: "Added",
   locationFailed: "GPS failed",

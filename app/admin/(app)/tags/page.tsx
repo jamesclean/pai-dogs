@@ -4,7 +4,7 @@ import { count, desc, sql } from "drizzle-orm";
 import { db, tags } from "@/db";
 import { createBatch } from "../../actions";
 import { normalizeCode } from "@/lib/codes";
-import { AdminHeader } from "@/components/AdminHeader";
+import { AdminHeader, SignOutButton } from "@/components/AdminHeader";
 import { Chevron, Search } from "@/components/Icons";
 
 async function findTag(form: FormData) {
@@ -26,7 +26,7 @@ export default async function TagsPage() {
 
   return (
     <>
-      <AdminHeader title="Tags" />
+      <AdminHeader title="Tags" right={<SignOutButton />} />
 
       <form action={findTag}>
         <label className="search">

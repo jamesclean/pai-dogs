@@ -3,7 +3,7 @@ import { redirect } from "next/navigation";
 import { revalidatePath } from "next/cache";
 import { and, eq, isNull, sql } from "drizzle-orm";
 import { adoptionQuestions, db, dogs, photos, tags, sightings, newDogReports, type NewDogReport } from "@/db";
-import { requireAdmin } from "@/lib/auth";
+import { endSession, requireAdmin } from "@/lib/auth";
 import { savePhoto } from "@/lib/photos";
 import { newCode, normalizeCode } from "@/lib/codes";
 import { DOG_GROUPS } from "@/lib/dog-groups";
@@ -65,6 +65,11 @@ function dogFields(f: FormData) {
     publicNotes: str(f, "publicNotes", 2000),
     privateNotes: str(f, "privateNotes", 4000),
   };
+}
+
+export async function signOut() {
+  await endSession();
+  redirect("/");
 }
 
 export async function createDog(form: FormData) {
