@@ -59,8 +59,8 @@ export function PublicShell({
 
 export function BottomBar({ children }: { children: React.ReactNode }) {
   return (
-    <div className="pointer-events-none fixed inset-x-0 bottom-0 z-30 bg-linear-to-t from-bg from-60% to-transparent px-4 pt-8 pb-[max(env(safe-area-inset-bottom),16px)]">
-      <div className="pointer-events-auto mx-auto flex max-w-xl gap-2.5">{children}</div>
+    <div className="pointer-events-none fixed inset-x-0 bottom-0 z-30 bg-linear-to-t from-bg from-60% to-transparent pt-8 pb-[max(env(safe-area-inset-bottom),16px)]">
+      <div className="pointer-events-auto mx-auto flex max-w-xl gap-2.5 px-4">{children}</div>
     </div>
   );
 }
