@@ -4,6 +4,7 @@ import { getTag } from "@/lib/data";
 import { savePhoto } from "@/lib/photos";
 import { notify } from "@/lib/notify";
 import { config } from "@/lib/config";
+import { allow } from "@/lib/ratelimit";
 
 const CONDITIONS = ["ok", "injured", "sick", "lost", "other"] as const;
 
@@ -16,6 +17,7 @@ export type ReportState = { ok: boolean; error?: string };
 
 export async function submitReport(code: string, _prev: ReportState, form: FormData): Promise<ReportState> {
   if (form.get("website")) return { ok: true }; // honeypot: bots fill every field
+  if (!(await allow("report", 6, 600))) return { ok: false, error: "rate" };
 
   const row = await getTag(code);
   if (!row?.dog) return { ok: false, error: "Unknown tag" };
@@ -32,7 +34,7 @@ export async function submitReport(code: string, _prev: ReportState, form: FormD
   try {
     photoId = await savePhoto(form.get("photo"));
   } catch {
-    return { ok: false, error: "Photo upload failed" };
+    return { ok: false, error: "Photo didn't upload. Try again." };
   }
 
   await db.insert(sightings).values({

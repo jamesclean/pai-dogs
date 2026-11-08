@@ -36,37 +36,37 @@ See README.md for features and deployment, SOURCING.md for tag and collar suppli
   LINE Notify is dead, so don't suggest it.
 - Next 16 with `cacheComponents: false`: every page is dynamic on purpose.
 
-## Design direction (in progress)
+## Design
 
-The current UI is an iOS-native re-skin: glass bars, large titles, inset grouped
-lists, system font, automatic dark mode. Colours are semantic tokens in
-`app/globals.css` (bg, surface, label, label-2, sep, fill, brand…). Components
-only use those names, never raw colours.
-
-**Next step:** James wants it to match his reference **App screens** in Figma
-(World ID–like: white, minimal, lots of whitespace). He also likes the white
-work in his Verifast One file.
-- References: https://www.figma.com/design/jYLDF4OWbACbl1cO4KkTLO/Pai-Dogs?node-id=0-1
-  ("the App screens are 100% what I'm after")
-- Build the Pai Dogs screens in Figma here: https://www.figma.com/design/jYLDF4OWbACbl1cO4KkTLO/Pai-Dogs?node-id=1-13201
-- Verifast One (work account, may not be readable from his personal Figma login):
-  https://www.figma.com/design/Kk25AP5gvE75caQ4JL3PsQ/Verifast-One?node-id=7814-8854
-
-Plan: read the references with the Figma read tools (`get_screenshot`,
-`get_design_context`, `get_variable_defs`), extract tokens (type scale,
-colours, radii, spacing, shadows), build the screens in node 1-13201, and
-once James signs off, port the tokens into `app/globals.css` and adjust
-components.
-
-Screens: public dog page (light + dark), report form, report sent, home,
-volunteer login, admin dashboard (inbox + map + list), dog detail/editor,
-tags list, tag link, batch print sheet.
+The UI follows the Pai Dogs Figma file (World ID–style: white, minimal, lots of whitespace):
+https://www.figma.com/design/jYLDF4OWbACbl1cO4KkTLO/Pai-Dogs?node-id=1-13201
+- Kit section holds the variables (Light/Dark), text styles, components and icons.
+  `app/globals.css` mirrors those variables one-to-one; components only use the token names.
+- Light and Dark screen sets, plus "New features" sections (scan sighting, add a new dog,
+  browse, look up). The sponsor (PromptPay) designs there are parked: don't build them yet.
+- Type: Geist + IBM Plex Sans Thai. Icons: Hugeicons stroke rounded, 1.5 stroke.
+- Main buttons are black (inverse). Orange is for the collar/brand only.
+- No decorative dots (in chips, labels or lists). History timeline dots and map pins are fine.
+- Image cards (photos, maps, the steel tag, the photo picker) have no border, Apple style.
+  List and form cards keep their 1px `sep` border; removing it everywhere feels too nested.
+- Copy follows James's house rules (`~/.claude/skills/copy-refinement`): verb + noun buttons,
+  labels not questions, • between facts, sentence case, no em dashes.
 
 ## Status
 
-- Code: https://github.com/jamesclean/pai-dogs (main). Not deployed yet.
-- Deploy plan: Supabase (Postgres) + Vercel. James hasn't created these yet.
-  When he sends the connection string, run `npm run db:migrate` against it.
+- Code: https://github.com/jamesclean/pai-dogs. `main` is the old iOS re-skin. The redesign +
+  new features are in PR #1 (`redesign-and-new-features`). Push over HTTPS as `jamesclean`
+  (`git push https://github.com/jamesclean/pai-dogs.git <branch>`): the SSH key on James's Mac
+  is his Verifast work account and can't push here. Don't touch his credentials.
+- Not deployed. Deploy plan: Supabase (Postgres) + Vercel, not created yet. When James sends
+  the connection string, run `npm run db:migrate` (migrations 0000–0002).
+- Before launch: native Thai check of `lib/i18n.ts` and `app/privacy/page.tsx`;
+  set `SITE_URL` (final, it's in every QR), `CONTACT_LINE`, `CONTACT_PHONE`.
+- Parked: Sponsor a dog (PromptPay) is designed in Figma but not to be built yet. It needs
+  real amounts and the program's PromptPay ID; a static PromptPay QR can't confirm payment.
+- Not in Figma yet: the `/privacy` page.
+- Deck: Figma Slides "Pai Dogs · Key features" (https://www.figma.com/slides/vvMZPTeKHcDFDzSZbOPNqL),
+  6 slides with shots of the current screens. Re-export shots if screens change.
 - Tags and collars: not ordered. Recommendation in SOURCING.md is 304 stainless slide-on,
   fiber-laser QR ≥18 mm, slot ≥26×4 mm, and a 25 mm orange TPU/biothane collar
   with metal buckle. Get samples first.
@@ -77,7 +77,8 @@ tags list, tag link, batch print sheet.
 cp .env.example .env.local   # DATABASE_URL, ADMIN_PASSWORD, SESSION_SECRET, SITE_URL
 npm install && npm run db:migrate
 npm run build && npm start
-node scripts/e2e.mjs /tmp/pai-e2e   # full public + volunteer flow in headless iPhones
+npx playwright install chromium   # once
+npm run e2e -- /tmp/pai-e2e         # full public + volunteer flow in headless iPhones
 ```
 
 In the cloud container, Postgres 16 is installed:

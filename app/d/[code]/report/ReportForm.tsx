@@ -1,72 +1,87 @@
 "use client";
-import { useActionState } from "react";
 import Link from "next/link";
+import { useActionState } from "react";
 import { submitReport, type ReportState } from "./actions";
-import { PhotoInput } from "@/components/PhotoInput";
 import { LocationField } from "@/components/LocationField";
-import { Check, Heart } from "@/components/Icons";
+import { PhotoInput } from "@/components/PhotoInput";
+import { BottomBar } from "@/components/PublicShell";
+import { Sheet } from "@/components/Sheet";
+import { DogPhoto } from "@/components/DogPhoto";
+import { Check, Close } from "@/components/Icons";
 import type { Dict } from "@/lib/i18n";
 
 const CONDITIONS = ["ok", "injured", "sick", "lost", "other"] as const;
 
-export function ReportForm({ code, s, initial }: { code: string; s: Dict; initial: string }) {
+export function ReportForm({
+  code,
+  s,
+  initial,
+  backLabel,
+  photoId,
+}: {
+  code: string;
+  photoId: number | null;
+  s: Dict;
+  initial: string;
+  backLabel: string;
+}) {
   const [state, action, pending] = useActionState<ReportState, FormData>(submitReport.bind(null, code), {
     ok: false,
   });
 
-  if (state.ok)
-    return (
-      <div className="flex flex-col items-center pt-16 text-center">
-        <span className="flex h-20 w-20 items-center justify-center rounded-full bg-brand-soft text-brand">
-          <Heart className="h-10 w-10" />
-        </span>
-        <p className="mt-6 text-[22px] font-semibold tracking-tight">{s.thanks}</p>
-        <Link href={`/d/${code}`} className="btn-gray mt-8 w-full">
-          {s.back}
-        </Link>
-      </div>
-    );
-
   return (
-    <form action={action}>
-      <h2 className="section-header">{s.condition}</h2>
-      <div className="inset-group">
+    <form action={action} className="mt-4">
+      <div className="card-rows">
         {CONDITIONS.map((c) => (
-          <label key={c} className="cell cursor-pointer active:bg-fill">
+          <label key={c} className="row cursor-pointer">
             <input type="radio" name="condition" value={c} defaultChecked={c === initial} className="peer sr-only" />
-            <span className="flex-1">{s[`c_${c}`]}</span>
-            <Check className="invisible h-5 w-5 text-brand peer-checked:visible" />
+            <span className="flex-1 text-body">{s[`c_${c}`]}</span>
+            <span className="tile h-6 w-6 rounded-full border-[1.5px] border-label-3 text-on-inverse peer-checked:border-inverse peer-checked:bg-inverse peer-focus-visible:ring-2 peer-focus-visible:ring-brand [&>svg]:invisible peer-checked:[&>svg]:visible">
+              <Check className="h-3.5 w-3.5" />
+            </span>
           </label>
         ))}
       </div>
 
-      <div className="inset-group mt-8">
+      <div className="card-rows mt-6">
         <LocationField labels={s} />
-        <PhotoInput label={s.photo} />
+        <PhotoInput label={s.addPhoto} changeLabel={s.changePhoto} />
       </div>
 
-      <h2 className="section-header mt-8">{s.note}</h2>
-      <div className="inset-group">
-        <textarea name="note" rows={3} className="cell-input block w-full px-4 py-3" />
-      </div>
+      <label className="mt-6 block">
+        <span className="field-label">{s.anythingElse}</span>
+        <textarea name="note" rows={3} placeholder={s.notePlaceholder} className="field py-3.5" />
+      </label>
 
-      <h2 className="section-header mt-8">{s.yourContact}</h2>
-      <div className="inset-group">
-        <div className="cell">
-          <input name="contact" className="cell-input" autoComplete="tel" placeholder="LINE / 08x-xxx-xxxx" />
-        </div>
-      </div>
+      <label className="mt-5 block">
+        <span className="field-label">{s.yourContact}</span>
+        <input name="contact" autoComplete="tel" placeholder={s.contactPlaceholder} className="field h-[50px]" />
+        <span className="field-help">{s.contactHelp}</span>
+      </label>
 
       <input name="website" tabIndex={-1} autoComplete="off" className="hidden" aria-hidden />
-      {state.error && <p className="section-footer text-bad">{state.error}</p>}
+      {state.error && <p className="mt-4 text-footnote text-bad">{state.error === "rate" ? s.tooMany : state.error}</p>}
 
-      <div className="sticky bottom-0 z-20 -mx-4 mt-8 px-4 pb-[max(env(safe-area-inset-bottom),16px)]">
-        <div className="glass mx-auto max-w-xl rounded-[32px] p-2">
-          <button className="btn-brand w-full" disabled={pending}>
-            {pending ? s.sending : s.send}
-          </button>
-        </div>
-      </div>
+      <BottomBar>
+        <button className="btn-primary flex-1" disabled={pending}>
+          {pending ? s.sending : s.sendReport}
+        </button>
+      </BottomBar>
+
+      {state.ok && (
+        <Sheet>
+          <div className="flex items-start justify-between">
+            <DogPhoto photoId={photoId} alt="" className="h-14 w-14 rounded-[18px]" />
+            <Link href={`/d/${code}`} aria-label={backLabel} className="circle-btn">
+              <Close className="h-5 w-5" />
+            </Link>
+          </div>
+          <h2 className="mt-5 text-title">{s.reportSent}</h2>
+          <Link href={`/d/${code}`} className="btn-primary mt-6 w-full">
+            {backLabel}
+          </Link>
+        </Sheet>
+      )}
     </form>
   );
 }

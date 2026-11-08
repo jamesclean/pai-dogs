@@ -1,5 +1,5 @@
 import "server-only";
-import { and, count, desc, eq, ne } from "drizzle-orm";
+import { and, asc, count, desc, eq, ilike, ne, notInArray, or, sql } from "drizzle-orm";
 import { db, dogs, tags, sightings } from "@/db";
 import { normalizeCode } from "./codes";
 
@@ -37,4 +37,26 @@ export async function activeDogCount() {
     .from(dogs)
     .where(and(ne(dogs.status, "deceased"), ne(dogs.status, "adopted")));
   return r.n;
+}
+
+// Public directory: community and missing dogs, with the tag their page lives at.
+export async function publicDogs(query = "") {
+  const q = query.trim();
+  return db
+    .select({
+      id: dogs.id,
+      name: dogs.name,
+      area: dogs.area,
+      status: dogs.status,
+      photoId: dogs.photoId,
+      tagCode: sql<string | null>`(select code from ${tags} where ${tags.dogId} = ${dogs.id} and not ${tags.retired} order by ${tags.assignedAt} desc limit 1)`,
+    })
+    .from(dogs)
+    .where(
+      and(
+        notInArray(dogs.status, ["deceased", "adopted"]),
+        q ? or(ilike(dogs.name, `%${q}%`), ilike(dogs.area, `%${q}%`)) : undefined,
+      ),
+    )
+    .orderBy(asc(dogs.name));
 }

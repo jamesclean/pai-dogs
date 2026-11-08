@@ -2,7 +2,7 @@
 import { redirect } from "next/navigation";
 import { revalidatePath } from "next/cache";
 import { and, eq, isNull } from "drizzle-orm";
-import { db, dogs, tags, sightings } from "@/db";
+import { db, dogs, tags, sightings, newDogReports } from "@/db";
 import { requireAdmin } from "@/lib/auth";
 import { savePhoto } from "@/lib/photos";
 import { newCode, normalizeCode } from "@/lib/codes";
@@ -47,12 +47,24 @@ function dogFields(f: FormData) {
 
 export async function createDog(form: FormData) {
   await requireAdmin();
-  const photoId = await savePhoto(form.get("photo"));
   const fields = dogFields(form);
+  // Made from a "new dog" report: reuse its photo and spot unless replaced.
+  const reportId = Number(form.get("report"));
+  const [report] = Number.isInteger(reportId) && reportId > 0
+    ? await db.select().from(newDogReports).where(eq(newDogReports.id, reportId))
+    : [];
+  const photoId = (await savePhoto(form.get("photo"))) ?? report?.photoId ?? null;
+  if (report && fields.homeLat === null && report.lat !== null) {
+    fields.homeLat = report.lat;
+    fields.homeLng = report.lng;
+  }
   const [dog] = await db
     .insert(dogs)
     .values({ ...fields, photoId })
     .returning({ id: dogs.id });
+  if (report) {
+    await db.update(newDogReports).set({ reviewed: true, dogId: dog.id }).where(eq(newDogReports.id, report.id));
+  }
 
   const code = normalizeCode(str(form, "tag", 20));
   if (code) {
@@ -108,6 +120,12 @@ export async function volunteerSighting(dogId: number, form: FormData) {
     reviewed: true,
   });
   revalidatePath(`/admin/dogs/${dogId}`);
+}
+
+export async function dismissNewDog(reportId: number) {
+  await requireAdmin();
+  await db.update(newDogReports).set({ reviewed: true }).where(eq(newDogReports.id, reportId));
+  redirect("/admin");
 }
 
 export async function markReviewed(sightingId: number) {

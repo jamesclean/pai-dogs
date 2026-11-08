@@ -1,49 +1,79 @@
-import type { Dog } from "@/db/schema";
+import type { Dog } from "@/db";
 import { PhotoInput } from "./PhotoInput";
 import { LocationField } from "./LocationField";
 import { Switch } from "./Switch";
+import { BottomBar } from "./PublicShell";
 import { UpDown } from "./Icons";
 
 const gps = {
-  useLocation: "Set home to my location",
+  yourLocation: "Home location set",
+  shareYourLocation: "Set home location",
   locating: "Getting GPS…",
-  located: "Home location set",
-  locationFailed: "GPS failed — describe the area instead",
+  added: "Added",
+  locationFailed: "GPS failed. Describe the area instead.",
 };
+
+export type DogPrefill = Partial<Pick<Dog, "description" | "homeLat" | "homeLng" | "area">>;
 
 export function DogForm({
   dog,
+  prefill,
   action,
   tag,
+  report,
   submit,
 }: {
   dog?: Dog;
+  prefill?: DogPrefill;
   action: (f: FormData) => Promise<void>;
   tag?: string;
+  report?: number;
   submit: string;
 }) {
+  const homeLat = dog?.homeLat ?? prefill?.homeLat ?? null;
+  const homeLng = dog?.homeLng ?? prefill?.homeLng ?? null;
   return (
     <form action={action}>
       {tag && <input type="hidden" name="tag" value={tag} />}
+      {report && <input type="hidden" name="report" value={report} />}
+
+      {!dog && (
+        <label className="mt-6 block">
+          <span className="field-label">Name</span>
+          <input name="name" required placeholder="e.g. Khao" className="field h-[50px]" />
+        </label>
+      )}
 
       <Section title="Dog">
-        <PhotoInput label={dog?.photoId ? "Replace photo" : "Add photo"} />
-        <Text label="Name" name="name" defaultValue={dog?.name} required />
-        <Select label="Sex" name="sex" value={dog?.sex} options={["unknown", "male", "female"]} />
-        <Select label="Temperament" name="temperament" value={dog?.temperament} options={["friendly", "shy", "careful"]} />
-        {dog && <Select label="Status" name="status" value={dog.status} options={["community", "missing", "adopted", "deceased"]} />}
-        <Text label="Looks like" name="description" defaultValue={dog?.description} placeholder="Tan, white chest" />
+        <PhotoInput label={dog?.photoId ? "Replace photo" : "Add a photo"} changeLabel="Change photo" />
+        {dog && <Text label="Name" name="name" defaultValue={dog.name} required />}
+        <Select label="Sex" name="sex" value={dog?.sex} options={[["unknown", "Unknown"], ["male", "Male"], ["female", "Female"]]} />
+        <Select
+          label="Temperament"
+          name="temperament"
+          value={dog?.temperament}
+          options={[["friendly", "Friendly"], ["shy", "Shy"], ["careful", "Careful"]]}
+        />
+        {dog && (
+          <Select
+            label="Status"
+            name="status"
+            value={dog.status}
+            options={[["community", "Community"], ["missing", "Missing"], ["adopted", "Adopted"], ["deceased", "In memory"]]}
+          />
+        )}
+        <Text label="Looks like" name="description" defaultValue={dog?.description ?? prefill?.description} placeholder="Tan, white chest" />
       </Section>
 
-      <Section title="Home" footer="Area is shown publicly. GPS is for volunteers' map only.">
-        <Text label="Area" name="area" defaultValue={dog?.area} placeholder="Walking Street" />
-        {dog?.homeLat != null ? (
-          <div className="cell">
-            <input type="hidden" name="lat" defaultValue={dog.homeLat} />
-            <input type="hidden" name="lng" defaultValue={dog.homeLng ?? ""} />
-            <span className="flex-1">GPS</span>
-            <span className="font-mono text-[15px] text-label-2">
-              {dog.homeLat.toFixed(4)}, {dog.homeLng?.toFixed(4)}
+      <Section title="Home" footer="Area shows on the public page. GPS stays private.">
+        <Text label="Area" name="area" defaultValue={dog?.area ?? prefill?.area} placeholder="Walking Street" />
+        {homeLat != null ? (
+          <div className="row">
+            <input type="hidden" name="lat" defaultValue={homeLat} />
+            <input type="hidden" name="lng" defaultValue={homeLng ?? ""} />
+            <span className="flex-1 text-callout">GPS</span>
+            <span className="text-subhead text-label-2">
+              {homeLat.toFixed(4)}, {homeLng?.toFixed(4)}
             </span>
           </div>
         ) : (
@@ -52,64 +82,70 @@ export function DogForm({
       </Section>
 
       <Section title="Health">
-        <div className="cell">
-          <span className="flex-1">Sterilized</span>
+        <div className="row">
+          <span className="flex-1 text-callout">Sterilized</span>
           <Switch name="sterilized" defaultChecked={dog?.sterilized} />
         </div>
         <Text label="Sterilized on" name="sterilizedOn" type="date" defaultValue={dog?.sterilizedOn ?? ""} />
-        <Text label="Rabies shot" name="rabiesVaccinatedOn" type="date" defaultValue={dog?.rabiesVaccinatedOn ?? ""} />
-        <Text label="Other" name="otherVaccines" defaultValue={dog?.otherVaccines} placeholder="DHPP, deworm…" />
+        <Text label="Rabies vaccine" name="rabiesVaccinatedOn" type="date" defaultValue={dog?.rabiesVaccinatedOn ?? ""} />
+        <Text label="Other" name="otherVaccines" defaultValue={dog?.otherVaccines} placeholder="DHPP, dewormed" />
       </Section>
 
-      <Section title="Caretaker" footer="Phone is only visible to volunteers.">
+      <Section title="Caretaker" footer="Only volunteers see the phone number.">
         <Text label="Name" name="caretakerName" defaultValue={dog?.caretakerName} placeholder="Khun Noi" />
-        <Text label="LINE ID" name="caretakerLine" defaultValue={dog?.caretakerLine} placeholder="Optional" />
-        <Text label="Phone" name="caretakerPhone" type="tel" defaultValue={dog?.caretakerPhone} placeholder="Optional" />
+        <Text label="LINE ID" name="caretakerLine" defaultValue={dog?.caretakerLine} placeholder="noi.pai" />
+        <Text label="Phone" name="caretakerPhone" type="tel" defaultValue={dog?.caretakerPhone} placeholder="08x-xxx-xxxx" />
       </Section>
 
-      <Section title="Public notes">
-        <textarea name="publicNotes" defaultValue={dog?.publicNotes} rows={3} placeholder="Shown on the tag page" className="cell-input block w-full px-4 py-3" />
-      </Section>
-      <Section title="Private notes">
-        <textarea name="privateNotes" defaultValue={dog?.privateNotes} rows={3} placeholder="Volunteers only" className="cell-input block w-full px-4 py-3" />
-      </Section>
+      <section className="mt-7">
+        <h2 className="text-section">Notes</h2>
+        <label className="mt-2 block">
+          <span className="field-label">Public note</span>
+          <textarea name="publicNotes" defaultValue={dog?.publicNotes} rows={3} placeholder="Shown on the tag page" className="field py-3.5" />
+        </label>
+        <label className="mt-4 block">
+          <span className="field-label">Private note</span>
+          <textarea name="privateNotes" defaultValue={dog?.privateNotes} rows={3} placeholder="Anything the team should know" className="field py-3.5" />
+        </label>
+      </section>
 
-      <div className="sticky bottom-0 z-20 -mx-4 mt-8 px-4 pb-[max(env(safe-area-inset-bottom),16px)]">
-        <div className="glass mx-auto max-w-3xl rounded-[32px] p-2">
-          <button className="btn-brand w-full">{submit}</button>
-        </div>
-      </div>
+      <BottomBar>
+        <button className="btn-primary flex-1">{submit}</button>
+      </BottomBar>
     </form>
   );
 }
 
 function Section({ title, footer, children }: { title: string; footer?: string; children: React.ReactNode }) {
   return (
-    <section className="mt-8">
-      <h2 className="section-header">{title}</h2>
-      <div className="inset-group">{children}</div>
-      {footer && <p className="section-footer">{footer}</p>}
+    <section className="mt-7">
+      <h2 className="text-section">{title}</h2>
+      <div className="card-rows mt-2">{children}</div>
+      {footer && <p className="mt-2 text-footnote text-label-3">{footer}</p>}
     </section>
   );
 }
 
 function Text({ label, ...props }: { label: string } & React.InputHTMLAttributes<HTMLInputElement>) {
   return (
-    <label className="cell">
-      <span className="w-32 shrink-0">{label}</span>
-      <input className="cell-input text-right [&::-webkit-date-and-time-value]:text-right" {...props} />
+    <label className="row">
+      <span className="w-32 shrink-0 text-callout">{label}</span>
+      <input
+        className="bare-input text-right text-subhead text-label-2 [&::-webkit-date-and-time-value]:text-right"
+        {...props}
+      />
     </label>
   );
 }
 
-function Select({ label, name, value, options }: { label: string; name: string; value?: string; options: string[] }) {
+function Select({ label, name, value, options }: { label: string; name: string; value?: string; options: [string, string][] }) {
   return (
-    <label className="cell">
-      <span className="flex-1">{label}</span>
-      <select name={name} defaultValue={value} className="cursor-pointer appearance-none bg-transparent text-right text-[17px] text-label-2 capitalize outline-none">
-        {options.map((o) => (
-          <option key={o} value={o}>
-            {o}
+    <label className="row">
+      <span className="flex-1 text-callout">{label}</span>
+      <select name={name} defaultValue={value} className="cursor-pointer appearance-none bg-transparent text-right text-subhead text-label-2 outline-none">
+        {options.map(([v, l]) => (
+          <option key={v} value={v}>
+            {l}
           </option>
         ))}
       </select>

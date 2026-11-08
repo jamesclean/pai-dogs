@@ -1,11 +1,20 @@
 import Link from "next/link";
 import { desc, eq, ilike, or, sql } from "drizzle-orm";
-import { db, dogs, sightings, tags } from "@/db";
+import { db, dogs, sightings, tags, newDogReports } from "@/db";
 import { DogPhoto } from "@/components/DogPhoto";
+import { AdminHeader } from "@/components/AdminHeader";
 import { Map, type Pin } from "@/components/Map";
-import { Chevron, Plus, Search } from "@/components/Icons";
+import { Chevron, Megaphone, Pin as PinIcon, Plus, Search } from "@/components/Icons";
 import { markReviewed } from "../actions";
 import { fmtDateTime, rabiesCurrent } from "@/lib/dates";
+
+const CONDITION: Record<string, [string, string] | null> = {
+  ok: null,
+  injured: ["Injured", "bg-bad-soft text-bad"],
+  sick: ["Looks sick", "bg-bad-soft text-bad"],
+  lost: ["Seems lost", "bg-warn-soft text-warn"],
+  other: ["Other", "bg-fill text-label-2"],
+};
 
 export default async function AdminHome({ searchParams }: PageProps<"/admin">) {
   const { q } = await searchParams;
@@ -30,134 +39,183 @@ export default async function AdminHome({ searchParams }: PageProps<"/admin">) {
     )
     .orderBy(dogs.name);
 
-  const inbox = await db
-    .select({ s: sightings, name: dogs.name })
+  const reports = await db
+    .select({ s: sightings, name: dogs.name, dogPhoto: dogs.photoId })
     .from(sightings)
     .innerJoin(dogs, eq(dogs.id, sightings.dogId))
     .where(eq(sightings.reviewed, false))
     .orderBy(desc(sightings.createdAt))
     .limit(30);
 
-  // Latest known position per dog.
+  const newDogs = await db
+    .select()
+    .from(newDogReports)
+    .where(eq(newDogReports.reviewed, false))
+    .orderBy(desc(newDogReports.createdAt))
+    .limit(30);
+
+  const inbox = [
+    ...newDogs.map((r) => ({ kind: "new" as const, at: r.createdAt, r })),
+    ...reports.map((r) => ({ kind: "sighting" as const, at: r.s.createdAt, r })),
+  ].sort((a, b) => b.at.getTime() - a.at.getTime());
+
+  // Latest known position per dog, scans included.
   const latest = await db.execute<{ dog_id: number; name: string; lat: number; lng: number; status: string }>(sql`
     select distinct on (s.dog_id) s.dog_id, d.name, s.lat, s.lng, d.status
     from ${sightings} s join ${dogs} d on d.id = s.dog_id
     where s.lat is not null
     order by s.dog_id, s.created_at desc`);
-  const pins: Pin[] = latest.map((r) => ({
-    lat: r.lat,
-    lng: r.lng,
-    label: r.name,
-    href: `/admin/dogs/${r.dog_id}`,
-    kind: r.status === "missing" ? "alert" : "latest",
-  }));
+  const pins: Pin[] = [
+    ...latest.map((r) => ({
+      lat: r.lat,
+      lng: r.lng,
+      label: r.name,
+      href: `/admin/dogs/${r.dog_id}`,
+      kind: (r.status === "missing" ? "alert" : "latest") as Pin["kind"],
+    })),
+    ...newDogs
+      .filter((r) => r.lat !== null && r.lng !== null)
+      .map((r) => ({ lat: r.lat!, lng: r.lng!, label: "New dog", href: `/admin/dogs/new?report=${r.id}`, kind: "newdog" as const })),
+  ];
 
   return (
     <>
-      <div className="flex items-end justify-between pt-8 pb-4">
-        <h1 className="large-title">Dogs</h1>
-        <Link
-          href="/admin/dogs/new"
-          aria-label="Add dog"
-          className="flex h-9 w-9 items-center justify-center rounded-full bg-brand-soft text-brand active:scale-95"
-        >
-          <Plus className="h-5 w-5" />
-        </Link>
-      </div>
+      <AdminHeader
+        title="Dogs"
+        right={
+          <Link href="/admin/dogs/new" aria-label="Add dog" className="circle-btn">
+            <Plus className="h-5 w-5" />
+          </Link>
+        }
+      />
 
       <form>
-        <label className="field flex items-center gap-2 py-0">
-          <Search className="h-[18px] w-[18px] shrink-0 text-label-2" />
-          <input name="q" defaultValue={query} placeholder="Name, area, caretaker or tag" className="cell-input h-11" />
+        <label className="search">
+          <Search className="h-[18px] w-[18px] shrink-0" />
+          <input name="q" defaultValue={query} placeholder="Name, area, caretaker or tag" className="bare-input" />
         </label>
       </form>
 
       {inbox.length > 0 && (
-        <section className="mt-8">
-          <h2 className="section-header">Reports to check · {inbox.length}</h2>
-          <div className="inset-group">
-            {inbox.map(({ s, name }) => {
-              const urgent = s.condition !== "ok";
-              return (
-                <div key={s.id} className="cell items-start py-3">
-                  {s.photoId ? (
-                    <DogPhoto photoId={s.photoId} alt="" className="h-14 w-14 shrink-0 rounded-[12px]" />
+        <section className="mt-7">
+          <div className="flex items-baseline justify-between">
+            <h2 className="text-section">Reports to check</h2>
+            <span className="text-footnote text-label-2">{inbox.length}</span>
+          </div>
+          <div className="mt-1 divide-y divide-sep">
+            {inbox.map((item) =>
+              item.kind === "new" ? (
+                <div key={`n${item.r.id}`} className="flex items-start gap-3 py-3">
+                  {item.r.photoId ? (
+                    <DogPhoto photoId={item.r.photoId} alt="" className="h-11 w-11 shrink-0 rounded-[12px]" />
                   ) : (
-                    <span className={`mt-1.5 h-2.5 w-2.5 shrink-0 rounded-full ${urgent ? "bg-bad" : "bg-label-3"}`} />
+                    <span className="tile h-11 w-11 rounded-[12px] bg-brand-soft text-brand">
+                      <Megaphone className="h-[22px] w-[22px]" />
+                    </span>
                   )}
                   <div className="min-w-0 flex-1">
-                    <div className="flex items-baseline gap-2">
-                      <Link href={`/admin/dogs/${s.dogId}`} className="font-semibold">
-                        {name}
+                    <p className="flex items-center gap-2">
+                      <span className="text-callout">New dog</span>
+                      <span className="pill bg-warn-soft text-warn">No collar</span>
+                    </p>
+                    {item.r.note && <p className="mt-0.5 text-footnote">{item.r.note}</p>}
+                    <p className="mt-0.5 text-footnote text-label-3">
+                      {[fmtDateTime(item.r.createdAt), item.r.contact].filter(Boolean).join(" • ")}
+                    </p>
+                  </div>
+                  <Link href={`/admin/dogs/new?report=${item.r.id}`} className="btn-primary btn-sm">
+                    Add dog
+                  </Link>
+                </div>
+              ) : (
+                <div key={`s${item.r.s.id}`} className="flex items-start gap-3 py-3">
+                  {item.r.s.photoId || item.r.dogPhoto ? (
+                    <DogPhoto
+                      photoId={item.r.s.photoId ?? item.r.dogPhoto}
+                      alt=""
+                      className="h-11 w-11 shrink-0 rounded-[12px]"
+                    />
+                  ) : (
+                    <span className="tile h-11 w-11 rounded-[12px] bg-fill text-label-2">
+                      <PinIcon className="h-5 w-5" />
+                    </span>
+                  )}
+                  <div className="min-w-0 flex-1">
+                    <p className="flex flex-wrap items-center gap-2">
+                      <Link href={`/admin/dogs/${item.r.s.dogId}`} className="text-callout">
+                        {item.r.name}
                       </Link>
-                      <span className={`text-[13px] font-semibold uppercase ${urgent ? "text-bad" : "text-label-2"}`}>
-                        {s.condition}
-                      </span>
-                    </div>
-                    {s.note && <p className="mt-0.5 text-[15px] leading-snug">{s.note}</p>}
-                    <p className="mt-1 flex flex-wrap gap-x-3 text-[15px] text-label-2">
-                      <span>{fmtDateTime(s.createdAt)}</span>
-                      {s.contact && <span>{s.contact}</span>}
-                      {s.lat !== null && (
-                        <a className="text-link" href={`https://maps.google.com/?q=${s.lat},${s.lng}`}>
-                          Map
+                      {CONDITION[item.r.s.condition] ? (
+                        <span className={`pill ${CONDITION[item.r.s.condition]![1]}`}>
+                          {CONDITION[item.r.s.condition]![0]}
+                        </span>
+                      ) : (
+                        <span className="text-footnote text-label-2">Looks fine</span>
+                      )}
+                    </p>
+                    {item.r.s.note && <p className="mt-0.5 text-footnote">{item.r.s.note}</p>}
+                    <p className="mt-0.5 flex flex-wrap gap-x-1 text-footnote text-label-3">
+                      <span>{[fmtDateTime(item.r.s.createdAt), item.r.s.contact].filter(Boolean).join(" • ")}</span>
+                      {item.r.s.lat !== null && (
+                        <a className="text-link" href={`https://maps.google.com/?q=${item.r.s.lat},${item.r.s.lng}`}>
+                          • Map
                         </a>
                       )}
                     </p>
                   </div>
-                  <form action={markReviewed.bind(null, s.id)} className="self-center">
-                    <button className="h-8 rounded-full bg-fill px-3.5 text-[15px] font-semibold text-brand active:scale-95">
-                      Done
-                    </button>
+                  <form action={markReviewed.bind(null, item.r.s.id)}>
+                    <button className="btn-outline btn-sm">Mark done</button>
                   </form>
                 </div>
-              );
-            })}
+              ),
+            )}
           </div>
         </section>
       )}
 
       {pins.length > 0 && (
-        <section className="mt-8">
-          <h2 className="section-header">Last seen</h2>
-          <Map pins={pins} />
+        <section className="mt-7">
+          <h2 className="text-section">Last seen</h2>
+          <Map pins={pins} className="mt-2 h-56" />
         </section>
       )}
 
-      <section className="mt-8">
-        <h2 className="section-header">{list.length} dogs</h2>
-        <div className="inset-group">
+      <section className="mt-7">
+        <h2 className="text-section">{list.length} dogs</h2>
+        <div className="mt-1">
           {list.map(({ dog, tagCode, lastSeen }) => {
             const flags = [
-              !dog.sterilized && "not sterilized",
-              !rabiesCurrent(dog.rabiesVaccinatedOn) && "rabies due",
+              !dog.sterilized && "Not sterilized",
+              !rabiesCurrent(dog.rabiesVaccinatedOn) && "Rabies due",
             ].filter(Boolean);
             return (
-              <Link key={dog.id} href={`/admin/dogs/${dog.id}`} className="cell cell-avatar py-2.5 active:bg-fill">
-                <DogPhoto photoId={dog.photoId} alt={dog.name} className="h-12 w-12 shrink-0 rounded-full" />
+              <Link key={dog.id} href={`/admin/dogs/${dog.id}`} className="flex items-center gap-3 py-2.5">
+                <DogPhoto photoId={dog.photoId} alt="" className="h-11 w-11 shrink-0 rounded-full" />
                 <div className="min-w-0 flex-1">
-                  <p className="flex items-center gap-2 font-semibold">
-                    {dog.name}
-                    {dog.status === "missing" && (
-                      <span className="rounded-full bg-bad px-2 py-px text-[11px] font-bold uppercase text-white">Missing</span>
-                    )}
+                  <p className="flex items-center gap-2">
+                    <span className="truncate text-callout">{dog.name}</span>
+                    {dog.status === "missing" && <span className="pill bg-bad-soft text-bad">Missing</span>}
                     {(dog.status === "adopted" || dog.status === "deceased") && (
-                      <span className="text-[13px] font-normal text-label-2 capitalize">{dog.status}</span>
+                      <span className="pill bg-fill text-label-2">{dog.status === "adopted" ? "Adopted" : "In memory"}</span>
                     )}
                   </p>
-                  <p className="truncate text-[15px] text-label-2">
-                    {flags.length ? <span className="text-warn">{flags.join(" · ")}</span> : dog.area || "—"}
+                  <p className={`truncate text-footnote ${flags.length ? "text-warn" : "text-label-2"}`}>
+                    {flags.length ? flags.join(" • ") : dog.area || "No area yet"}
                   </p>
                 </div>
-                <div className="text-right text-[13px] text-label-2">
-                  <p className="font-mono tracking-wider">{tagCode ?? "—"}</p>
-                  {lastSeen && <p>{fmtDateTime(new Date(lastSeen))}</p>}
+                <div className="text-right">
+                  {tagCode ? (
+                    <p className="font-mono text-[13px] leading-[18px] font-medium tracking-[1.5px] text-label-2">{tagCode}</p>
+                  ) : (
+                    <p className="text-footnote text-label-3">No tag</p>
+                  )}
+                  {lastSeen && <p className="text-footnote text-label-3">{fmtDateTime(new Date(lastSeen))}</p>}
                 </div>
                 <Chevron className="h-4 w-4 shrink-0 text-label-3" />
               </Link>
             );
           })}
-          {list.length === 0 && <p className="cell text-label-2">No dogs yet</p>}
+          {list.length === 0 && <p className="py-3 text-subhead text-label-2">No dogs yet</p>}
         </div>
       </section>
     </>
