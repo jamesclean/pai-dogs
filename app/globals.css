@@ -260,3 +260,57 @@ body {
     cursor: pointer;
   }
 }
+
+/* Progressive glass behind the floating top bar. Each layer blurs more and
+   covers less, so the blur eases out; the last layer is a light tint for
+   legibility. Fades live on the layers: opacity on the parent would stop
+   backdrop-filter from seeing the page behind it. */
+.progressive-glass {
+  position: absolute;
+  inset-inline: 0;
+  top: 0;
+  z-index: -1;
+  height: calc(100% + 24px);
+  pointer-events: none;
+}
+.progressive-glass > div {
+  position: absolute;
+  inset: 0;
+  opacity: 0;
+  transition: opacity 0.2s ease;
+}
+.progressive-glass[data-on="true"] > div {
+  opacity: 1;
+}
+.progressive-glass > div:nth-child(1) {
+  -webkit-backdrop-filter: blur(1px);
+  backdrop-filter: blur(1px);
+  -webkit-mask-image: linear-gradient(to bottom, #000 70%, transparent 100%);
+  mask-image: linear-gradient(to bottom, #000 70%, transparent 100%);
+}
+.progressive-glass > div:nth-child(2) {
+  -webkit-backdrop-filter: blur(3px);
+  backdrop-filter: blur(3px);
+  -webkit-mask-image: linear-gradient(to bottom, #000 50%, transparent 85%);
+  mask-image: linear-gradient(to bottom, #000 50%, transparent 85%);
+}
+.progressive-glass > div:nth-child(3) {
+  -webkit-backdrop-filter: blur(8px);
+  backdrop-filter: blur(8px);
+  -webkit-mask-image: linear-gradient(to bottom, #000 30%, transparent 65%);
+  mask-image: linear-gradient(to bottom, #000 30%, transparent 65%);
+}
+.progressive-glass > div:nth-child(4) {
+  -webkit-backdrop-filter: blur(16px);
+  backdrop-filter: blur(16px);
+  -webkit-mask-image: linear-gradient(to bottom, #000 10%, transparent 45%);
+  mask-image: linear-gradient(to bottom, #000 10%, transparent 45%);
+}
+.progressive-glass > div:nth-child(5) {
+  background: linear-gradient(
+    to bottom,
+    color-mix(in srgb, var(--bg) 62%, transparent),
+    color-mix(in srgb, var(--bg) 30%, transparent) 55%,
+    transparent
+  );
+}

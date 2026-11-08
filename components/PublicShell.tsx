@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { config } from "@/lib/config";
 import { LangToggle } from "./LangToggle";
-import { HeaderFade } from "./HeaderFade";
+import { HeaderGlass } from "./HeaderGlass";
 import { RevealTitle } from "./RevealTitle";
 import { ChevronLeft, Paw } from "./Icons";
 import type { Lang } from "@/lib/i18n";
@@ -28,8 +28,8 @@ export function BackButton({ href, label }: { href: string; label: string }) {
 }
 
 // White page. With `back`, a bar with the back button and page title floats on
-// top as you scroll; otherwise the logo sits at the top. `titleFrom` is for a page
-// with its own large title: the bar shows the title once that element scrolls away.
+// top as you scroll; otherwise the logo sits at the top. `revealTitle` is for a page
+// with its own large title: the bar shows the title once the page scrolls.
 // `bottomBar` floats over the content with a fade, like the Figma screens.
 export function PublicShell({
   lang,
@@ -37,7 +37,7 @@ export function PublicShell({
   bottomBar,
   back,
   title,
-  titleFrom,
+  revealTitle = false,
   volunteerLabel,
 }: {
   lang: Lang;
@@ -45,19 +45,19 @@ export function PublicShell({
   bottomBar?: React.ReactNode;
   back?: { href: string; label: string };
   title?: string;
-  titleFrom?: string;
+  revealTitle?: boolean;
   volunteerLabel?: string;
 }) {
   return (
     <>
       {back ? (
         <header className="sticky top-0 z-30">
-          <HeaderFade />
+          <HeaderGlass />
           <div className="mx-auto grid w-full max-w-xl grid-cols-[40px_minmax(0,1fr)_40px] items-center gap-2 px-4 pt-[max(env(safe-area-inset-top),12px)] pb-4">
             <BackButton {...back} />
             {title &&
-              (titleFrom ? (
-                <RevealTitle targetId={titleFrom}>{title}</RevealTitle>
+              (revealTitle ? (
+                <RevealTitle>{title}</RevealTitle>
               ) : (
                 <h1 className="truncate text-center text-section">{title}</h1>
               ))}
