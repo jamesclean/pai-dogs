@@ -73,7 +73,7 @@ await q.goto(B + "/D/" + codes[0]);
 await q.waitForLoadState("networkidle");
 await q.screenshot({ path: S + "/shots/public-th.png", fullPage: true });
 log("thai title present:", await q.isVisible("text=หมาชุมชน"));
-await q.click("button:has-text('EN')"); await q.waitForSelector("text=I saw this dog");
+await q.click("button:has-text('Switch to English')"); await q.waitForSelector("text=I saw this dog");
 // Scan as sighting: share location from the card under the photo
 await q.click("button:has-text('Share location')");
 await q.waitForSelector("text=Added to the map");
@@ -91,17 +91,16 @@ await q.screenshot({ path: S + "/shots/report.png" });
 await q.click("button:has-text('Send report')");
 await q.waitForSelector("text=Report sent");
 log("report sent");
-// Add a new dog (no collar)
-await q.goto(B + "/add");
-await q.setInputFiles("input[type=file]:not([name])", DOG);
-await q.waitForSelector("label img");
+// Report a dog in trouble (unknown dog, no photo needed)
+await q.goto(B + "/report");
+log("vet row on injured:", await q.isVisible("a[href='tel:0804111985']"));
 await q.fill("textarea[name=note]", "Black, white paws, near the hospital");
 await q.fill("input[name=contact]", "LINE @mai");
 await q.waitForSelector("text=Your location");
 await q.screenshot({ path: S + "/shots/add-dog.png", fullPage: true });
-await q.click("button:has-text('Add dog')");
-await q.waitForSelector("text=Dog added");
-log("new dog reported");
+await q.click("button:has-text('Send report')");
+await q.waitForSelector("text=Report sent");
+log("new report sent, vet on sheet:", await q.isVisible("[role=dialog] a[href='tel:0804111985']"));
 // Browse and look up
 await q.goto(B + "/dogs"); await q.waitForLoadState("networkidle");
 log("browse shows Mango:", await q.isVisible("text=Mango"));
@@ -120,7 +119,7 @@ await p.waitForLoadState("networkidle");
 await p.waitForTimeout(800);
 log("inbox shows report:", await p.isVisible("text=Limping on back left leg"));
 await p.screenshot({ path: S + "/shots/admin-home.png", fullPage: true });
-log("inbox shows new dog:", await p.isVisible("text=No collar"));
+log("inbox shows new report:", await p.isVisible("text=New report"));
 await p.click("button:has-text('Mark done')");
 await p.waitForTimeout(800);
 log("report cleared:", !(await p.isVisible("text=Limping on back left leg")));
@@ -130,7 +129,9 @@ await p.fill("input[name=name]", "Khao");
 await p.screenshot({ path: S + "/shots/admin-new-from-report.png", fullPage: true });
 await p.click("button:has-text('Add dog')");
 await p.waitForURL(/dogs\/\d+\?saved=1/);
-log("dog from report:", await p.isVisible("img[alt=Khao]"));
+log("dog from report:", await p.isVisible("h1:has-text('Khao')"));
+// The report joined Khao's history and is still open, because it was urgent.
+await p.click("button:has-text('Mark done')"); await p.waitForTimeout(800);
 await p.goto(B + "/admin"); await p.waitForTimeout(500);
 log("inbox cleared:", !(await p.isVisible("text=Reports to check")));
 await p.goto(dogUrl);

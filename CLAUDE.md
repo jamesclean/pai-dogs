@@ -32,8 +32,12 @@ See README.md for features and deployment, SOURCING.md for tag and collar suppli
 - Public pages are Thai/English (cookie `lang`, falls back to Accept-Language).
   Strings live in `lib/i18n.ts`; Thai needs a native-speaker check.
   The admin UI is English only.
-- Optional Telegram alerts on public reports (TELEGRAM_BOT_TOKEN/CHAT_ID).
-  LINE Notify is dead, so don't suggest it.
+- Crew messaging lives inside the app: form submissions with contact details, waiting in the
+  Dogs tab. No outside alerts. The crew doesn't use Telegram, and LINE Notify is dead.
+- Collars and tags are optional. Every dog has a page at `/dogs/<id>`; a tag shows the same
+  page at `/d/<CODE>`.
+- `status` (community, missing, deceased) and `homeStatus` (Has a home, Ask about adoption) are
+  separate. "Please don't take it away" stays on every community dog.
 - Next 16 with `cacheComponents: false`: every page is dynamic on purpose.
 
 ## Design

@@ -4,7 +4,7 @@ import { usePathname } from "next/navigation";
 import { Heart, Paw, Tag } from "./Icons";
 
 // Floating tab bar at the bottom of volunteer screens.
-export function AdminNav() {
+export function AdminNav({ inbox }: { inbox: number }) {
   const path = usePathname();
   // Only the three main screens show the tab bar; detail screens have a back button.
   if (path !== "/admin" && path !== "/admin/tags" && path !== "/admin/crew") return null;
@@ -22,12 +22,18 @@ export function AdminNav() {
             key={key}
             href={href}
             aria-current={tab === key ? "page" : undefined}
-            className={`flex h-12 w-[84px] flex-col items-center justify-center gap-0.5 rounded-full text-caption ${
+            aria-label={key === "dogs" && inbox > 0 ? `${label}, ${inbox} to check` : undefined}
+            className={`relative flex h-12 w-[84px] flex-col items-center justify-center gap-0.5 rounded-full text-caption ${
               tab === key ? "bg-fill text-label" : "text-label-2"
             }`}
           >
             <Icon className="h-[22px] w-[22px]" />
             {label}
+            {key === "dogs" && inbox > 0 && (
+              <span className="absolute top-0.5 left-1/2 ml-1.5 flex h-[18px] min-w-[18px] items-center justify-center rounded-full bg-bad px-1 text-[11px] leading-none font-medium text-white">
+                {inbox > 99 ? "99+" : inbox}
+              </span>
+            )}
           </Link>
         ))}
       </div>

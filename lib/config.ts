@@ -3,7 +3,17 @@ export const config = {
   programName: process.env.PROGRAM_NAME ?? "Pai Dogs",
   contactLine: process.env.CONTACT_LINE ?? "",
   contactPhone: process.env.CONTACT_PHONE ?? "",
+  vetName: process.env.VET_NAME ?? "Dr. Karuna",
+  vetPhone: process.env.VET_PHONE ?? "0804111985",
 };
+
+export type Vet = { name: string; phone: string };
+
+export const vet: Vet = { name: config.vetName, phone: config.vetPhone };
+
+export function fmtPhone(phone: string) {
+  return phone.replace(/^(\d{3})(\d{3})(\d{4})$/, "$1 $2 $3");
+}
 
 export function lineUrl(id: string) {
   const clean = id.trim().replace(/^@/, "");

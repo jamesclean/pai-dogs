@@ -2,7 +2,7 @@
 import { redirect } from "next/navigation";
 import { revalidatePath } from "next/cache";
 import { and, eq, isNull } from "drizzle-orm";
-import { db, dogs, tags, sightings, newDogReports } from "@/db";
+import { adoptionQuestions, db, dogs, tags, sightings, newDogReports, type NewDogReport } from "@/db";
 import { requireAdmin } from "@/lib/auth";
 import { savePhoto } from "@/lib/photos";
 import { newCode, normalizeCode } from "@/lib/codes";
@@ -23,12 +23,30 @@ function pick<T extends string>(v: string, allowed: readonly T[], fallback: T): 
   return (allowed as readonly string[]).includes(v) ? (v as T) : fallback;
 }
 
+// A report joining a dog's history. Anything but "looks fine" stays open for a volunteer.
+function sightingFromReport(report: NewDogReport, dogId: number) {
+  return {
+    dogId,
+    source: "public" as const,
+    condition: report.condition,
+    note: report.note,
+    contact: report.contact,
+    lat: report.lat,
+    lng: report.lng,
+    accuracy: report.accuracy,
+    photoId: report.photoId,
+    reviewed: report.condition === "ok",
+    createdAt: report.createdAt,
+  };
+}
+
 function dogFields(f: FormData) {
   return {
     name: str(f, "name", 80) || "Unnamed",
     sex: pick(str(f, "sex"), ["male", "female", "unknown"] as const, "unknown"),
     temperament: pick(str(f, "temperament"), ["friendly", "shy", "careful"] as const, "friendly"),
-    status: pick(str(f, "status"), ["community", "missing", "adopted", "deceased"] as const, "community"),
+    status: pick(str(f, "status"), ["community", "missing", "deceased"] as const, "community"),
+    homeStatus: (["has_home", "ask_adoption"] as const).find((v) => v === str(f, "homeStatus")) ?? null,
     description: str(f, "description"),
     area: str(f, "area", 200),
     homeLat: numOrNull(f, "lat"),
@@ -73,7 +91,9 @@ export async function createDog(form: FormData) {
       .set({ dogId: dog.id, assignedAt: new Date() })
       .where(and(eq(tags.code, code), isNull(tags.dogId)));
   }
-  if (fields.homeLat !== null) {
+  if (report) {
+    await db.insert(sightings).values(sightingFromReport(report, dog.id));
+  } else if (fields.homeLat !== null) {
     await db.insert(sightings).values({
       dogId: dog.id,
       source: "volunteer",
@@ -83,6 +103,7 @@ export async function createDog(form: FormData) {
       reviewed: true,
     });
   }
+  revalidatePath("/admin", "layout");
   redirect(`/admin/dogs/${dog.id}?saved=1`);
 }
 
@@ -125,7 +146,29 @@ export async function volunteerSighting(dogId: number, form: FormData) {
 export async function dismissNewDog(reportId: number) {
   await requireAdmin();
   await db.update(newDogReports).set({ reviewed: true }).where(eq(newDogReports.id, reportId));
+  revalidatePath("/admin", "layout");
   redirect("/admin");
+}
+
+// The reported dog is one we already know: its report joins that dog's history.
+export async function matchReport(reportId: number, dogId: number) {
+  await requireAdmin();
+  await db.transaction(async (tx) => {
+    const [report] = await tx
+      .update(newDogReports)
+      .set({ reviewed: true, dogId })
+      .where(and(eq(newDogReports.id, reportId), eq(newDogReports.reviewed, false)))
+      .returning();
+    if (report) await tx.insert(sightings).values(sightingFromReport(report, dogId));
+  });
+  revalidatePath("/admin", "layout");
+  redirect(`/admin/dogs/${dogId}?saved=1`);
+}
+
+export async function markAdoptionDone(questionId: number) {
+  await requireAdmin();
+  await db.update(adoptionQuestions).set({ reviewed: true }).where(eq(adoptionQuestions.id, questionId));
+  revalidatePath("/admin", "layout");
 }
 
 export async function markReviewed(sightingId: number) {

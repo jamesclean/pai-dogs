@@ -17,17 +17,15 @@ async function resize(file: File, max = 1280): Promise<File> {
   return new File([blob], "photo.jpg", { type: "image/jpeg" });
 }
 
-// "row" sits inside a .card-rows; "large" is the big picker on Add a new dog.
+// Sits inside a .card-rows.
 export function PhotoInput({
   name = "photo",
   label,
   changeLabel,
-  variant = "row",
 }: {
   name?: string;
   label: string;
   changeLabel?: string;
-  variant?: "row" | "large";
 }) {
   const hidden = useRef<HTMLInputElement>(null);
   const [preview, setPreview] = useState<string | null>(null);
@@ -57,27 +55,6 @@ export function PhotoInput({
       <input ref={hidden} type="file" name={name} className="hidden" />
     </>
   );
-
-  if (variant === "large")
-    return (
-      <label className="relative flex h-[200px] cursor-pointer flex-col items-center justify-center gap-2.5 overflow-hidden rounded-[24px] bg-surface">
-        {preview ? (
-          <>
-            {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img src={preview} alt="" className="absolute inset-0 h-full w-full object-cover" />
-            <span className="chip absolute bottom-3 left-3">{changeLabel ?? label}</span>
-          </>
-        ) : (
-          <>
-            <span className="tile h-[52px] w-[52px] rounded-full bg-surface-raised shadow-control">
-              <Camera className="h-6 w-6" />
-            </span>
-            <span className="text-callout">{busy ? "…" : label}</span>
-          </>
-        )}
-        {picker}
-      </label>
-    );
 
   return (
     <label className="row cursor-pointer">

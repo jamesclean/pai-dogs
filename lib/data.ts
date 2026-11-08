@@ -1,6 +1,6 @@
 import "server-only";
-import { and, asc, count, desc, eq, ilike, ne, notInArray, or, sql } from "drizzle-orm";
-import { db, dogs, tags, sightings } from "@/db";
+import { and, asc, count, desc, eq, ilike, ne, or } from "drizzle-orm";
+import { db, dogs, tags, sightings, newDogReports, adoptionQuestions } from "@/db";
 import { normalizeCode } from "./codes";
 
 export async function getTag(rawCode: string) {
@@ -35,11 +35,11 @@ export async function activeDogCount() {
   const [r] = await db
     .select({ n: count() })
     .from(dogs)
-    .where(and(ne(dogs.status, "deceased"), ne(dogs.status, "adopted")));
+    .where(ne(dogs.status, "deceased"));
   return r.n;
 }
 
-// Public directory: community and missing dogs, with the tag their page lives at.
+// Public directory: every living dog, tag or no tag.
 export async function publicDogs(query = "") {
   const q = query.trim();
   return db
@@ -48,15 +48,29 @@ export async function publicDogs(query = "") {
       name: dogs.name,
       area: dogs.area,
       status: dogs.status,
+      homeStatus: dogs.homeStatus,
       photoId: dogs.photoId,
-      tagCode: sql<string | null>`(select code from ${tags} where ${tags.dogId} = ${dogs.id} and not ${tags.retired} order by ${tags.assignedAt} desc limit 1)`,
     })
     .from(dogs)
-    .where(
-      and(
-        notInArray(dogs.status, ["deceased", "adopted"]),
-        q ? or(ilike(dogs.name, `%${q}%`), ilike(dogs.area, `%${q}%`)) : undefined,
-      ),
-    )
+    .where(and(ne(dogs.status, "deceased"), q ? or(ilike(dogs.name, `%${q}%`), ilike(dogs.area, `%${q}%`)) : undefined))
     .orderBy(asc(dogs.name));
+}
+
+export async function dogAdoptionQuestions(dogId: number) {
+  return db
+    .select()
+    .from(adoptionQuestions)
+    .where(eq(adoptionQuestions.dogId, dogId))
+    .orderBy(desc(adoptionQuestions.createdAt))
+    .limit(20);
+}
+
+// Everything waiting for a volunteer, for the count on the Dogs tab.
+export async function inboxCount() {
+  const counts = await Promise.all(
+    [sightings, newDogReports, adoptionQuestions].map((table) =>
+      db.select({ n: count() }).from(table).where(eq(table.reviewed, false)),
+    ),
+  );
+  return counts.reduce((sum, [r]) => sum + r.n, 0);
 }

@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { getDog, dogTags, dogSightings } from "@/lib/data";
+import { getDog, dogTags, dogSightings, dogAdoptionQuestions } from "@/lib/data";
 import { DogPhoto } from "@/components/DogPhoto";
 import { DogForm } from "@/components/DogForm";
 import { Map, type Pin } from "@/components/Map";
@@ -8,7 +8,7 @@ import { LocationField } from "@/components/LocationField";
 import { PhotoInput } from "@/components/PhotoInput";
 import { AdminNavRow } from "@/components/AdminHeader";
 import { Check, Heart, Tag, UpDown } from "@/components/Icons";
-import { updateDog, deleteDog, retireTag, volunteerSighting } from "../../../actions";
+import { updateDog, deleteDog, retireTag, volunteerSighting, markReviewed, markAdoptionDone } from "../../../actions";
 import { fmtDate, fmtDateTime, rabiesCurrent } from "@/lib/dates";
 
 const gps = {
@@ -27,15 +27,15 @@ const CONDITION: Record<string, string> = {
   other: "Other",
 };
 const SOURCE: Record<string, string> = { public: "Public report", volunteer: "Volunteer", scan: "Tag scan" };
-const STATUS: Record<string, string> = { community: "Community dog", missing: "Missing", adopted: "Adopted", deceased: "In memory" };
+const STATUS: Record<string, string> = { community: "Community dog", missing: "Missing", deceased: "In memory" };
+const HOME: Record<string, string> = { has_home: "Has a home", ask_adoption: "Ask about adoption" };
 
 export default async function DogAdmin({ params, searchParams }: PageProps<"/admin/dogs/[id]">) {
   const id = Number((await params).id);
   const { saved } = await searchParams;
   const dog = Number.isInteger(id) ? await getDog(id) : null;
   if (!dog) notFound();
-  const [tagList, seen] = await Promise.all([dogTags(id), dogSightings(id)]);
-  const activeTag = tagList.find((t) => !t.retired);
+  const [tagList, seen, questions] = await Promise.all([dogTags(id), dogSightings(id), dogAdoptionQuestions(id)]);
   const latestAlert = seen.find((s) => s.source !== "scan" && s.condition !== "ok" && !s.reviewed);
 
   const pins: Pin[] = seen
@@ -62,18 +62,16 @@ export default async function DogAdmin({ params, searchParams }: PageProps<"/adm
       <AdminNavRow
         back={{ href: "/admin", label: "Dogs" }}
         right={
-          activeTag && (
-            <Link href={`/d/${activeTag.code}`} className="btn-outline btn-sm">
-              View public page
-            </Link>
-          )
+          <Link href={`/dogs/${dog.id}`} className="btn-outline btn-sm">
+            View public page
+          </Link>
         }
       />
 
       <div className="flex flex-col items-center pt-2 text-center">
         <DogPhoto photoId={dog.photoId} alt={dog.name} className="h-[104px] w-[104px] rounded-full" />
         <h1 className="mt-4 text-display">{dog.name}</h1>
-        <p className="mt-1 text-subhead text-label-2">{[dog.area, STATUS[dog.status]].filter(Boolean).join(" • ")}</p>
+        <p className="mt-1 text-subhead text-label-2">{[dog.area, STATUS[dog.status], dog.homeStatus && HOME[dog.homeStatus]].filter(Boolean).join(" • ")}</p>
         <div className="mt-3.5 flex flex-wrap justify-center gap-1.5">
           <span className={`pill ${dog.sterilized ? "bg-ok-soft text-ok" : "bg-warn-soft text-warn"}`}>
             {dog.sterilized ? "Sterilized" : "Not sterilized"}
@@ -138,6 +136,27 @@ export default async function DogAdmin({ params, searchParams }: PageProps<"/adm
         </section>
       )}
 
+      {questions.length > 0 && (
+        <section className="mt-7">
+          <h2 className="text-section">Adoption questions</h2>
+          <div className="mt-1 divide-y divide-sep">
+            {questions.map((q) => (
+              <div key={q.id} className="flex items-start gap-3 py-2.5">
+                <div className="min-w-0 flex-1">
+                  <p className={`text-callout ${q.reviewed ? "text-label-2" : ""}`}>{q.contact}</p>
+                  <p className="text-footnote text-label-2">{[fmtDateTime(q.createdAt), q.note].filter(Boolean).join(" • ")}</p>
+                </div>
+                {!q.reviewed && (
+                  <form action={markAdoptionDone.bind(null, q.id)}>
+                    <button className="btn-outline btn-sm">Mark done</button>
+                  </form>
+                )}
+              </div>
+            ))}
+          </div>
+        </section>
+      )}
+
       {seen.length > 0 && (
         <section className="mt-7">
           <h2 className="text-section">History</h2>
@@ -162,6 +181,11 @@ export default async function DogAdmin({ params, searchParams }: PageProps<"/adm
                     {[SOURCE[s.source], s.note, s.contact].filter(Boolean).join(" • ")}
                   </p>
                 </div>
+                {!s.reviewed && (
+                  <form action={markReviewed.bind(null, s.id)}>
+                    <button className="btn-outline btn-sm">Mark done</button>
+                  </form>
+                )}
               </div>
             ))}
           </div>
@@ -176,7 +200,7 @@ export default async function DogAdmin({ params, searchParams }: PageProps<"/adm
         <form action={deleteDog.bind(null, dog.id)} className="mt-3">
           <button className="btn-danger w-full">Delete {dog.name}</button>
           <p className="mt-2 text-center text-footnote text-label-3">
-            Deletes {dog.name} and every sighting. To keep the record, set the status to Adopted or In memory.
+            Deletes {dog.name} and every sighting. To keep the record, set the status to In memory.
           </p>
         </form>
       </details>

@@ -32,9 +32,11 @@ export const dogs = pgTable("dogs", {
   temperament: text("temperament", { enum: ["friendly", "shy", "careful"] })
     .notNull()
     .default("friendly"),
-  status: text("status", { enum: ["community", "missing", "adopted", "deceased"] })
+  status: text("status", { enum: ["community", "missing", "deceased"] })
     .notNull()
     .default("community"),
+  // Separate from status: a dog up for adoption can still go missing. Null until a volunteer picks.
+  homeStatus: text("home_status", { enum: ["has_home", "ask_adoption"] }),
   area: text("area").notNull().default(""), // e.g. "Walking Street, near 7-Eleven"
   homeLat: doublePrecision("home_lat"),
   homeLng: doublePrecision("home_lng"),
@@ -93,12 +95,15 @@ export const sightings = pgTable(
   (t) => [index("sightings_dog_idx").on(t.dogId, t.createdAt)],
 );
 
-// A dog someone spotted without an orange collar. Volunteers turn these into
-// dogs (dogId is set once they do).
+// A report that isn't tied to a known dog. Volunteers add it as a new dog or
+// match it to one already in the records (dogId is set once they do).
 export const newDogReports = pgTable(
   "new_dog_reports",
   {
     id: serial("id").primaryKey(),
+    condition: text("condition", { enum: ["ok", "injured", "sick", "lost", "other"] })
+      .notNull()
+      .default("ok"),
     note: text("note").notNull().default(""),
     contact: text("contact").notNull().default(""),
     lat: doublePrecision("lat"),
@@ -110,6 +115,23 @@ export const newDogReports = pgTable(
     createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
   },
   (t) => [index("new_dog_reports_reviewed_idx").on(t.reviewed, t.createdAt)],
+);
+
+// Someone asking about adopting a dog marked "Ask about adoption". Volunteers
+// reply on the contact they left.
+export const adoptionQuestions = pgTable(
+  "adoption_questions",
+  {
+    id: serial("id").primaryKey(),
+    dogId: integer("dog_id")
+      .notNull()
+      .references(() => dogs.id, { onDelete: "cascade" }),
+    contact: text("contact").notNull(),
+    note: text("note").notNull().default(""),
+    reviewed: boolean("reviewed").notNull().default(false),
+    createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+  },
+  (t) => [index("adoption_questions_reviewed_idx").on(t.reviewed, t.createdAt)],
 );
 
 // One row per public submission, keyed by a salted hash of the IP (never the
@@ -128,3 +150,4 @@ export type Dog = typeof dogs.$inferSelect;
 export type NewDogReport = typeof newDogReports.$inferSelect;
 export type Sighting = typeof sightings.$inferSelect;
 export type Tag = typeof tags.$inferSelect;
+export type AdoptionQuestion = typeof adoptionQuestions.$inferSelect;

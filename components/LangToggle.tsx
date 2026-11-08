@@ -1,32 +1,23 @@
 "use client";
 import { useRouter } from "next/navigation";
+import { Globe } from "./Icons";
 
-const LANGS = [
-  ["en", "EN"],
-  ["th", "ไทย"],
-] as const;
-
+// Written in the language it switches to, so the person who needs it can read it.
 export function LangToggle({ lang }: { lang: "en" | "th" }) {
   const router = useRouter();
+  const next = lang === "en" ? "th" : "en";
   return (
-    <div role="group" aria-label="Language" className="flex rounded-full bg-fill p-[3px]">
-      {LANGS.map(([code, label]) => (
-        <button
-          key={code}
-          type="button"
-          aria-pressed={lang === code}
-          className={`h-8 rounded-full px-3 text-[13px] leading-[18px] font-medium transition ${
-            lang === code ? "bg-surface-raised text-label shadow-control" : "text-label-2"
-          }`}
-          onClick={() => {
-            if (lang === code) return;
-            document.cookie = `lang=${code};path=/;max-age=31536000;samesite=lax`;
-            router.refresh();
-          }}
-        >
-          {label}
-        </button>
-      ))}
-    </div>
+    <button
+      type="button"
+      lang={next}
+      className="inline-flex items-center gap-1.5 py-1 text-label-2"
+      onClick={() => {
+        document.cookie = `lang=${next};path=/;max-age=31536000;samesite=lax`;
+        router.refresh();
+      }}
+    >
+      <Globe className="h-4 w-4" />
+      {next === "th" ? "เปลี่ยนเป็นภาษาไทย" : "Switch to English"}
+    </button>
   );
 }

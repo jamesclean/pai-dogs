@@ -12,7 +12,7 @@ const copy = {
       [
         "What we keep",
         [
-          "When you send a report or add a new dog: what you wrote, the photo, where you were, and your LINE or phone if you gave it.",
+          "When you send a report or ask about adoption: what you wrote, the photo, where you were, and your LINE, Facebook or phone if you gave it.",
           "When you share your location on a dog's page: where you were and when.",
           "One cookie remembers your language. Volunteers who sign in get a second one that keeps them signed in.",
         ],
@@ -33,7 +33,7 @@ const copy = {
       [
         "ข้อมูลที่เราเก็บ",
         [
-          "เมื่อคุณส่งรายงานหรือเพิ่มหมาตัวใหม่: ข้อความที่คุณเขียน รูปภาพ ตำแหน่งที่คุณอยู่ และ LINE หรือเบอร์โทรถ้าคุณให้ไว้",
+          "เมื่อคุณส่งรายงานหรือสอบถามเรื่องรับเลี้ยง: ข้อความที่คุณเขียน รูปภาพ ตำแหน่งที่คุณอยู่ และ LINE, Facebook หรือเบอร์โทรถ้าคุณให้ไว้",
           "เมื่อคุณแชร์ตำแหน่งในหน้าของหมา: ตำแหน่งที่คุณอยู่และเวลา",
           "คุกกี้หนึ่งตัวจำภาษาที่คุณเลือก อาสาสมัครที่เข้าสู่ระบบจะมีอีกตัวเพื่อให้อยู่ในระบบ",
         ],
@@ -52,10 +52,9 @@ export default async function Privacy() {
   const lang = await getLang();
   const c = copy[lang];
   return (
-    <PublicShell lang={lang} back={{ href: "/", label: lang === "th" ? "กลับ" : "Back" }}>
-      <h1 className="text-title">{c.title}</h1>
+    <PublicShell lang={lang} back={{ href: "/", label: lang === "th" ? "กลับ" : "Back" }} title={c.title}>
       {c.sections.map(([heading, lines]) => (
-        <section key={heading} className="mt-7">
+        <section key={heading} className="mt-7 first:mt-0">
           <h2 className="text-section">{heading}</h2>
           {lines.map((l) => (
             <p key={l} className="mt-2 text-body text-label-2">
