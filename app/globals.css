@@ -285,32 +285,35 @@ body {
 .progressive-glass > div:nth-child(1) {
   -webkit-backdrop-filter: blur(1px);
   backdrop-filter: blur(1px);
-  -webkit-mask-image: linear-gradient(to bottom, #000 70%, transparent 100%);
-  mask-image: linear-gradient(to bottom, #000 70%, transparent 100%);
+  -webkit-mask-image: linear-gradient(to bottom, #000 80%, transparent 100%);
+  mask-image: linear-gradient(to bottom, #000 80%, transparent 100%);
 }
 .progressive-glass > div:nth-child(2) {
-  -webkit-backdrop-filter: blur(3px);
-  backdrop-filter: blur(3px);
+  -webkit-backdrop-filter: blur(4px);
+  backdrop-filter: blur(4px);
+  -webkit-mask-image: linear-gradient(to bottom, #000 65%, transparent 95%);
+  mask-image: linear-gradient(to bottom, #000 65%, transparent 95%);
+}
+.progressive-glass > div:nth-child(3) {
+  -webkit-backdrop-filter: blur(10px);
+  backdrop-filter: blur(10px);
   -webkit-mask-image: linear-gradient(to bottom, #000 50%, transparent 85%);
   mask-image: linear-gradient(to bottom, #000 50%, transparent 85%);
 }
-.progressive-glass > div:nth-child(3) {
-  -webkit-backdrop-filter: blur(8px);
-  backdrop-filter: blur(8px);
-  -webkit-mask-image: linear-gradient(to bottom, #000 30%, transparent 65%);
-  mask-image: linear-gradient(to bottom, #000 30%, transparent 65%);
-}
 .progressive-glass > div:nth-child(4) {
-  -webkit-backdrop-filter: blur(16px);
-  backdrop-filter: blur(16px);
-  -webkit-mask-image: linear-gradient(to bottom, #000 10%, transparent 45%);
-  mask-image: linear-gradient(to bottom, #000 10%, transparent 45%);
+  -webkit-backdrop-filter: blur(24px);
+  backdrop-filter: blur(24px);
+  -webkit-mask-image: linear-gradient(to bottom, #000 35%, transparent 75%);
+  mask-image: linear-gradient(to bottom, #000 35%, transparent 75%);
 }
+/* Starts as the exact page colour, which Safari also paints behind the status
+   bar, so the glass meets it with no line. */
 .progressive-glass > div:nth-child(5) {
   background: linear-gradient(
     to bottom,
-    color-mix(in srgb, var(--bg) 62%, transparent),
-    color-mix(in srgb, var(--bg) 30%, transparent) 55%,
+    var(--bg),
+    color-mix(in srgb, var(--bg) 72%, transparent) 20%,
+    color-mix(in srgb, var(--bg) 48%, transparent) 55%,
     transparent
   );
 }
