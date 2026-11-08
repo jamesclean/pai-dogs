@@ -24,7 +24,7 @@ export default async function TagPage({ params }: PageProps<"/admin/tags/[code]"
     <>
       <AdminNavRow back={{ href: "/admin/tags", label: "Tags" }} />
 
-      <div className="relative mt-2 flex h-80 items-center justify-center overflow-hidden rounded-[28px] border border-sep bg-surface">
+      <div className="relative mt-2 flex h-80 items-center justify-center overflow-hidden rounded-[28px] bg-surface">
         <span className="chip absolute top-4 left-4">
           {dog ? (
             <>
