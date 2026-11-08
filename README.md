@@ -8,7 +8,7 @@ report a sighting or an injury.
 ## What's in it
 
 **Public (Thai / English, picks from the phone's language)**
-- `/`: home with four tasks: browse dogs, look up a dog, add a new dog, volunteer sign in.
+- `/`: home with Report a dog in trouble, Meet our dogs and Look up a dog. Volunteer sign in is in the footer.
 - `/d/K7M2X`: dog page reached from the tag. Shows a missing banner if the dog is marked missing.
   A card asks once to "Add Mali to the map": if the person shares their location, the scan
   becomes a quiet sighting on the volunteers' map (no inbox item, at most one per dog every 5 minutes).
