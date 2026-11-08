@@ -251,3 +251,12 @@ body {
   font: inherit;
   background: var(--map);
 }
+
+/* Tailwind 4 leaves these on the default arrow cursor. */
+@layer base {
+  button:not(:disabled),
+  select:not(:disabled),
+  summary {
+    cursor: pointer;
+  }
+}
