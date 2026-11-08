@@ -7,7 +7,7 @@ import { getLang, t } from "@/lib/i18n";
 import { dogGroupCounts, publicDogs } from "@/lib/data";
 import { DOG_GROUPS, type DogGroup } from "@/lib/dog-groups";
 
-export const metadata = { title: "Dogs" };
+export const metadata = { title: "Meet our dogs" };
 
 export default async function BrowseDogs({ searchParams }: PageProps<"/dogs">) {
   const { q, show } = await searchParams;
@@ -27,7 +27,7 @@ export default async function BrowseDogs({ searchParams }: PageProps<"/dogs">) {
   }
 
   return (
-    <PublicShell lang={lang} back={{ href: "/", label: s.back }} title={s.dogsOfPai}>
+    <PublicShell lang={lang} back={{ href: "/", label: s.back }} title={s.browseDogs}>
       <div className={GROUP_TRACK}>
         {DOG_GROUPS.map((g) => {
           const Icon = GROUP_ICONS[g];

@@ -2,10 +2,12 @@ import type { Dog } from "@/db";
 import { PhotoInput } from "./PhotoInput";
 import { HomeLocation } from "./HomeLocation";
 import { Switch } from "./Switch";
-import { GROUP_ICONS, GROUP_RADIO_ITEM, GROUP_TRACK } from "./DogGroups";
-import { DOG_GROUPS, GROUP_LABELS, groupOf } from "@/lib/dog-groups";
+import { SaveButton } from "./SaveButton";
+import { DOG_GROUPS, GROUP_LABELS, groupOf, type DogGroup } from "@/lib/dog-groups";
 import { BottomBar } from "./PublicShell";
 import { UpDown } from "./Icons";
+
+export const DOG_FORM_ID = "dog-form";
 
 export type DogPrefill = Partial<Pick<Dog, "description" | "homeLat" | "homeLng" | "area">>;
 
@@ -28,22 +30,13 @@ export function DogForm({
   const homeLat = dog?.homeLat ?? prefill?.homeLat ?? null;
   const homeLng = dog?.homeLng ?? prefill?.homeLng ?? null;
   return (
-    <form action={action}>
+    <form id={DOG_FORM_ID} action={action}>
       {tag && <input type="hidden" name="tag" value={tag} />}
       {report && <input type="hidden" name="report" value={report} />}
 
       {!dog && (
-        <div role="radiogroup" aria-label="Situation" className={`${GROUP_TRACK} mt-5`}>
-          {DOG_GROUPS.map((g) => {
-            const Icon = GROUP_ICONS[g];
-            return (
-              <label key={g} className={GROUP_RADIO_ITEM}>
-                <input type="radio" name="group" value={g} defaultChecked={g === "community"} className="sr-only" />
-                <Icon className="h-4 w-4 shrink-0" />
-                {GROUP_LABELS[g]}
-              </label>
-            );
-          })}
+        <div className="card-rows mt-5">
+          <SituationSelect value="community" />
         </div>
       )}
 
@@ -71,7 +64,7 @@ export function DogForm({
           </div>
         )}
         {(!dog || group === "community") && (
-          <div className="row [form:has(input[name=group][value=community]:not(:checked))_&]:hidden">
+          <div className="row [form:has(select[name=group]_option[value=community]:not(:checked))_&]:hidden">
             <span className="flex-1 text-callout">Ask about adoption</span>
             <Switch name="adoption" defaultChecked={dog?.homeStatus === "ask_adoption"} />
           </div>
@@ -113,9 +106,16 @@ export function DogForm({
       </section>
 
       <BottomBar>
-        <button className="btn-primary flex-1">{submit}</button>
+        <SaveButton label={submit} />
       </BottomBar>
     </form>
+  );
+}
+
+// Saves with the dog form. On a dog's page it sits at the top, outside the form, so it joins by id.
+export function SituationSelect({ value, form }: { value: DogGroup; form?: string }) {
+  return (
+    <Select label="Situation" name="group" value={value} form={form} options={DOG_GROUPS.map((g) => [g, GROUP_LABELS[g]])} />
   );
 }
 
@@ -141,11 +141,23 @@ function Text({ label, ...props }: { label: string } & React.InputHTMLAttributes
   );
 }
 
-function Select({ label, name, value, options }: { label: string; name: string; value?: string; options: [string, string][] }) {
+function Select({
+  label,
+  name,
+  value,
+  options,
+  form,
+}: {
+  label: string;
+  name: string;
+  value?: string;
+  options: [string, string][];
+  form?: string;
+}) {
   return (
     <label className="row">
       <span className="flex-1 text-callout">{label}</span>
-      <select name={name} defaultValue={value} className="cursor-pointer appearance-none bg-transparent text-right text-subhead text-label-2 outline-none">
+      <select name={name} form={form} defaultValue={value} className="cursor-pointer appearance-none bg-transparent text-right text-subhead text-label-2 outline-none">
         {options.map(([v, l]) => (
           <option key={v} value={v}>
             {l}

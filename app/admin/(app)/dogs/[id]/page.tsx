@@ -2,7 +2,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { getDog, dogTags, dogSightings, dogAdoptionQuestions } from "@/lib/data";
 import { DogPhoto } from "@/components/DogPhoto";
-import { DogForm } from "@/components/DogForm";
+import { DOG_FORM_ID, DogForm, SituationSelect } from "@/components/DogForm";
 import { Map, type Pin } from "@/components/Map";
 import { LocationField } from "@/components/LocationField";
 import { PhotoInput } from "@/components/PhotoInput";
@@ -10,9 +10,8 @@ import { DeleteEntryButton } from "@/components/DeleteEntryButton";
 import { SavedToast } from "@/components/SavedToast";
 import { AdminNavRow } from "@/components/AdminHeader";
 import { Heart, Tag, UpDown } from "@/components/Icons";
-import { updateDog, deleteDog, deleteSighting, retireTag, setDogGroup, volunteerSighting, markReviewed, markAdoptionDone } from "../../../actions";
-import { GROUP_ICONS, GROUP_TRACK, groupItemClass } from "@/components/DogGroups";
-import { DOG_GROUPS, GROUP_LABELS, groupOf } from "@/lib/dog-groups";
+import { updateDog, deleteDog, deleteSighting, retireTag, volunteerSighting, markReviewed, markAdoptionDone } from "../../../actions";
+import { groupOf } from "@/lib/dog-groups";
 import { fmtDate, fmtDateTime, rabiesCurrent } from "@/lib/dates";
 
 const gps = {
@@ -66,18 +65,9 @@ export default async function DogAdmin({ params, searchParams }: PageProps<"/adm
         }
       />
 
-      <form action={setDogGroup.bind(null, dog.id)} aria-label="Situation" className={`${GROUP_TRACK} mt-1`}>
-        {DOG_GROUPS.map((g) => {
-          const Icon = GROUP_ICONS[g];
-          const active = g === group;
-          return (
-            <button key={g} name="group" value={g} aria-pressed={active} className={groupItemClass(active)}>
-              <Icon className="h-4 w-4 shrink-0" />
-              {GROUP_LABELS[g]}
-            </button>
-          );
-        })}
-      </form>
+      <div className="card-rows mt-1">
+        <SituationSelect form={DOG_FORM_ID} value={group} />
+      </div>
 
       <div className="mt-5 flex flex-col items-center text-center">
         <DogPhoto photoId={dog.photoId} alt={dog.name} className="h-[104px] w-[104px] rounded-full" />

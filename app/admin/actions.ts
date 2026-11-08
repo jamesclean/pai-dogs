@@ -6,7 +6,6 @@ import { adoptionQuestions, db, dogs, photos, tags, sightings, newDogReports, ty
 import { requireAdmin } from "@/lib/auth";
 import { savePhoto } from "@/lib/photos";
 import { newCode, normalizeCode } from "@/lib/codes";
-import { getDog } from "@/lib/data";
 import { DOG_GROUPS } from "@/lib/dog-groups";
 
 function str(f: FormData, k: string, max = 500) {
@@ -122,34 +121,14 @@ export async function updateDog(id: number, form: FormData) {
   await requireAdmin();
   const photoId = await savePhoto(form.get("photo"));
   const fields = dogFields(form);
-  const current = await getDog(id);
-  if (!current) redirect("/admin");
+  const group = pick(str(form, "group"), DOG_GROUPS, "community");
   await db
     .update(dogs)
     .set({
       ...fields,
       ...(photoId ? { photoId } : {}),
-      status: current.status === "deceased" ? "deceased" : form.get("missing") === "on" ? "missing" : "community",
-      homeStatus: current.homeStatus === "has_home" ? "has_home" : form.get("adoption") === "on" ? "ask_adoption" : null,
-      updatedAt: new Date(),
-    })
-    .where(eq(dogs.id, id));
-  revalidatePath("/", "layout");
-  redirect(savedUrl(id));
-}
-
-// The switcher at the top of a dog's page. Saves straight away.
-export async function setDogGroup(id: number, form: FormData) {
-  await requireAdmin();
-  const dog = await getDog(id);
-  if (!dog) redirect("/admin");
-  const group = pick(str(form, "group"), DOG_GROUPS, "community");
-  const alive = dog.status === "deceased" ? "community" : dog.status;
-  await db
-    .update(dogs)
-    .set({
-      status: group === "memory" ? "deceased" : alive,
-      homeStatus: group === "home" ? "has_home" : dog.homeStatus === "has_home" ? null : dog.homeStatus,
+      status: group === "memory" ? "deceased" : form.get("missing") === "on" ? "missing" : "community",
+      homeStatus: group === "home" ? "has_home" : group === "community" && form.get("adoption") === "on" ? "ask_adoption" : null,
       updatedAt: new Date(),
     })
     .where(eq(dogs.id, id));

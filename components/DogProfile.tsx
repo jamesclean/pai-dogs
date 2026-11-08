@@ -47,7 +47,7 @@ export async function DogProfile({ dog, tagCode, scanned = false }: { dog: Dog; 
     );
 
   return (
-    <PublicShell lang={lang} bottomBar={bottomBar} back={{ href: "/dogs", label: s.dogsOfPai }} title={dog.name} revealTitle>
+    <PublicShell lang={lang} bottomBar={bottomBar} back={{ href: "/dogs", label: s.browseDogs }} title={dog.name} revealTitle>
       <div className="relative overflow-hidden rounded-[28px] shadow-card">
         <DogPhoto photoId={dog.photoId} alt={dog.name} className="aspect-[358/430] w-full" />
         <span className={`chip absolute top-4 left-4 ${dog.status === "missing" ? "text-bad" : ""}`}>
