@@ -2,6 +2,8 @@ import type { Dog } from "@/db";
 import { PhotoInput } from "./PhotoInput";
 import { HomeLocation } from "./HomeLocation";
 import { Switch } from "./Switch";
+import { GROUP_ICONS, GROUP_RADIO_ITEM, GROUP_TRACK } from "./DogGroups";
+import { DOG_GROUPS, GROUP_LABELS, groupOf } from "@/lib/dog-groups";
 import { BottomBar } from "./PublicShell";
 import { UpDown } from "./Icons";
 
@@ -22,12 +24,28 @@ export function DogForm({
   report?: number;
   submit: string;
 }) {
+  const group = dog ? groupOf(dog) : "community";
   const homeLat = dog?.homeLat ?? prefill?.homeLat ?? null;
   const homeLng = dog?.homeLng ?? prefill?.homeLng ?? null;
   return (
     <form action={action}>
       {tag && <input type="hidden" name="tag" value={tag} />}
       {report && <input type="hidden" name="report" value={report} />}
+
+      {!dog && (
+        <div role="radiogroup" aria-label="Situation" className={`${GROUP_TRACK} mt-5`}>
+          {DOG_GROUPS.map((g) => {
+            const Icon = GROUP_ICONS[g];
+            return (
+              <label key={g} className={GROUP_RADIO_ITEM}>
+                <input type="radio" name="group" value={g} defaultChecked={g === "community"} className="sr-only" />
+                <Icon className="h-4 w-4 shrink-0" />
+                {GROUP_LABELS[g]}
+              </label>
+            );
+          })}
+        </div>
+      )}
 
       {!dog && (
         <label className="mt-6 block">
@@ -46,20 +64,18 @@ export function DogForm({
           value={dog?.temperament}
           options={[["friendly", "Friendly"], ["shy", "Shy"], ["careful", "Careful"]]}
         />
-        {dog && (
-          <Select
-            label="Status"
-            name="status"
-            value={dog.status}
-            options={[["community", "Community"], ["missing", "Missing"], ["deceased", "In memory"]]}
-          />
+        {dog && group !== "memory" && (
+          <div className="row">
+            <span className="flex-1 text-callout">Missing</span>
+            <Switch name="missing" defaultChecked={dog.status === "missing"} />
+          </div>
         )}
-        <Select
-          label="Home status"
-          name="homeStatus"
-          value={dog?.homeStatus ?? ""}
-          options={[["", "Not set"], ["has_home", "Has a home"], ["ask_adoption", "Ask about adoption"]]}
-        />
+        {(!dog || group === "community") && (
+          <div className="row [form:has(input[name=group][value=community]:not(:checked))_&]:hidden">
+            <span className="flex-1 text-callout">Ask about adoption</span>
+            <Switch name="adoption" defaultChecked={dog?.homeStatus === "ask_adoption"} />
+          </div>
+        )}
         <Text label="Looks like" name="description" defaultValue={dog?.description ?? prefill?.description} placeholder="Tan, white chest" />
       </Section>
 

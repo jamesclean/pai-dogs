@@ -1,13 +1,13 @@
 import Link from "next/link";
 import { PublicShell } from "@/components/PublicShell";
 import { DogPhoto } from "@/components/DogPhoto";
-import { Flower, Heart, Paw, Search } from "@/components/Icons";
+import { GROUP_ICONS, GROUP_TRACK, groupItemClass } from "@/components/DogGroups";
+import { Search } from "@/components/Icons";
 import { getLang, t, fill } from "@/lib/i18n";
-import { DOG_GROUPS, publicDogs, type DogGroup } from "@/lib/data";
+import { publicDogs } from "@/lib/data";
+import { DOG_GROUPS, type DogGroup } from "@/lib/dog-groups";
 
 export const metadata = { title: "Dogs" };
-
-const ICONS = { community: Paw, home: Heart, memory: Flower };
 
 export default async function BrowseDogs({ searchParams }: PageProps<"/dogs">) {
   const { q, show } = await searchParams;
@@ -16,7 +16,7 @@ export default async function BrowseDogs({ searchParams }: PageProps<"/dogs">) {
   const lang = await getLang();
   const s = t(lang);
   const list = await publicDogs(group, query);
-  const labels = { community: s.community, home: s.hasHome, memory: s.deceased };
+  const labels = { community: s.communityDog, home: s.hasFamily, memory: s.deceased };
 
   function hrefFor(g: DogGroup) {
     const params = new URLSearchParams();
@@ -28,18 +28,16 @@ export default async function BrowseDogs({ searchParams }: PageProps<"/dogs">) {
 
   return (
     <PublicShell lang={lang} back={{ href: "/", label: s.back }} title={s.dogsOfPai}>
-      <div className="flex rounded-full bg-fill p-[3px]">
+      <div className={GROUP_TRACK}>
         {DOG_GROUPS.map((g) => {
-          const Icon = ICONS[g];
+          const Icon = GROUP_ICONS[g];
           return (
             <Link
               key={g}
               href={hrefFor(g)}
               scroll={false}
               aria-current={g === group ? "true" : undefined}
-              className={`flex h-9 flex-1 items-center justify-center gap-1.5 rounded-full text-[13px] leading-[18px] font-medium whitespace-nowrap transition ${
-                g === group ? "bg-surface-raised text-label shadow-control" : "text-label-2"
-              }`}
+              className={groupItemClass(g === group)}
             >
               <Icon className="h-4 w-4 shrink-0" />
               {labels[g]}

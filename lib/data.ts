@@ -2,6 +2,7 @@ import "server-only";
 import { and, asc, count, desc, eq, ilike, isNull, ne, or } from "drizzle-orm";
 import { db, dogs, tags, sightings, newDogReports, adoptionQuestions } from "@/db";
 import { normalizeCode } from "./codes";
+import type { DogGroup } from "./dog-groups";
 
 export async function getTag(rawCode: string) {
   const code = normalizeCode(rawCode);
@@ -38,9 +39,6 @@ export async function activeDogCount() {
     .where(ne(dogs.status, "deceased"));
   return r.n;
 }
-
-export const DOG_GROUPS = ["community", "home", "memory"] as const;
-export type DogGroup = (typeof DOG_GROUPS)[number];
 
 const GROUP_FILTER = {
   community: and(ne(dogs.status, "deceased"), or(isNull(dogs.homeStatus), ne(dogs.homeStatus, "has_home"))),
