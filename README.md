@@ -8,7 +8,7 @@ report a sighting or an injury.
 ## What's in it
 
 **Public (Thai / English, picks from the phone's language)**
-- `/`: home with Report a dog in trouble, Meet our dogs and Look up a dog. The admin login is the icon at the top right.
+- `/`: home with Report a dog sighting, Meet our dogs and Look up a dog. The admin login is the icon at the top right.
 - `/d/K7M2X`: dog page reached from the tag. Shows a missing banner if the dog is marked missing.
   A card asks once to "Add Mali to the map": if the person shares their location, the scan
   becomes a quiet sighting on the volunteers' map (no inbox item, at most one per dog every 5 minutes).
@@ -17,7 +17,7 @@ report a sighting or an injury.
 - `/dogs/12/adopt`: "Ask about adoption" form, for dogs marked that way.
 - `/dogs`: every community and missing dog, with photo and area. No GPS is shown publicly.
 - `/lookup`: scan instructions, plus a box to type a tag code if the QR is scratched.
-- `/report`: "Report a dog in trouble" when you don't know which dog it is. Volunteers add it or match it to a dog in the records.
+- `/report`: "Report a dog sighting" when you don't know which dog it is. Volunteers add it or match it to a dog in the records.
 
 **Volunteers (`/admin`, one shared password)**
 - Inbox of public reports and new-dog reports. Mark reports done; turn a new-dog report into a dog with "Add dog" (photo and GPS carry over).

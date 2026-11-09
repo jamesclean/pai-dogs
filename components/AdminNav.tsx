@@ -4,7 +4,11 @@ import { usePathname } from "next/navigation";
 import { Paw, Tag } from "./Icons";
 
 // Floating tab bar at the bottom of volunteer screens.
-export function AdminNav({ inbox }: { inbox: number }) {
+export function AdminNav({
+  inbox,
+}: {
+  inbox: { total: number; needsHelp: number };
+}) {
   const path = usePathname();
   // Only the two main screens show the tab bar; detail screens have a back button.
   if (path !== "/admin" && path !== "/admin/tags") return null;
@@ -21,16 +25,26 @@ export function AdminNav({ inbox }: { inbox: number }) {
             key={key}
             href={href}
             aria-current={tab === key ? "page" : undefined}
-            aria-label={key === "dogs" && inbox > 0 ? `${label}, ${inbox} to check` : undefined}
+            aria-label={
+              key === "dogs" && inbox.total > 0
+                ? `${label}, ${inbox.total} to check`
+                : undefined
+            }
             className={`relative flex h-12 w-[84px] flex-col items-center justify-center gap-0.5 rounded-full text-caption ${
               tab === key ? "bg-fill text-label" : "text-label-2"
             }`}
           >
             <Icon className="h-[22px] w-[22px]" />
             {label}
-            {key === "dogs" && inbox > 0 && (
-              <span className="absolute top-0.5 left-1/2 ml-1.5 flex h-[18px] min-w-[18px] items-center justify-center rounded-full bg-bad px-1 text-[11px] leading-none font-medium text-white">
-                {inbox > 99 ? "99+" : inbox}
+            {key === "dogs" && inbox.total > 0 && (
+              <span
+                className={`absolute top-0.5 left-1/2 ml-1.5 flex h-[18px] min-w-[18px] items-center justify-center rounded-full px-1 text-[11px] leading-none font-medium ${
+                  inbox.needsHelp > 0
+                    ? "bg-bad text-white"
+                    : "bg-inverse text-on-inverse"
+                }`}
+              >
+                {inbox.total > 99 ? "99+" : inbox.total}
               </span>
             )}
           </Link>
