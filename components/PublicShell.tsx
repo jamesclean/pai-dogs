@@ -11,11 +11,8 @@ export { Paw };
 
 export function Logo() {
   return (
-    <Link href="/" className="flex items-center gap-2.5">
-      <span className="tile h-[30px] w-[30px] rounded-full bg-brand text-white">
-        <Paw className="h-[17px] w-[17px]" />
-      </span>
-      <span className="text-headline">{config.programName}</span>
+    <Link href="/" className="text-headline">
+      {config.programName}
     </Link>
   );
 }
