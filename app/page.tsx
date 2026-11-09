@@ -11,7 +11,7 @@ import { config, lineUrl } from "@/lib/config";
 const meetDogs = [
   { image: "/home/dog-left.webp", place: "fan-left top-2 left-[1.17%] h-36 w-[38.91%]", card: "border-[0.75px] shadow-card", size: "h-[90px] w-[90px]" },
   { image: "/home/dog-right.webp", place: "fan-right top-2 left-[59.85%] h-36 w-[38.91%]", card: "border-[0.75px] shadow-card", size: "h-[90px] w-[90px]" },
-  { image: "/home/dog-centre.webp", place: "top-0 left-[24.03%] h-40 w-[51.87%]", card: "border shadow-float", size: "h-[120px] w-[120px]" },
+  { image: "/home/dog-centre.webp", place: "fan-centre top-0 left-[24.03%] h-40 w-[51.87%]", card: "border shadow-float", size: "h-[120px] w-[120px]" },
 ];
 
 export default async function Home() {

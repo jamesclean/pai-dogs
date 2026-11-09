@@ -235,7 +235,7 @@ body {
 /* Meet our dogs cards. Each has 40px of padding around it, so its edge fade
    moves with the card and doesn't cut off the shadow. */
 .fan-card {
-  transition: transform 340ms ease-out;
+  transition: translate 340ms ease-out, rotate 340ms ease-out, scale 340ms cubic-bezier(0.5, 0, 0.5, 1);
 }
 .fan-left,
 .fan-right {
@@ -246,14 +246,19 @@ body {
   --fan-tilt: -8deg;
   mask-image: linear-gradient(to right, transparent var(--fade-start), black var(--fade-end));
 }
+.fan-centre {
+  --fan-grow: 1.02;
+}
 .fan-right {
   --fan-tilt: 8deg;
   mask-image: linear-gradient(to left, transparent var(--fade-start), black var(--fade-end));
 }
 @media (hover: hover) and (prefers-reduced-motion: no-preference) {
   a:hover .fan-card {
-    transition-duration: 280ms;
-    transform: translateY(-6px) rotate(var(--fan-tilt, 0deg));
+    translate: 0 -6px;
+    rotate: var(--fan-tilt, 0deg);
+    scale: var(--fan-grow, 1);
+    transition: translate 280ms ease-out, rotate 280ms ease-out, scale 280ms cubic-bezier(0.5, 0, 0.5, 1);
   }
 }
 
@@ -300,7 +305,7 @@ body {
    The Log in button gets the same treatment, as the tilting cards reach it. */
 @media (hover: hover) and (prefers-reduced-motion: no-preference) {
   .fan-card {
-    will-change: transform;
+    will-change: translate, rotate, scale;
   }
   .ray {
     will-change: transform, opacity;
