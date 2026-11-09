@@ -113,11 +113,14 @@ export async function submitNewReport(_prev: ReportState, form: FormData): Promi
   const guess = Number(form.get("guessDogId"));
   const guessed = Number.isInteger(guess) && guess > 0 && guess <= 2147483647 ? await getDog(guess) : null;
 
-  await db.insert(newDogReports).values({
-    ...reportFields(form),
-    photoId,
-    guessDogId: guessed && guessed.status !== "deceased" ? guessed.id : null,
-  });
+  const guessDogId = guessed && guessed.status !== "deceased" ? guessed.id : null;
+  const fields = reportFields(form);
+  const note =
+    form.get("notListed") && !guessDogId
+      ? ["Doesn't seem to be listed", fields.note].filter(Boolean).join(" • ").slice(0, 2000)
+      : fields.note;
+
+  await db.insert(newDogReports).values({ ...fields, note, photoId, guessDogId });
   return { ok: true };
 }
 

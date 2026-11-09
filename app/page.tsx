@@ -22,7 +22,7 @@ export default async function Home() {
           href="/dogs"
           className="card tappable relative flex flex-col rounded-[28px] p-5 transition active:scale-[0.98]"
         >
-          <span className="chip absolute top-4 left-4">
+          <span className="chip absolute top-4 right-4">
             <Paw className="h-4 w-4" />
             {n === 1 ? s.oneDog : fill(s.dogsCount, { n })}
           </span>
@@ -37,13 +37,13 @@ export default async function Home() {
             <Link
               key={href}
               href={href}
-              className="card tappable flex flex-col rounded-[24px] p-4 transition active:scale-[0.98]"
+              className="card tappable relative flex flex-col rounded-[24px] p-4 transition active:scale-[0.98]"
             >
+              {badge && <span className="chip absolute top-4 right-4">{badge}</span>}
               {/* eslint-disable-next-line @next/next/no-img-element */}
               <img src={image} alt="" width={360} height={360} className="h-[84px] w-auto self-start" />
               <span className="mt-3 block text-section">{title}</span>
               {sub && <span className="mt-0.5 block text-footnote text-label-2">{sub}</span>}
-              {badge && <span className="pill mt-2 self-start bg-fill text-label-2">{badge}</span>}
             </Link>
           ))}
         </div>

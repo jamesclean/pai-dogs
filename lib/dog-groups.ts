@@ -9,6 +9,6 @@ export function groupOf(dog: { status: string; homeStatus: string | null }): Dog
 
 export const GROUP_LABELS: Record<DogGroup, string> = {
   community: "Street dog",
-  home: "Has a family",
+  home: "Family dog",
   memory: "In memory",
 };
