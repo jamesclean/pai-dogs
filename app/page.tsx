@@ -27,7 +27,7 @@ export default async function Home() {
             {n === 1 ? s.oneDog : fill(s.dogsCount, { n })}
           </span>
           {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img src="/home/dog.webp" alt="" width={560} height={640} className="mx-auto h-[210px] w-auto" />
+          <img src="/home/dog.webp" alt="" width={567} height={640} className="mx-auto h-[210px] w-auto" />
           <h1 className="mt-3 text-title">{s.browseDogs}</h1>
           <p className="mt-1 text-subhead text-balance text-label-2">{s.tagline}</p>
         </Link>
