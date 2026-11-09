@@ -31,7 +31,6 @@ export default async function DogReportPage({ params, searchParams }: PageProps<
         action={submitReport.bind(null, dog.id, typeof tag === "string" ? tag : undefined)}
         s={s}
         initial={typeof c === "string" ? c : "ok"}
-        notePlaceholder={s.notePlaceholder}
         back={{ href, label: fill(s.backTo, { name: dog.name }) }}
         photoId={dog.photoId}
         vet={vet}

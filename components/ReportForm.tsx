@@ -18,7 +18,6 @@ export function ReportForm({
   action: submit,
   s,
   initial,
-  notePlaceholder,
   back,
   photoId,
   vet,
@@ -26,7 +25,6 @@ export function ReportForm({
   action: (prev: ReportState, form: FormData) => Promise<ReportState>;
   s: Dict;
   initial?: string;
-  notePlaceholder: string;
   back: { href: string; label: string };
   photoId?: number | null;
   vet: Vet;
@@ -62,13 +60,13 @@ export function ReportForm({
       {urgent && <VetCard vet={vet} s={s} className="mt-3" />}
 
       <div className="card-rows mt-6">
-        <LocationField labels={s} />
+        <LocationField labels={s} named />
         <PhotoInput label={s.addPhoto} changeLabel={s.changePhoto} />
       </div>
 
       <label className="mt-6 block">
-        <span className="field-label">{s.anythingElse}</span>
-        <textarea name="note" rows={3} placeholder={notePlaceholder} className="field py-3.5" />
+        <span className="field-label">{s.addNote}</span>
+        <textarea name="note" rows={3} className="field py-3.5" />
       </label>
 
       <label className="mt-5 block">

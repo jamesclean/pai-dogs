@@ -26,8 +26,8 @@ export function AdoptForm({
         <span className="field-help">{s.contactHelp}</span>
       </label>
       <label className="mt-5 block">
-        <span className="field-label">{s.anythingElse}</span>
-        <textarea name="note" rows={3} placeholder={s.adoptNotePlaceholder} className="field py-3.5" />
+        <span className="field-label">{s.addNote}</span>
+        <textarea name="note" rows={3} className="field py-3.5" />
       </label>
       <input name="website" tabIndex={-1} autoComplete="off" className="hidden" aria-hidden />
       <FormError error={state.error} s={s} />

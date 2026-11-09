@@ -14,7 +14,6 @@ export default async function ReportDog() {
       <ReportForm
         action={submitNewReport}
         s={s}
-        notePlaceholder={s.looksLikePlaceholder}
         back={{ href: "/", label: s.backHome }}
         vet={vet}
       />
