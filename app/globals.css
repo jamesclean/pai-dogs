@@ -323,7 +323,7 @@ body {
 
 /* Hover: a white layer, 10% on buttons and 33% on cards. Mouse devices only.
    As a background image it sits over the fill and under the text. Rows and
-   photos have no fill of their own, so they use a layer on top instead. */
+   photos have no fill of their own, so they get a separate layer. */
 @media (hover: hover) {
   :is(.btn-primary, .btn-secondary, .btn-outline, .btn-danger, .circle-btn, .tappable):not(:disabled):hover {
     background-image: linear-gradient(rgb(255 255 255 / 0.1), rgb(255 255 255 / 0.1));
@@ -336,11 +336,13 @@ body {
   }
   .card-rows :is(a.row, button.row, label.row:has(input[type="radio"], input[type="file"], select)) {
     position: relative;
+    isolation: isolate;
   }
   .card-rows :is(a.row, button.row, label.row:has(input[type="radio"], input[type="file"], select)):hover::before {
     content: "";
     position: absolute;
     inset: 0 -16px;
+    z-index: -1; /* behind the row's text */
     background: rgb(255 255 255 / 0.33);
     pointer-events: none;
   }
