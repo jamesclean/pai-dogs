@@ -39,7 +39,7 @@ export async function DogProfile({ dog, tagCode, scanned = false }: { dog: Dog; 
   const bottomBar =
     dog.status === "deceased" ? undefined : (
       <>
-        <Link href={`${reportHref}?c=injured${tagQuery && `&${tagQuery}`}`} className="btn-danger flex-1">
+        <Link href={`${reportHref}?c=injured${tagQuery && `&${tagQuery}`}`} className="btn-outline flex-1 border-label! shadow-none!">
           {s.getHelp}
         </Link>
         <Link href={`${reportHref}${tagQuery && `?${tagQuery}`}`} className="btn-primary flex-1">
@@ -51,7 +51,7 @@ export async function DogProfile({ dog, tagCode, scanned = false }: { dog: Dog; 
   return (
     <PublicShell lang={lang} bottomBar={bottomBar} back={{ href: "/dogs", label: s.browseDogs }} title={dog.name} revealTitle>
       <div className="relative overflow-hidden rounded-[28px] shadow-card">
-        <DogGallery photoIds={photoIds} alt={dog.name} ofLabel={s.photoOf} />
+        <DogGallery photoIds={photoIds} alt={dog.name} ofLabel={s.photoOf} previousLabel={s.previousPhoto} nextLabel={s.nextPhoto} />
         <span className={`chip absolute top-4 left-4 ${dog.status === "missing" ? "text-bad" : ""}`}>
           {dog.status === "missing" ? (
             <Alert className="h-4 w-4" />
