@@ -9,8 +9,8 @@ import { config, lineUrl } from "@/lib/config";
 
 // Side cards first, so the centre card sits on top of them.
 const meetDogs = [
-  { image: "/home/dog-left.webp", place: "fan-left top-8 left-[max(-20px,calc(50%-180.7px))] h-36 w-36", card: "border-[0.75px] shadow-card", size: "h-[90px] w-[90px]" },
-  { image: "/home/dog-right.webp", place: "fan-right top-8 right-[max(-20px,calc(50%-180.7px))] h-36 w-36", card: "border-[0.75px] shadow-card", size: "h-[90px] w-[90px]" },
+  { image: "/home/dog-left.webp", place: "fan-left top-8 left-[calc(50%-72px-min(60.7px,50%-71.2px))] h-36 w-36", card: "border-[0.75px] shadow-card", size: "h-[90px] w-[90px]" },
+  { image: "/home/dog-right.webp", place: "fan-right top-8 right-[calc(50%-72px-min(60.7px,50%-71.2px))] h-36 w-36", card: "border-[0.75px] shadow-card", size: "h-[90px] w-[90px]" },
   { image: "/home/dog-centre.webp", place: "fan-centre top-0 left-[calc(50%-80px)] h-40 w-40", card: "border shadow-float", size: "h-[120px] w-[120px]" },
 ];
 
