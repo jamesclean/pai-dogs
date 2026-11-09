@@ -222,9 +222,8 @@ body {
 
 /* One pulse of the Figma loop, which plays three of these in 2.4s. */
 @keyframes ray-pulse {
-  0%, 100% { transform: scale(1); opacity: 1; }
+  0%, 100% { transform: scale(1); }
   45% { transform: scale(1.18, 1.12); }
-  50% { opacity: 0.55; }
 }
 @media (hover: hover) {
   .rays-pulsing .ray {
@@ -308,7 +307,7 @@ body {
     will-change: translate, rotate, scale;
   }
   .ray {
-    will-change: transform, opacity;
+    will-change: transform;
   }
   .collar-tag {
     will-change: rotate;
