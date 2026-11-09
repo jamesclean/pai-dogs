@@ -5,6 +5,14 @@ import { getLang, t, fill } from "@/lib/i18n";
 import { totalDogCount } from "@/lib/data";
 import { config, lineUrl } from "@/lib/config";
 
+// Side cards first, so the centre card sits on top of them. Tops include the
+// 40px of room the fade needs so it doesn't cut off the shadows.
+const meetDogs = [
+  { image: "/home/dog-left.webp", card: "top-12 left-[1.17%] h-36 w-[38.91%] border-[0.75px] shadow-card", size: "h-[90px] w-[90px]" },
+  { image: "/home/dog-right.webp", card: "top-12 left-[59.85%] h-36 w-[38.91%] border-[0.75px] shadow-card", size: "h-[90px] w-[90px]" },
+  { image: "/home/dog-centre.webp", card: "top-10 left-[24.03%] h-40 w-[51.87%] border shadow-float", size: "h-[120px] w-[120px]" },
+];
+
 export default async function Home() {
   const lang = await getLang();
   const s = t(lang);
@@ -22,13 +30,22 @@ export default async function Home() {
           href="/dogs"
           className="card tappable relative flex flex-col rounded-[28px] p-5 transition active:scale-[0.98]"
         >
-          <span className="chip absolute top-4 right-4">
+          <span className="chip absolute top-4 right-4 z-10">
             <Paw className="h-4 w-4" />
             {n === 1 ? s.oneDog : fill(s.dogsCount, { n })}
           </span>
-          {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img src="/home/dog.webp" alt="" width={567} height={640} className="mx-auto h-[210px] w-auto" />
-          <h1 className="mt-3 text-title">{s.browseDogs}</h1>
+          <div className="relative -my-10 h-60 [mask-image:linear-gradient(to_right,transparent_3.24%,black_6.48%,black_93.52%,transparent_96.76%)]">
+            {meetDogs.map(({ image, card, size }) => (
+              <span
+                key={image}
+                className={`absolute flex items-center justify-center rounded-[24px] border-sep bg-surface-raised ${card}`}
+              >
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img src={image} alt="" width={360} height={360} className={size} />
+              </span>
+            ))}
+          </div>
+          <h1 className="relative mt-3 text-title">{s.browseDogs}</h1>
           <p className="mt-1 text-subhead text-balance text-label-2">{s.tagline}</p>
         </Link>
 
