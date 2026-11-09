@@ -2,6 +2,7 @@
 import Link from "next/link";
 import { useActionState, useState } from "react";
 import type { ReportState } from "@/app/report/actions";
+import { ContactField } from "./ContactField";
 import { LocationField } from "./LocationField";
 import { PhotoInput } from "./PhotoInput";
 import { BottomBar } from "./PublicShell";
@@ -69,11 +70,9 @@ export function ReportForm({
         <textarea name="note" rows={3} className="field py-3.5" />
       </label>
 
-      <label className="mt-5 block">
-        <span className="field-label">{s.yourContact}</span>
-        <input name="contact" placeholder={s.contactPlaceholder} className="field h-[50px]" />
-        <span className="field-help">{s.contactHelp}</span>
-      </label>
+      <div className="mt-5">
+        <ContactField s={s} />
+      </div>
 
       <input name="website" tabIndex={-1} autoComplete="off" className="hidden" aria-hidden />
       <FormError error={state.error} s={s} />

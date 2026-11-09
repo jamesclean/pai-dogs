@@ -2,6 +2,7 @@
 import { useActionState } from "react";
 import type { ReportState } from "@/app/report/actions";
 import { BottomBar } from "@/components/PublicShell";
+import { ContactField } from "@/components/ContactField";
 import { DogPhoto } from "@/components/DogPhoto";
 import { FormError, SentSheet } from "@/components/ReportForm";
 import type { Dict } from "@/lib/i18n";
@@ -20,11 +21,7 @@ export function AdoptForm({
   const [state, action, pending] = useActionState<ReportState, FormData>(submit, { ok: false });
   return (
     <form action={action}>
-      <label className="block">
-        <span className="field-label">{s.yourContact}</span>
-        <input name="contact" required placeholder={s.contactPlaceholder} className="field h-[50px]" />
-        <span className="field-help">{s.contactHelp}</span>
-      </label>
+      <ContactField s={s} required />
       <label className="mt-5 block">
         <span className="field-label">{s.addNote}</span>
         <textarea name="note" rows={3} className="field py-3.5" />

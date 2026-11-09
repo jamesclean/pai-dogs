@@ -11,6 +11,20 @@ function num(v: FormDataEntryValue | null) {
   return v !== null && v !== "" && Number.isFinite(n) ? n : null;
 }
 
+const CONTACT_TYPES = [
+  ["line", "LINE"],
+  ["facebook", "Facebook"],
+  ["phone", "Phone"],
+] as const;
+
+// "LINE: noi.pai", so volunteers know where to reply. Other is just what they typed.
+function contactFrom(form: FormData) {
+  const value = String(form.get("contact") ?? "").trim().slice(0, 180);
+  if (!value) return "";
+  const type = CONTACT_TYPES.find(([key]) => key === form.get("contactType"));
+  return type ? `${type[1]}: ${value}` : value;
+}
+
 function reportFields(form: FormData) {
   const raw = form.get("condition");
   const place = String(form.get("place") ?? "").trim().slice(0, 200);
@@ -18,7 +32,7 @@ function reportFields(form: FormData) {
   return {
     condition: CONDITIONS.find((c) => c === raw) ?? ("other" as const),
     note: [place && `Seen at ${place}`, written].filter(Boolean).join(" • ").slice(0, 2000),
-    contact: String(form.get("contact") ?? "").slice(0, 200),
+    contact: contactFrom(form),
     lat: num(form.get("lat")),
     lng: num(form.get("lng")),
     accuracy: num(form.get("accuracy")),
@@ -101,7 +115,7 @@ export async function submitNewReport(_prev: ReportState, form: FormData): Promi
 
 export async function submitAdoptionQuestion(dogId: number, _prev: ReportState, form: FormData): Promise<ReportState> {
   if (form.get("website")) return { ok: true }; // honeypot
-  const contact = String(form.get("contact") ?? "").trim().slice(0, 200);
+  const contact = contactFrom(form);
   if (!contact) return { ok: false, error: "failed" };
   if (!(await allow("adopt", 5, 3600))) return { ok: false, error: "rate" };
 
