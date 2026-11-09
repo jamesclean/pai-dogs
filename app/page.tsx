@@ -9,9 +9,9 @@ import { config, lineUrl } from "@/lib/config";
 
 // Side cards first, so the centre card sits on top of them.
 const meetDogs = [
-  { image: "/home/dog-left.webp", place: "fan-left top-2 left-[3.7%] h-36 w-[38.91%]", card: "border-[0.75px] shadow-card", size: "h-[90px] w-[90px]" },
-  { image: "/home/dog-right.webp", place: "fan-right top-2 left-[57.32%] h-36 w-[38.91%]", card: "border-[0.75px] shadow-card", size: "h-[90px] w-[90px]" },
-  { image: "/home/dog-centre.webp", place: "fan-centre top-0 left-[24.03%] h-40 w-[51.87%]", card: "border shadow-float", size: "h-[120px] w-[120px]" },
+  { image: "/home/dog-left.webp", place: "fan-left top-8 left-[max(-20px,calc(50%-180.7px))] h-36 w-36", card: "border-[0.75px] shadow-card", size: "h-[90px] w-[90px]" },
+  { image: "/home/dog-right.webp", place: "fan-right top-8 right-[max(-20px,calc(50%-180.7px))] h-36 w-36", card: "border-[0.75px] shadow-card", size: "h-[90px] w-[90px]" },
+  { image: "/home/dog-centre.webp", place: "fan-centre top-0 left-[calc(50%-80px)] h-40 w-40", card: "border shadow-float", size: "h-[120px] w-[120px]" },
 ];
 
 export default async function Home() {
@@ -26,7 +26,8 @@ export default async function Home() {
 
   return (
     <PublicShell lang={lang} adminLabel={s.logInToAdmin}>
-      <nav>
+      {/* Clip at the screen edge so the outer dog cards can't add sideways scrolling. */}
+      <nav className="-mx-4 overflow-x-clip px-4">
         <Link
           href="/dogs"
           className="card tappable relative flex flex-col rounded-[28px] p-5 transition active:scale-[0.98]"
@@ -35,7 +36,7 @@ export default async function Home() {
             <Paw className="h-4 w-4" />
             {n === 1 ? s.oneDog : fill(s.dogsCount, { n })}
           </span>
-          <div className="relative h-40">
+          <div className="relative h-44">
             {meetDogs.map(({ image, place, card, size }) => (
               <span key={image} className={`fan-card absolute -m-10 box-content block p-10 ${place}`}>
                 <span className={`flex h-full items-center justify-center rounded-[24px] border-sep bg-surface-raised ${card}`}>
