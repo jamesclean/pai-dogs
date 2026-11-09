@@ -10,6 +10,7 @@ import {
 } from "@/db";
 import { DogPhoto } from "@/components/DogPhoto";
 import { AdminHeader, SignOutButton } from "@/components/AdminHeader";
+import { DoneButton } from "@/components/DoneButton";
 import { Map, type Pin } from "@/components/Map";
 import {
   Chevron,
@@ -33,7 +34,7 @@ function ConditionLabel({
   const c = CONDITION[condition];
   if (!c) return <span className="text-footnote text-label-2">Looks fine</span>;
   return (
-    <span className={`pill ${solid ? "bg-bad text-white" : c[1]}`}>{c[0]}</span>
+    <span className={`pill ${solid ? "bg-warn text-on-inverse" : c[1]}`}>{c[0]}</span>
   );
 }
 
@@ -181,9 +182,7 @@ export default async function AdminHome({ searchParams }: PageProps<"/admin">) {
             {fmtDateTime(item.r.q.createdAt)} • {item.r.q.contact}
           </p>
         </div>
-        <form action={markAdoptionDone.bind(null, item.r.q.id)}>
-          <button className="btn-outline btn-sm">Mark done</button>
-        </form>
+        <DoneButton action={markAdoptionDone.bind(null, item.r.q.id)} />
       </div>
     ) : item.kind === "new" ? (
       <div key={`n${item.r.id}`} className="flex items-start gap-3 py-3">
@@ -194,7 +193,7 @@ export default async function AdminHome({ searchParams }: PageProps<"/admin">) {
             className="h-11 w-11 shrink-0 rounded-[12px]"
           />
         ) : (
-          <span className="tile h-11 w-11 rounded-[12px] bg-brand-soft text-brand">
+          <span className={`tile h-11 w-11 rounded-[12px] text-brand ${urgent ? "bg-surface-raised" : "bg-brand-soft"}`}>
             <Megaphone className="h-[22px] w-[22px]" />
           </span>
         )}
@@ -237,7 +236,7 @@ export default async function AdminHome({ searchParams }: PageProps<"/admin">) {
             className="h-11 w-11 shrink-0 rounded-[12px]"
           />
         ) : (
-          <span className="tile h-11 w-11 rounded-[12px] bg-fill text-label-2">
+          <span className={`tile h-11 w-11 rounded-[12px] text-label-2 ${urgent ? "bg-surface-raised" : "bg-fill"}`}>
             <PinIcon className="h-5 w-5" />
           </span>
         )}
@@ -263,9 +262,7 @@ export default async function AdminHome({ searchParams }: PageProps<"/admin">) {
             <MapLink lat={item.r.s.lat} lng={item.r.s.lng} />
           </p>
         </div>
-        <form action={markReviewed.bind(null, item.r.s.id)}>
-          <button className="btn-outline btn-sm">Mark done</button>
-        </form>
+        <DoneButton action={markReviewed.bind(null, item.r.s.id)} raised={urgent} />
       </div>
     );
 
@@ -300,12 +297,12 @@ export default async function AdminHome({ searchParams }: PageProps<"/admin">) {
       </form>
 
       {needsHelp.length > 0 && (
-        <section className="mt-7 rounded-[24px] bg-bad-soft px-4 pt-3.5 pb-1">
+        <section className="mt-7 rounded-[24px] bg-warn-soft px-4 pt-3.5 pb-1">
           <div className="flex items-baseline justify-between">
-            <h2 className="text-section text-bad">Needs help</h2>
-            <span className="text-footnote text-bad">{needsHelp.length}</span>
+            <h2 className="text-section text-warn">Needs help</h2>
+            <span className="text-footnote text-warn">{needsHelp.length}</span>
           </div>
-          <div className="mt-1 divide-y divide-bad/15">
+          <div className="mt-1 divide-y divide-warn/15">
             {needsHelp.map((item) => inboxRow(item, true))}
           </div>
         </section>

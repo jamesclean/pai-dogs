@@ -27,7 +27,7 @@ export default async function LookUp() {
           <p className="text-footnote text-label-2">{s.useCamera}</p>
         </div>
       </div>
-      <CodeEntry action={lookup} label={s.orType} button={s.findDog} />
+      <CodeEntry action={lookup} label={s.orType} button={s.findDog} incomplete={s.codeIncomplete} />
     </PublicShell>
   );
 }
