@@ -32,7 +32,12 @@ export default async function BrowseDogs({ searchParams }: PageProps<"/dogs">) {
       <form>
         <label className="search">
           <Search className="h-[18px] w-[18px] shrink-0" />
-          <input name="q" defaultValue={query} placeholder={s.searchDogs} className="bare-input" />
+          <input key={query} name="q" defaultValue={query} placeholder={s.searchDogs} className="bare-input" />
+          {query && (
+            <Link href={group && group !== "community" ? `/dogs?show=${group}` : "/dogs"} scroll={false} className="shrink-0 text-footnote text-label-2">
+              {s.clearSearch}
+            </Link>
+          )}
         </label>
       </form>
 
