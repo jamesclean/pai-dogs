@@ -1,17 +1,17 @@
 import Link from "next/link";
 import { PublicShell } from "@/components/PublicShell";
+import { CollarArt } from "@/components/CollarArt";
 import { MegaphoneArt } from "@/components/MegaphoneArt";
 import { Chat, Paw, Phone } from "@/components/Icons";
 import { getLang, t, fill } from "@/lib/i18n";
 import { totalDogCount } from "@/lib/data";
 import { config, lineUrl } from "@/lib/config";
 
-// Side cards first, so the centre card sits on top of them. Tops include the
-// 40px of room the fade needs so it doesn't cut off the shadows.
+// Side cards first, so the centre card sits on top of them.
 const meetDogs = [
-  { image: "/home/dog-left.webp", card: "top-12 left-[1.17%] h-36 w-[38.91%] border-[0.75px] shadow-card", size: "h-[90px] w-[90px]" },
-  { image: "/home/dog-right.webp", card: "top-12 left-[59.85%] h-36 w-[38.91%] border-[0.75px] shadow-card", size: "h-[90px] w-[90px]" },
-  { image: "/home/dog-centre.webp", card: "top-10 left-[24.03%] h-40 w-[51.87%] border shadow-float", size: "h-[120px] w-[120px]" },
+  { image: "/home/dog-left.webp", place: "fan-left top-2 left-[1.17%] h-36 w-[38.91%]", card: "border-[0.75px] shadow-card", size: "h-[90px] w-[90px]" },
+  { image: "/home/dog-right.webp", place: "fan-right top-2 left-[59.85%] h-36 w-[38.91%]", card: "border-[0.75px] shadow-card", size: "h-[90px] w-[90px]" },
+  { image: "/home/dog-centre.webp", place: "top-0 left-[24.03%] h-40 w-[51.87%]", card: "border shadow-float", size: "h-[120px] w-[120px]" },
 ];
 
 export default async function Home() {
@@ -20,8 +20,8 @@ export default async function Home() {
   const n = await totalDogCount();
 
   const secondary = [
-    { href: "/report", title: s.reportDog },
-    { href: "/lookup", image: "/home/collar.webp", title: s.lookUp, sub: s.lookUpSub, badge: s.comingSoon },
+    { href: "/report", art: <MegaphoneArt />, title: s.reportDog },
+    { href: "/lookup", art: <CollarArt />, title: s.lookUp, sub: s.lookUpSub, badge: s.comingSoon },
   ];
 
   return (
@@ -35,14 +35,13 @@ export default async function Home() {
             <Paw className="h-4 w-4" />
             {n === 1 ? s.oneDog : fill(s.dogsCount, { n })}
           </span>
-          <div className="relative -my-10 h-60 [mask-image:linear-gradient(to_right,transparent_3.24%,black_6.48%,black_93.52%,transparent_96.76%)]">
-            {meetDogs.map(({ image, card, size }) => (
-              <span
-                key={image}
-                className={`absolute flex items-center justify-center rounded-[24px] border-sep bg-surface-raised ${card}`}
-              >
-                {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img src={image} alt="" width={360} height={360} className={size} />
+          <div className="relative h-40">
+            {meetDogs.map(({ image, place, card, size }) => (
+              <span key={image} className={`fan-card absolute -m-10 box-content block p-10 ${place}`}>
+                <span className={`flex h-full items-center justify-center rounded-[24px] border-sep bg-surface-raised ${card}`}>
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                  <img src={image} alt="" width={360} height={360} className={size} />
+                </span>
               </span>
             ))}
           </div>
@@ -51,19 +50,14 @@ export default async function Home() {
         </Link>
 
         <div className="mt-2.5 grid grid-cols-2 gap-2.5">
-          {secondary.map(({ href, image, title, sub, badge }) => (
+          {secondary.map(({ href, art, title, sub, badge }) => (
             <Link
               key={href}
               href={href}
               className="card tappable relative flex flex-col rounded-[24px] p-4 transition active:scale-[0.98]"
             >
-              {badge && <span className="chip absolute top-4 right-4">{badge}</span>}
-              {image ? (
-                // eslint-disable-next-line @next/next/no-img-element
-                <img src={image} alt="" width={360} height={360} className="h-[84px] w-auto self-start" />
-              ) : (
-                <MegaphoneArt />
-              )}
+              {badge && <span className="chip absolute top-4 right-4 z-10">{badge}</span>}
+              {art}
               <span className="mt-3 block text-section">{title}</span>
               {sub && <span className="mt-0.5 block text-footnote text-label-2">{sub}</span>}
             </Link>

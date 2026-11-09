@@ -232,6 +232,90 @@ body {
   }
 }
 
+/* Meet our dogs cards. Each has 40px of padding around it, so its edge fade
+   moves with the card and doesn't cut off the shadow. */
+.fan-card {
+  transition: transform 340ms ease-out;
+}
+.fan-left,
+.fan-right {
+  --fade-start: calc(40px + (100% - 80px) * 0.053);
+  --fade-end: calc(40px + (100% - 80px) * 0.136);
+}
+.fan-left {
+  --fan-tilt: -8deg;
+  mask-image: linear-gradient(to right, transparent var(--fade-start), black var(--fade-end));
+}
+.fan-right {
+  --fan-tilt: 8deg;
+  mask-image: linear-gradient(to left, transparent var(--fade-start), black var(--fade-end));
+}
+@media (hover: hover) and (prefers-reduced-motion: no-preference) {
+  a:hover .fan-card {
+    transition-duration: 280ms;
+    transform: translateY(-6px) rotate(var(--fan-tilt, 0deg));
+  }
+}
+
+/* Look up a dog collar. Sine motion: each quarter eases out to a peak, then in
+   to the centre. */
+@keyframes tag-swing {
+  0%, 50% { rotate: 0deg; animation-timing-function: cubic-bezier(0.61, 1, 0.88, 1); }
+  25% { rotate: -6deg; animation-timing-function: cubic-bezier(0.12, 0, 0.39, 0); }
+  75% { rotate: 6deg; animation-timing-function: cubic-bezier(0.12, 0, 0.39, 0); }
+  100% { rotate: 0deg; }
+}
+@keyframes shadow-drift {
+  0%, 50% { translate: 0; animation-timing-function: cubic-bezier(0.61, 1, 0.88, 1); }
+  25% { translate: 5.66%; animation-timing-function: cubic-bezier(0.12, 0, 0.39, 0); }
+  75% { translate: -5.66%; animation-timing-function: cubic-bezier(0.12, 0, 0.39, 0); }
+  100% { translate: 0; }
+}
+@keyframes shadow-breathe {
+  0%, 50%, 100% { scale: 1; opacity: 1; }
+  25%, 75% { scale: 0.96 0.975; opacity: 0.9; }
+}
+.collar-tag {
+  transform-origin: 50% 47.5%;
+}
+.collar-shadow {
+  top: 88.89%;
+  left: 19.63%;
+  width: 60.74%;
+  height: 13.33%;
+  max-width: none;
+  transform-origin: 50% 54.17%;
+}
+@media (hover: hover) {
+  .swinging .collar-tag {
+    animation: tag-swing 3.6s infinite;
+  }
+  .swinging .collar-shadow {
+    animation: shadow-drift 3.6s infinite, shadow-breathe 3.6s cubic-bezier(0.37, 0, 0.63, 1) infinite;
+  }
+}
+
+/* Keep the moving art on its own layers from the start. Otherwise the browser
+   promotes whatever overlaps it only while it moves, and that visibly redraws.
+   The Log in button gets the same treatment, as the tilting cards reach it. */
+@media (hover: hover) and (prefers-reduced-motion: no-preference) {
+  .fan-card {
+    will-change: transform;
+  }
+  .ray {
+    will-change: transform, opacity;
+  }
+  .collar-tag {
+    will-change: rotate;
+  }
+  .collar-shadow {
+    will-change: translate, scale, opacity;
+  }
+  .stable-layer {
+    will-change: transform;
+  }
+}
+
 @media (prefers-reduced-motion: reduce) {
   *, .sheet-in {
     transition: none !important;

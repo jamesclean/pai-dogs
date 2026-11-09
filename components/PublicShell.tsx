@@ -65,7 +65,7 @@ export function PublicShell({
         <header className="mx-auto flex w-full max-w-xl items-center justify-between px-4 pt-[max(env(safe-area-inset-top),12px)] pb-4">
           <Logo />
           {adminLabel && (
-            <Link href="/admin" aria-label={adminLabel} className="circle-btn group relative z-10 hover:z-40 focus-visible:z-40">
+            <Link href="/admin" aria-label={adminLabel} className="stable-layer circle-btn group relative z-10 hover:z-40 focus-visible:z-40">
               <Admin className="h-5 w-5" />
               <HoverLabel className="top-full right-0 mt-2">{adminLabel}</HoverLabel>
             </Link>

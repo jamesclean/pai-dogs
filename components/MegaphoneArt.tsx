@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
+import { onCardHover } from "@/lib/card-hover";
 
 // Each sound ray as a share of the artwork: the slice of the sound layer that
 // holds it (the layer also contains the horn), and the point it pulses from.
@@ -18,21 +19,17 @@ export function MegaphoneArt() {
   const [pulsing, setPulsing] = useState(false);
 
   useEffect(() => {
-    const card = ref.current?.closest("a");
-    if (!card) return;
-    const enter = () => {
-      hovering.current = true;
-      setPulsing(true);
-    };
-    const leave = () => {
-      hovering.current = false;
-    };
-    card.addEventListener("pointerenter", enter);
-    card.addEventListener("pointerleave", leave);
-    return () => {
-      card.removeEventListener("pointerenter", enter);
-      card.removeEventListener("pointerleave", leave);
-    };
+    if (!ref.current) return;
+    return onCardHover(
+      ref.current,
+      () => {
+        hovering.current = true;
+        setPulsing(true);
+      },
+      () => {
+        hovering.current = false;
+      },
+    );
   }, []);
 
   return (
