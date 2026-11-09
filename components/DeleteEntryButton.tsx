@@ -19,7 +19,7 @@ export function DeleteEntryButton({ action }: { action: () => Promise<void> }) {
     <form action={action}>
       <button
         aria-label={label}
-        className={`circle-btn group relative ${armed ? "bg-bad! text-white!" : "bg-bad-soft! text-bad!"}`}
+        className={`circle-btn group relative hover:z-40 focus-visible:z-40 ${armed ? "bg-bad! text-white!" : "bg-bad-soft! text-bad!"}`}
         onClick={(e) => {
           if (armed) return;
           e.preventDefault();

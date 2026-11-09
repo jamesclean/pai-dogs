@@ -124,7 +124,7 @@ export default async function AdminHome({ searchParams }: PageProps<"/admin">) {
     where s.lat is not null
     order by s.dog_id, s.created_at desc`);
   const pins: Pin[] = [
-    ...latest.map((r) => ({
+    ...latest.rows.map((r) => ({
       lat: r.lat,
       lng: r.lng,
       label: r.name,
