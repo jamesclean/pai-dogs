@@ -21,6 +21,7 @@ const copy = {
         "Who sees it",
         [
           "Only Pai Dogs volunteers. Dog pages show the area a dog lives in and its caretaker's LINE, never a GPS point or the details you send us.",
+          "To show the name of a place, we send a rough position to OpenStreetMap, without your details.",
         ],
       ],
       ["Deleting what you sent", ["Message us with roughly when you sent it, and we'll delete it."]],
@@ -40,7 +41,7 @@ const copy = {
       ],
       [
         "ใครเห็นข้อมูล",
-        ["เฉพาะอาสาสมัคร Pai Dogs เท่านั้น หน้าของหมาแสดงย่านที่หมาอยู่และ LINE ของผู้ดูแล ไม่แสดงพิกัด GPS หรือข้อมูลที่คุณส่งมา"],
+        ["เฉพาะอาสาสมัคร Pai Dogs เท่านั้น หน้าของหมาแสดงย่านที่หมาอยู่และ LINE ของผู้ดูแล ไม่แสดงพิกัด GPS หรือข้อมูลที่คุณส่งมา", "เพื่อแสดงชื่อสถานที่ เราส่งตำแหน่งโดยประมาณไปยัง OpenStreetMap โดยไม่ระบุข้อมูลของคุณ"],
       ],
       ["การลบข้อมูลที่คุณส่ง", ["ส่งข้อความหาเราพร้อมบอกเวลาคร่าว ๆ ที่คุณส่ง แล้วเราจะลบให้"]],
     ],

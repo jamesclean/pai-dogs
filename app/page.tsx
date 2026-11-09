@@ -30,7 +30,7 @@ export default async function Home() {
       <nav className="mt-3 grid grid-cols-2 gap-2.5">
         <Link
           href="/report"
-          className="col-span-2 flex items-center gap-3.5 rounded-[24px] bg-brand-soft p-4 transition active:scale-[0.98]"
+          className="tappable col-span-2 flex items-center gap-3.5 rounded-[24px] bg-brand-soft p-4 transition active:scale-[0.98]"
         >
           <span className="tile h-10 w-10 shrink-0 rounded-[12px] bg-surface-raised text-brand">
             <Megaphone className="h-[22px] w-[22px]" />
@@ -42,7 +42,7 @@ export default async function Home() {
           <Link
             key={href}
             href={href}
-            className="card flex min-h-[150px] flex-col justify-between rounded-[24px] p-4 transition active:scale-[0.98]"
+            className="card tappable flex min-h-[150px] flex-col justify-between rounded-[24px] p-4 transition active:scale-[0.98]"
           >
             <span className="tile h-10 w-10 rounded-[12px] border border-sep bg-surface-raised">
               <Icon className="h-[22px] w-[22px]" />

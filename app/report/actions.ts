@@ -13,14 +13,37 @@ function num(v: FormDataEntryValue | null) {
 
 function reportFields(form: FormData) {
   const raw = form.get("condition");
+  const place = String(form.get("place") ?? "").trim().slice(0, 200);
+  const written = String(form.get("note") ?? "").trim();
   return {
     condition: CONDITIONS.find((c) => c === raw) ?? ("other" as const),
-    note: String(form.get("note") ?? "").slice(0, 2000),
+    note: [place && `Seen at ${place}`, written].filter(Boolean).join(" • ").slice(0, 2000),
     contact: String(form.get("contact") ?? "").slice(0, 200),
     lat: num(form.get("lat")),
     lng: num(form.get("lng")),
     accuracy: num(form.get("accuracy")),
   };
+}
+
+// The name of a spot, for the report form. The position is rounded to about
+// 100 m first, and goes to OpenStreetMap from our server, not the person's phone.
+export async function placeName(lat: number, lng: number, lang: "en" | "th"): Promise<string | null> {
+  if (!Number.isFinite(lat) || !Number.isFinite(lng) || Math.abs(lat) > 90 || Math.abs(lng) > 180) return null;
+  if (!(await allow("place", 30, 600))) return null;
+  try {
+    const url = `https://nominatim.openstreetmap.org/reverse?format=jsonv2&zoom=17&lat=${lat.toFixed(3)}&lon=${lng.toFixed(3)}&accept-language=${lang === "th" ? "th" : "en"}`;
+    const res = await fetch(url, {
+      headers: { "User-Agent": "PaiDogs/1.0 (https://paidogs.vercel.app)" },
+      signal: AbortSignal.timeout(4000),
+    });
+    if (!res.ok) return null;
+    const { address: a } = (await res.json()) as { address?: Record<string, string> };
+    if (!a) return null;
+    const area = a.neighbourhood ?? a.suburb ?? a.village ?? a.town ?? a.city;
+    return [a.road, area].filter(Boolean).join(", ") || null;
+  } catch {
+    return null;
+  }
 }
 
 export type ReportState = { ok: boolean; error?: "rate" | "upload" | "failed" };

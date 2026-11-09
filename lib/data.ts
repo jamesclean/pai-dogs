@@ -1,8 +1,7 @@
 import "server-only";
-import { and, asc, count, desc, eq, ilike, isNull, ne, or, sql } from "drizzle-orm";
+import { and, asc, count, desc, eq, ne } from "drizzle-orm";
 import { db, dogs, tags, sightings, newDogReports, adoptionQuestions } from "@/db";
 import { normalizeCode } from "./codes";
-import type { DogGroup } from "./dog-groups";
 
 export async function getTag(rawCode: string) {
   const code = normalizeCode(rawCode);
@@ -40,32 +39,8 @@ export async function activeDogCount() {
   return r.n;
 }
 
-const GROUP_FILTER = {
-  community: and(ne(dogs.status, "deceased"), or(isNull(dogs.homeStatus), ne(dogs.homeStatus, "has_home"))),
-  home: and(ne(dogs.status, "deceased"), eq(dogs.homeStatus, "has_home")),
-  memory: eq(dogs.status, "deceased"),
-};
-
-function searchFilter(q: string) {
-  return q ? or(ilike(dogs.name, `%${q}%`), ilike(dogs.area, `%${q}%`)) : undefined;
-}
-
-// How many dogs each Browse group holds, for the current search.
-export async function dogGroupCounts(query = ""): Promise<Record<DogGroup, number>> {
-  const [row] = await db
-    .select({
-      community: sql<number>`(count(*) filter (where ${GROUP_FILTER.community}))::int`,
-      home: sql<number>`(count(*) filter (where ${GROUP_FILTER.home}))::int`,
-      memory: sql<number>`(count(*) filter (where ${GROUP_FILTER.memory}))::int`,
-    })
-    .from(dogs)
-    .where(searchFilter(query.trim()));
-  return row;
-}
-
-// Public directory, tag or no tag. A null group searches every group.
-export async function publicDogs(group: DogGroup | null, query = "") {
-  const q = query.trim();
+// Public directory, tag or no tag. Meet our dogs filters this on the phone.
+export async function publicDogs() {
   return db
     .select({
       id: dogs.id,
@@ -76,7 +51,6 @@ export async function publicDogs(group: DogGroup | null, query = "") {
       photoId: dogs.photoId,
     })
     .from(dogs)
-    .where(and(group ? GROUP_FILTER[group] : undefined, searchFilter(q)))
     .orderBy(asc(dogs.name));
 }
 
