@@ -1,5 +1,5 @@
 "use client";
-import { useState } from "react";
+import { useRef, useState } from "react";
 
 const LENGTH = 5;
 
@@ -17,16 +17,30 @@ export function CodeEntry({
   action,
   label,
   button,
+  incomplete,
 }: {
   action: (form: FormData) => Promise<void>;
   label: string;
   button: string;
+  incomplete: string;
 }) {
   const [code, setCode] = useState("");
   const [focused, setFocused] = useState(false);
+  const [showError, setShowError] = useState(false);
+  const input = useRef<HTMLInputElement>(null);
 
   return (
-    <form action={action} className="mt-6">
+    <form
+      action={action}
+      noValidate
+      className="mt-6"
+      onSubmit={(e) => {
+        if (code.length === LENGTH) return;
+        e.preventDefault();
+        setShowError(true);
+        input.current?.focus();
+      }}
+    >
       <label htmlFor="code" className="field-label">
         {label}
       </label>
@@ -37,7 +51,7 @@ export function CodeEntry({
             <div
               key={i}
               className={`flex aspect-square min-w-0 flex-1 items-center justify-center rounded-[14px] border bg-surface-raised font-mono text-[22px] font-medium transition-colors ${
-                active ? "border-inverse" : "border-sep"
+                showError ? "border-bad" : active ? "border-inverse" : "border-sep"
               }`}
             >
               {code[i] ?? (active && <span className="h-6 w-px animate-pulse bg-label" />)}
@@ -47,8 +61,13 @@ export function CodeEntry({
         <input
           id="code"
           name="code"
+          ref={input}
           value={code}
-          onChange={(e) => setCode(clean(e.target.value))}
+          aria-invalid={showError}
+          onChange={(e) => {
+            setCode(clean(e.target.value));
+            setShowError(false);
+          }}
           onFocus={() => setFocused(true)}
           onBlur={() => setFocused(false)}
           autoCapitalize="characters"
@@ -59,9 +78,12 @@ export function CodeEntry({
           className="absolute inset-0 h-full w-full text-base opacity-0"
         />
       </div>
-      <button className="btn-primary mt-3 w-full" disabled={code.length < LENGTH}>
-        {button}
-      </button>
+      {showError && (
+        <p role="alert" className="mt-2 text-footnote text-bad">
+          {incomplete}
+        </p>
+      )}
+      <button className="btn-primary mt-3 w-full">{button}</button>
     </form>
   );
 }

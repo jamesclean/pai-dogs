@@ -40,7 +40,7 @@ export function AdminNav({
               <span
                 className={`absolute top-0.5 left-1/2 ml-1.5 flex h-[18px] min-w-[18px] items-center justify-center rounded-full px-1 text-[11px] leading-none font-medium ${
                   inbox.needsHelp > 0
-                    ? "bg-bad text-white"
+                    ? "bg-warn text-on-inverse"
                     : "bg-inverse text-on-inverse"
                 }`}
               >

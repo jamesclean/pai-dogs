@@ -29,7 +29,7 @@ export function Map({ pins, className = "h-56" }: { pins: Pin[]; className?: str
     (async () => {
       const L = await import("leaflet");
       if (cancelled || !el.current) return;
-      const color = { brand: css("--brand"), bad: css("--bad"), label: css("--label"), ok: css("--ok"), ring: css("--surface-raised") };
+      const color = { brand: css("--brand"), warn: css("--warn"), label: css("--label"), ok: css("--ok"), ring: css("--surface-raised") };
       map = L.map(el.current, { scrollWheelZoom: false, attributionControl: false, zoomControl: false }).setView([PAI.lat, PAI.lng], 14);
       L.tileLayer("https://tile.openstreetmap.org/{z}/{x}/{y}.png", { maxZoom: 19, className: "map-tiles" }).addTo(map);
       L.control.attribution({ prefix: false }).addAttribution("© OpenStreetMap").addTo(map);
@@ -47,7 +47,7 @@ export function Map({ pins, className = "h-56" }: { pins: Pin[]; className?: str
           L.marker([p.lat, p.lng], { icon }).addTo(map).bindPopup(popup);
         } else {
           const fill =
-            p.kind === "alert" ? color.bad : p.kind === "home" ? color.ok : color.brand;
+            p.kind === "alert" ? color.warn : p.kind === "home" ? color.ok : color.brand;
           L.circleMarker([p.lat, p.lng], {
             radius: p.kind === "latest" || p.kind === "home" || p.kind === "alert" ? 7 : 5,
             color: color.ring,

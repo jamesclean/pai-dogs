@@ -7,6 +7,7 @@ import { Map, type Pin } from "@/components/Map";
 import { LocationField } from "@/components/LocationField";
 import { PhotoInput } from "@/components/PhotoInput";
 import { DeleteEntryButton } from "@/components/DeleteEntryButton";
+import { DoneButton } from "@/components/DoneButton";
 import { SavedToast } from "@/components/SavedToast";
 import { AdminNavRow } from "@/components/AdminHeader";
 import { Heart, Tag, UpDown } from "@/components/Icons";
@@ -76,7 +77,7 @@ export default async function DogAdmin({ params, searchParams }: PageProps<"/adm
           <span className={`pill ${rabiesOk ? "bg-ok-soft text-ok" : "bg-warn-soft text-warn"}`}>
             {rabiesOk ? `Rabies vaccine ${fmtDate(dog.rabiesVaccinatedOn)}` : "Rabies due"}
           </span>
-          {latestAlert && <span className="pill bg-bad-soft text-bad">{CONDITION[latestAlert.condition]}</span>}
+          {latestAlert && <span className="pill bg-warn-soft text-warn">{CONDITION[latestAlert.condition]}</span>}
         </div>
       </div>
 
@@ -148,9 +149,7 @@ export default async function DogAdmin({ params, searchParams }: PageProps<"/adm
                   <p className="text-footnote text-label-2">{[fmtDateTime(q.createdAt), q.note].filter(Boolean).join(" • ")}</p>
                 </div>
                 {!q.reviewed && (
-                  <form action={markAdoptionDone.bind(null, q.id)}>
-                    <button className="btn-outline btn-sm">Mark done</button>
-                  </form>
+                  <DoneButton action={markAdoptionDone.bind(null, q.id)} />
                 )}
               </div>
             ))}
@@ -164,12 +163,12 @@ export default async function DogAdmin({ params, searchParams }: PageProps<"/adm
           <div className="mt-1">
             {seen.map((s) => (
               <div key={s.id} className="flex items-start gap-3 py-2.5">
-                <span className={`mt-1.5 h-2 w-2 shrink-0 rounded-full ${s.condition === "ok" ? "bg-label-3" : "bg-bad"}`} />
+                <span className={`mt-1.5 h-2 w-2 shrink-0 rounded-full ${s.condition === "ok" ? "bg-label-3" : "bg-warn"}`} />
                 {s.photoId && <DogPhoto photoId={s.photoId} alt="" className="h-11 w-11 shrink-0 rounded-[10px]" />}
                 <div className="min-w-0 flex-1">
                   <div className="flex flex-wrap items-baseline gap-x-2">
                     <span className="text-callout">{fmtDateTime(s.createdAt)}</span>
-                    <span className={`text-footnote ${s.condition === "ok" ? "text-label-2" : "text-bad"}`}>
+                    <span className={`text-footnote ${s.condition === "ok" ? "text-label-2" : "text-warn"}`}>
                       {CONDITION[s.condition]}
                     </span>
                     {s.lat !== null && (
@@ -177,19 +176,15 @@ export default async function DogAdmin({ params, searchParams }: PageProps<"/adm
                         Map
                       </a>
                     )}
-                    <span className="ml-auto">
-                      <DeleteEntryButton action={deleteSighting.bind(null, s.id)} />
-                    </span>
                   </div>
                   <p className="text-footnote text-label-2">
                     {[SOURCE[s.source], s.note, s.contact].filter(Boolean).join(" • ")}
                   </p>
                 </div>
-                {!s.reviewed && (
-                  <form action={markReviewed.bind(null, s.id)}>
-                    <button className="btn-outline btn-sm">Mark done</button>
-                  </form>
-                )}
+                <div className="flex shrink-0 gap-2">
+                  <DeleteEntryButton action={deleteSighting.bind(null, s.id)} />
+                  {!s.reviewed && <DoneButton action={markReviewed.bind(null, s.id)} />}
+                </div>
               </div>
             ))}
           </div>
