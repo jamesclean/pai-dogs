@@ -23,7 +23,7 @@ export default async function DogByTag({ params }: PageProps<"/d/[code]">) {
     const s = t(lang);
     const admin = await isAdmin();
     return (
-      <PublicShell lang={lang}>
+      <PublicShell lang={lang} back={{ href: "/lookup", label: s.back }}>
         <div className="pt-16 text-center">
           <p className="font-mono text-[40px] leading-[44px] font-medium tracking-[8px]">{tag.code}</p>
           <p className="mt-3 text-body text-label-2">{s.tagNotLinked}</p>
