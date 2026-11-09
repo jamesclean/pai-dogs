@@ -220,6 +220,18 @@ body {
   animation: sheet-in 220ms ease-out;
 }
 
+/* One pulse of the Figma loop, which plays three of these in 2.4s. */
+@keyframes ray-pulse {
+  0%, 100% { transform: scale(1); opacity: 1; }
+  45% { transform: scale(1.18, 1.12); }
+  50% { opacity: 0.55; }
+}
+@media (hover: hover) {
+  .rays-pulsing .ray {
+    animation: ray-pulse 0.8s ease-in-out infinite;
+  }
+}
+
 @media (prefers-reduced-motion: reduce) {
   *, .sheet-in {
     transition: none !important;

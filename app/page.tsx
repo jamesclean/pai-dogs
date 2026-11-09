@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { PublicShell } from "@/components/PublicShell";
+import { MegaphoneArt } from "@/components/MegaphoneArt";
 import { Chat, Paw, Phone } from "@/components/Icons";
 import { getLang, t, fill } from "@/lib/i18n";
 import { totalDogCount } from "@/lib/data";
@@ -19,7 +20,7 @@ export default async function Home() {
   const n = await totalDogCount();
 
   const secondary = [
-    { href: "/report", image: "/home/megaphone.webp", title: s.reportDog },
+    { href: "/report", title: s.reportDog },
     { href: "/lookup", image: "/home/collar.webp", title: s.lookUp, sub: s.lookUpSub, badge: s.comingSoon },
   ];
 
@@ -57,8 +58,12 @@ export default async function Home() {
               className="card tappable relative flex flex-col rounded-[24px] p-4 transition active:scale-[0.98]"
             >
               {badge && <span className="chip absolute top-4 right-4">{badge}</span>}
-              {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img src={image} alt="" width={360} height={360} className="h-[84px] w-auto self-start" />
+              {image ? (
+                // eslint-disable-next-line @next/next/no-img-element
+                <img src={image} alt="" width={360} height={360} className="h-[84px] w-auto self-start" />
+              ) : (
+                <MegaphoneArt />
+              )}
               <span className="mt-3 block text-section">{title}</span>
               {sub && <span className="mt-0.5 block text-footnote text-label-2">{sub}</span>}
             </Link>
