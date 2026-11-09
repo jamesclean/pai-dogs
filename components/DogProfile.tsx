@@ -1,3 +1,4 @@
+import { groupOf } from "@/lib/dog-groups";
 import Link from "next/link";
 import { PublicShell } from "./PublicShell";
 import { DogGallery } from "./DogGallery";
@@ -49,7 +50,7 @@ export async function DogProfile({ dog, tagCode, scanned = false }: { dog: Dog; 
     );
 
   return (
-    <PublicShell lang={lang} bottomBar={bottomBar} back={{ href: "/dogs", label: s.browseDogs }} title={dog.name} revealTitle>
+    <PublicShell lang={lang} bottomBar={bottomBar} back={{ href: `/dogs?show=${groupOf(dog)}`, label: s.browseDogs }} title={dog.name} revealTitle>
       <div className="relative overflow-hidden rounded-[28px] shadow-card">
         <DogGallery photoIds={photoIds} alt={dog.name} ofLabel={s.photoOf} previousLabel={s.previousPhoto} nextLabel={s.nextPhoto} />
         <span className={`chip absolute top-4 left-4 ${dog.status === "missing" ? "text-bad" : ""}`}>
