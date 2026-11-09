@@ -4,7 +4,7 @@ import { useSearchParams } from "next/navigation";
 import { useEffect, useMemo, useState } from "react";
 import { DogPhoto } from "./DogPhoto";
 import { Map } from "./Map";
-import { GROUP_ICONS, GROUP_TRACK, groupItemClass } from "./DogGroups";
+import { GroupTabs } from "./DogGroups";
 import { Search } from "./Icons";
 import { DOG_GROUPS, groupOf, type DogGroup } from "@/lib/dog-groups";
 import { isNearPai } from "@/lib/pai";
@@ -86,34 +86,18 @@ export function DogBrowser({ dogs, s }: { dogs: BrowseDog[]; s: Dict }) {
         </label>
       </form>
 
-      <div className={`${GROUP_TRACK} mt-3`}>
-        {DOG_GROUPS.map((g) => {
-          const Icon = GROUP_ICONS[g];
-          return (
-            <a
-              key={g}
-              href={urlFor(query, g)}
-              onClick={(e) => {
-                e.preventDefault();
-                setShow(g);
-              }}
-              aria-current={g === group ? "true" : undefined}
-              className={groupItemClass(g === group, "gap-1 px-0.5 text-[12px]! max-[389px]:gap-[3px]")}
-            >
-              <Icon className="h-3.5 w-3.5 shrink-0 max-[374px]:hidden" />
-              {labels[g]}
-              {/* The selected tab is already white, so its circle is grey. */}
-              <span
-                className={`flex h-[18px] min-w-[18px] shrink-0 items-center justify-center rounded-full px-1 text-[11px] leading-none tabular-nums ${
-                  g === group ? "bg-fill text-label" : "bg-surface-raised text-label-2"
-                }`}
-              >
-                {matches.filter((d) => groupOf(d) === g).length}
-              </span>
-            </a>
-          );
-        })}
-      </div>
+      <GroupTabs
+        className="mt-3"
+        active={group}
+        labels={labels}
+        counts={{
+          community: matches.filter((d) => groupOf(d) === "community").length,
+          home: matches.filter((d) => groupOf(d) === "home").length,
+          memory: matches.filter((d) => groupOf(d) === "memory").length,
+        }}
+        hrefFor={(g) => urlFor(query, g)}
+        onSelect={setShow}
+      />
 
       {query && <h2 className="mt-5 text-section">{s.searchResults}</h2>}
 

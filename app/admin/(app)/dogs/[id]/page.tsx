@@ -61,7 +61,7 @@ export default async function DogAdmin({ params, searchParams }: PageProps<"/adm
       {typeof saved === "string" && <SavedToast key={saved} />}
 
       <AdminNavRow
-        back={{ href: "/admin", label: "Dogs" }}
+        back={{ href: `/admin?show=${group}`, label: "Dogs" }}
         right={
           <Link href={`/dogs/${dog.id}`} className="btn-outline btn-sm">
             View public page

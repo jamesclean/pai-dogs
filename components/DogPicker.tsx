@@ -1,5 +1,5 @@
 "use client";
-import { useEffect, useState } from "react";
+import { useEffect, useLayoutEffect, useRef, useState } from "react";
 import { DogPhoto } from "./DogPhoto";
 import { Chevron, Close, Paw, Search } from "./Icons";
 import { Sheet } from "./Sheet";
@@ -20,8 +20,14 @@ const GROUPS: DogGroup[] = ["community", "home"];
 // "I think it's..." on the report form: an optional guess for the crew to confirm. Sits inside a .card-rows.
 export function DogPicker({ dogs, s }: { dogs: PickerDog[]; s: Dict }) {
   const [open, setOpen] = useState(false);
-  const [picked, setPicked] = useState<PickerDog | null>(null);
+  const [picked, setPicked] = useState<PickerDog | "not-listed" | null>(null);
   const [text, setText] = useState("");
+  const list = useRef<HTMLDivElement>(null);
+
+  // Keep the height it opened at, so the sheet doesn't jump while someone searches.
+  useLayoutEffect(() => {
+    if (open && list.current) list.current.style.minHeight = `${list.current.offsetHeight}px`;
+  }, [open]);
 
   useEffect(() => {
     if (!open) return;
@@ -44,12 +50,24 @@ export function DogPicker({ dogs, s }: { dogs: PickerDog[]; s: Dict }) {
     <>
       {picked ? (
         <div className="row">
-          <input type="hidden" name="guessDogId" value={picked.id} />
+          {picked === "not-listed" ? (
+            <input type="hidden" name="notListed" value="1" />
+          ) : (
+            <input type="hidden" name="guessDogId" value={picked.id} />
+          )}
           <button type="button" onClick={show} className="flex min-w-0 flex-1 items-center gap-3.5 text-left">
-            <DogPhoto photoId={picked.photoId} alt="" className="-my-1 h-10 w-10 shrink-0 rounded-[10px]" />
+            <DogPhoto
+              photoId={picked === "not-listed" ? null : picked.photoId}
+              alt=""
+              className="-my-1 h-10 w-10 shrink-0 rounded-[10px]"
+            />
             <span className="min-w-0 flex-1">
               <span className="block text-footnote text-label-2">{s.thinkIts}</span>
-              <span className="block truncate text-callout">{picked.name}</span>
+              {picked === "not-listed" ? (
+                <span className="block text-callout">{s.notListed}</span>
+              ) : (
+                <span className="block truncate text-callout">{picked.name}</span>
+              )}
             </span>
           </button>
           <button type="button" className="btn-outline btn-sm" onClick={() => setPicked(null)}>
@@ -89,7 +107,7 @@ export function DogPicker({ dogs, s }: { dogs: PickerDog[]; s: Dict }) {
             />
           </label>
 
-          <div className="mt-4 h-[50dvh] overflow-y-auto overscroll-contain">
+          <div ref={list} className="mt-4 max-h-[50dvh] overflow-y-auto overscroll-contain">
             {GROUPS.map((g) => {
               const list = matches.filter((d) => groupOf(d) === g);
               if (list.length === 0) return null;
@@ -119,6 +137,20 @@ export function DogPicker({ dogs, s }: { dogs: PickerDog[]; s: Dict }) {
               );
             })}
             {matches.length === 0 && <p className="mt-10 text-center text-subhead text-label-2">{s.noDogsFound}</p>}
+          </div>
+
+          <div className="card-rows mt-3">
+            <button
+              type="button"
+              className="row w-full text-left"
+              onClick={() => {
+                setPicked("not-listed");
+                setOpen(false);
+              }}
+            >
+              <DogPhoto photoId={null} alt="" className="h-12 w-12 shrink-0 rounded-[12px]" />
+              <span className="min-w-0 flex-1 text-callout">{s.notListed}</span>
+            </button>
           </div>
         </Sheet>
       )}

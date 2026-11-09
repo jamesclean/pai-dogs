@@ -8,6 +8,7 @@ import {
   newDogReports,
   adoptionQuestions,
 } from "@/db";
+import { AdminDogGroups } from "@/components/AdminDogGroups";
 import { DogPhoto } from "@/components/DogPhoto";
 import { AdminHeader, SignOutButton } from "@/components/AdminHeader";
 import { DoneButton } from "@/components/DoneButton";
@@ -25,6 +26,7 @@ import { markAdoptionDone, markReviewed } from "../actions";
 import { fmtDateTime, rabiesCurrent } from "@/lib/dates";
 import { CONDITION } from "@/lib/conditions";
 import { isNearPai } from "@/lib/pai";
+import { groupOf, type DogGroup } from "@/lib/dog-groups";
 
 function ConditionLabel({
   condition,
@@ -205,7 +207,9 @@ export default async function AdminHome({ searchParams }: PageProps<"/admin">) {
             <span className="text-callout">New report</span>
             <ConditionLabel condition={item.r.condition} solid={urgent} />
           </p>
-          {item.r.guessName && <p className="mt-0.5 text-footnote">Might be {item.r.guessName}</p>}
+          {item.r.guessName && (
+            <p className="mt-0.5 text-footnote">Might be {item.r.guessName}</p>
+          )}
           {item.r.note && <p className="mt-0.5 text-footnote">{item.r.note}</p>}
           <p className="mt-0.5 flex flex-wrap gap-x-1 text-footnote text-label-3">
             <span>
@@ -277,6 +281,63 @@ export default async function AdminHome({ searchParams }: PageProps<"/admin">) {
       </div>
     );
 
+  const dogRows = (group: DogGroup) =>
+    list
+      .filter(({ dog }) => groupOf(dog) === group)
+      .map(({ dog, tagCode, lastSeen }) => {
+        const flags = [
+          !dog.sterilized && "Not sterilized",
+          !rabiesCurrent(dog.rabiesVaccinatedOn) && "Rabies due",
+        ].filter(Boolean);
+        return (
+          <Link
+            key={dog.id}
+            href={`/admin/dogs/${dog.id}`}
+            className="flex items-center gap-3 py-2.5"
+          >
+            <DogPhoto
+              photoId={dog.photoId}
+              alt=""
+              className="h-11 w-11 shrink-0 rounded-full"
+            />
+            <div className="min-w-0 flex-1">
+              <p className="flex items-center gap-2">
+                <span className="truncate text-callout">{dog.name}</span>
+                {dog.status === "missing" && (
+                  <span className="pill bg-bad-soft text-bad">Missing</span>
+                )}
+                {/* Only a search mixes the groups, so only then does it need saying. */}
+                {query !== "" && dog.status === "deceased" && (
+                  <span className="pill bg-fill text-label-2">In memory</span>
+                )}
+              </p>
+              <p
+                className={`truncate text-footnote ${flags.length ? "text-warn" : "text-label-2"}`}
+              >
+                {flags.length
+                  ? flags.join(" • ")
+                  : dog.area || "No location yet"}
+              </p>
+            </div>
+            <div className="text-right">
+              {tagCode ? (
+                <p className="font-mono text-[13px] leading-[18px] font-medium tracking-[1.5px] text-label-2">
+                  {tagCode}
+                </p>
+              ) : (
+                <p className="text-footnote text-label-3">No tag</p>
+              )}
+              {lastSeen && (
+                <p className="text-footnote text-label-3">
+                  {fmtDateTime(new Date(lastSeen))}
+                </p>
+              )}
+            </div>
+            <Chevron className="h-4 w-4 shrink-0 text-label-3" />
+          </Link>
+        );
+      });
+
   return (
     <>
       <AdminHeader
@@ -342,65 +403,18 @@ export default async function AdminHome({ searchParams }: PageProps<"/admin">) {
         <h2 className="text-section">
           {list.length === 1 ? "1 dog" : `${list.length} dogs`}
         </h2>
-        <div className="mt-1">
-          {list.map(({ dog, tagCode, lastSeen }) => {
-            const flags = [
-              !dog.sterilized && "Not sterilized",
-              !rabiesCurrent(dog.rabiesVaccinatedOn) && "Rabies due",
-            ].filter(Boolean);
-            return (
-              <Link
-                key={dog.id}
-                href={`/admin/dogs/${dog.id}`}
-                className="flex items-center gap-3 py-2.5"
-              >
-                <DogPhoto
-                  photoId={dog.photoId}
-                  alt=""
-                  className="h-11 w-11 shrink-0 rounded-full"
-                />
-                <div className="min-w-0 flex-1">
-                  <p className="flex items-center gap-2">
-                    <span className="truncate text-callout">{dog.name}</span>
-                    {dog.status === "missing" && (
-                      <span className="pill bg-bad-soft text-bad">Missing</span>
-                    )}
-                    {dog.status === "deceased" && (
-                      <span className="pill bg-fill text-label-2">
-                        In memory
-                      </span>
-                    )}
-                  </p>
-                  <p
-                    className={`truncate text-footnote ${flags.length ? "text-warn" : "text-label-2"}`}
-                  >
-                    {flags.length
-                      ? flags.join(" • ")
-                      : dog.area || "No location yet"}
-                  </p>
-                </div>
-                <div className="text-right">
-                  {tagCode ? (
-                    <p className="font-mono text-[13px] leading-[18px] font-medium tracking-[1.5px] text-label-2">
-                      {tagCode}
-                    </p>
-                  ) : (
-                    <p className="text-footnote text-label-3">No tag</p>
-                  )}
-                  {lastSeen && (
-                    <p className="text-footnote text-label-3">
-                      {fmtDateTime(new Date(lastSeen))}
-                    </p>
-                  )}
-                </div>
-                <Chevron className="h-4 w-4 shrink-0 text-label-3" />
-              </Link>
-            );
-          })}
-          {list.length === 0 && (
-            <p className="py-3 text-subhead text-label-2">No dogs yet</p>
-          )}
-        </div>
+        {list.length === 0 ? (
+          <p className="py-3 text-subhead text-label-2">No dogs yet</p>
+        ) : (
+          <AdminDogGroups
+            searching={query !== ""}
+            groups={{
+              community: dogRows("community"),
+              home: dogRows("home"),
+              memory: dogRows("memory"),
+            }}
+          />
+        )}
       </section>
     </>
   );
