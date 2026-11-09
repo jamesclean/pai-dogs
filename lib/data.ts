@@ -91,10 +91,12 @@ export async function dogAdoptionQuestions(dogId: number) {
 
 // Everything waiting for a volunteer, for the count on the Dogs tab.
 export async function inboxCount() {
-  const counts = await Promise.all(
-    [sightings, newDogReports, adoptionQuestions].map((table) =>
-      db.select({ n: count() }).from(table).where(eq(table.reviewed, false)),
-    ),
-  );
-  return counts.reduce((sum, [r]) => sum + r.n, 0);
+  const [[a], [b], [c], [d], [e]] = await Promise.all([
+    db.select({ n: count() }).from(sightings).where(eq(sightings.reviewed, false)),
+    db.select({ n: count() }).from(newDogReports).where(eq(newDogReports.reviewed, false)),
+    db.select({ n: count() }).from(adoptionQuestions).where(eq(adoptionQuestions.reviewed, false)),
+    db.select({ n: count() }).from(sightings).where(and(eq(sightings.reviewed, false), ne(sightings.condition, "ok"))),
+    db.select({ n: count() }).from(newDogReports).where(and(eq(newDogReports.reviewed, false), ne(newDogReports.condition, "ok"))),
+  ]);
+  return { total: a.n + b.n + c.n, needsHelp: d.n + e.n };
 }
