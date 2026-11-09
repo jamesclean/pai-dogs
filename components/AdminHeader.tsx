@@ -6,9 +6,9 @@ import { HoverLabel } from "./HoverLabel";
 export function SignOutButton() {
   return (
     <form action={signOut}>
-      <button aria-label="Log out of admin" className="circle-btn group relative z-10 hover:z-40 focus-visible:z-40">
+      <button aria-label="Go back to meet our dogs" className="circle-btn group relative z-10 hover:z-40 focus-visible:z-40">
         <MeetDogs className="h-5 w-5" />
-        <HoverLabel className="top-full right-0 mt-2">Log out of admin</HoverLabel>
+        <HoverLabel className="top-full right-0 mt-2">Go back to meet our dogs</HoverLabel>
       </button>
     </form>
   );

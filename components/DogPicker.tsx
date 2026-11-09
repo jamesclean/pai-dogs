@@ -32,8 +32,6 @@ export function DogPicker({ dogs, s }: { dogs: PickerDog[]; s: Dict }) {
     return () => window.removeEventListener("keydown", onKey);
   }, [open]);
 
-  if (dogs.length === 0) return null;
-
   const query = text.trim().toLowerCase();
   const matches = dogs.filter((d) => !query || `${d.name} ${d.area}`.toLowerCase().includes(query));
   const labels = { community: s.communityDog, home: s.hasFamily };
