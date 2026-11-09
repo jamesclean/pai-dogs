@@ -31,11 +31,9 @@ export async function dogSightings(dogId: number, limit = 50) {
     .limit(limit);
 }
 
-export async function activeDogCount() {
-  const [r] = await db
-    .select({ n: count() })
-    .from(dogs)
-    .where(ne(dogs.status, "deceased"));
+// Every dog on record. In memory dogs count: they are still with us.
+export async function totalDogCount() {
+  const [r] = await db.select({ n: count() }).from(dogs);
   return r.n;
 }
 
