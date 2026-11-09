@@ -293,10 +293,10 @@ body {
 }
 @media (hover: hover) {
   .swinging .collar-tag {
-    animation: tag-swing 3.6s infinite;
+    animation: tag-swing 2.8s infinite;
   }
   .swinging .collar-shadow {
-    animation: shadow-drift 3.6s infinite, shadow-breathe 3.6s cubic-bezier(0.37, 0, 0.63, 1) infinite;
+    animation: shadow-drift 2.8s infinite, shadow-breathe 2.8s cubic-bezier(0.37, 0, 0.63, 1) infinite;
   }
 }
 
