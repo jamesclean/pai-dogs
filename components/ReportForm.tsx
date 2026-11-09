@@ -49,6 +49,12 @@ export function ReportForm({
         if (file) setPreview(URL.createObjectURL(file));
       }}
     >
+      {dogs && dogs.length > 0 && (
+        <div className="card-rows mb-6">
+          <DogPicker dogs={dogs} s={s} />
+        </div>
+      )}
+
       <div className="card-rows">
         {CONDITIONS.map((c) => (
           <label key={c} className="row cursor-pointer">
@@ -64,7 +70,6 @@ export function ReportForm({
       {urgent && <VetCard vet={vet} s={s} className="mt-3" />}
 
       <div className="card-rows mt-6">
-        {dogs && <DogPicker dogs={dogs} s={s} />}
         <LocationField labels={s} named />
         <PhotoInput label={s.addPhoto} changeLabel={s.changePhoto} />
       </div>
