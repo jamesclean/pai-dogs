@@ -63,8 +63,8 @@ export async function dogGroupCounts(query = ""): Promise<Record<DogGroup, numbe
   return row;
 }
 
-// Public directory, tag or no tag.
-export async function publicDogs(group: DogGroup, query = "") {
+// Public directory, tag or no tag. A null group searches every group.
+export async function publicDogs(group: DogGroup | null, query = "") {
   const q = query.trim();
   return db
     .select({
@@ -76,7 +76,7 @@ export async function publicDogs(group: DogGroup, query = "") {
       photoId: dogs.photoId,
     })
     .from(dogs)
-    .where(and(GROUP_FILTER[group], searchFilter(q)))
+    .where(and(group ? GROUP_FILTER[group] : undefined, searchFilter(q)))
     .orderBy(asc(dogs.name));
 }
 
