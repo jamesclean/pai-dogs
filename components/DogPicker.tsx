@@ -56,11 +56,11 @@ export function DogPicker({ dogs, s }: { dogs: PickerDog[]; s: Dict }) {
             <input type="hidden" name="guessDogId" value={picked.id} />
           )}
           <button type="button" onClick={show} className="flex min-w-0 flex-1 items-center gap-3.5 text-left">
-            <DogPhoto
-              photoId={picked === "not-listed" ? null : picked.photoId}
-              alt=""
-              className="-my-1 h-10 w-10 shrink-0 rounded-[10px]"
-            />
+            {picked === "not-listed" ? (
+              <Paw className="h-[22px] w-[22px] shrink-0" />
+            ) : (
+              <DogPhoto photoId={picked.photoId} alt="" className="-my-1 h-10 w-10 shrink-0 rounded-[10px]" />
+            )}
             <span className="min-w-0 flex-1">
               <span className="block text-footnote text-label-2">{s.thinkIts}</span>
               {picked === "not-listed" ? (
@@ -148,7 +148,7 @@ export function DogPicker({ dogs, s }: { dogs: PickerDog[]; s: Dict }) {
                 setOpen(false);
               }}
             >
-              <DogPhoto photoId={null} alt="" className="h-12 w-12 shrink-0 rounded-[12px]" />
+              <Paw className="h-[22px] w-[22px] shrink-0" />
               <span className="min-w-0 flex-1 text-callout">{s.notListed}</span>
             </button>
           </div>
