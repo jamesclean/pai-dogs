@@ -30,7 +30,7 @@ export default async function MatchReport({ params, searchParams }: PageProps<"/
     )
     .orderBy(dogs.name);
 
-  // Dogs usually found closest to the report come first.
+  // The person's guess comes first, then dogs usually found closest to the report.
   const list = rows
     .map((dog) => ({
       dog,
@@ -39,7 +39,11 @@ export default async function MatchReport({ params, searchParams }: PageProps<"/
           ? metres(report.lat, report.lng, dog.homeLat, dog.homeLng)
           : null,
     }))
-    .sort((a, b) => (a.distance ?? Infinity) - (b.distance ?? Infinity));
+    .sort(
+      (a, b) =>
+        Number(b.dog.id === report.guessDogId) - Number(a.dog.id === report.guessDogId) ||
+        (a.distance ?? Infinity) - (b.distance ?? Infinity),
+    );
 
   const condition = CONDITION[report.condition];
 
@@ -80,7 +84,9 @@ export default async function MatchReport({ params, searchParams }: PageProps<"/
               <span className="min-w-0 flex-1">
                 <span className="block truncate text-callout">{dog.name}</span>
                 <span className="block truncate text-footnote text-label-2">
-                  {[dog.area, distance !== null && `${distance} m away`].filter(Boolean).join(" • ")}
+                  {[dog.id === report.guessDogId && "Their guess", dog.area, distance !== null && `${distance} m away`]
+                    .filter(Boolean)
+                    .join(" • ")}
                 </span>
               </span>
               <Chevron className="h-4 w-4 shrink-0 text-label-3" />
