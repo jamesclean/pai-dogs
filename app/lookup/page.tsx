@@ -1,5 +1,6 @@
 import { redirect } from "next/navigation";
 import { PublicShell } from "@/components/PublicShell";
+import { CodeEntry } from "@/components/CodeEntry";
 import { Qr } from "@/components/Icons";
 import { getLang, t } from "@/lib/i18n";
 import { normalizeCode } from "@/lib/codes";
@@ -26,22 +27,7 @@ export default async function LookUp() {
           <p className="text-footnote text-label-2">{s.useCamera}</p>
         </div>
       </div>
-      <form action={lookup} className="mt-6">
-        <label htmlFor="code" className="field-label">
-          {s.orType}
-        </label>
-        <div className="flex gap-2">
-          <input
-            id="code"
-            name="code"
-            placeholder={s.codePlaceholder}
-            autoCapitalize="characters"
-            autoComplete="off"
-            className="field h-12 font-mono tracking-[0.2em] uppercase placeholder:tracking-[0.2em]"
-          />
-          <button className="btn-primary">{s.findDog}</button>
-        </div>
-      </form>
+      <CodeEntry action={lookup} label={s.orType} button={s.findDog} />
     </PublicShell>
   );
 }

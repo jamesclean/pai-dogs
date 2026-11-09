@@ -92,6 +92,9 @@
 }
 
 html {
+  /* Keeps room for the scrollbar on every page, so content doesn't jump
+     between screens that scroll and screens that don't. */
+  scrollbar-gutter: stable;
   -webkit-tap-highlight-color: transparent;
 }
 body {
