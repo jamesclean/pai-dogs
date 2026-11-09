@@ -129,6 +129,8 @@ export const newDogReports = pgTable(
     photoId: integer("photo_id").references(() => photos.id, { onDelete: "set null" }),
     reviewed: boolean("reviewed").notNull().default(false),
     dogId: integer("dog_id").references(() => dogs.id, { onDelete: "set null" }),
+    // Who the person thought it was ("I think it's..."), for the crew to confirm.
+    guessDogId: integer("guess_dog_id").references(() => dogs.id, { onDelete: "set null" }),
     createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
   },
   (t) => [index("new_dog_reports_reviewed_idx").on(t.reviewed, t.createdAt)],

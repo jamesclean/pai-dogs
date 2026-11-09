@@ -8,6 +8,7 @@ import { PhotoInput } from "./PhotoInput";
 import { BottomBar } from "./PublicShell";
 import { Sheet } from "./Sheet";
 import { DogPhoto } from "./DogPhoto";
+import { DogPicker, type PickerDog } from "./DogPicker";
 import { Check, Close, Megaphone, Phone } from "./Icons";
 import { fmtPhone, type Vet } from "@/lib/config";
 import type { Dict } from "@/lib/i18n";
@@ -22,6 +23,7 @@ export function ReportForm({
   back,
   photoId,
   vet,
+  dogs,
 }: {
   action: (prev: ReportState, form: FormData) => Promise<ReportState>;
   s: Dict;
@@ -29,6 +31,7 @@ export function ReportForm({
   back: { href: string; label: string };
   photoId?: number | null;
   vet: Vet;
+  dogs?: PickerDog[];
 }) {
   const [state, action, pending] = useActionState<ReportState, FormData>(submit, { ok: false });
   const [condition, setCondition] = useState(CONDITIONS.find((c) => c === initial));
@@ -61,6 +64,7 @@ export function ReportForm({
       {urgent && <VetCard vet={vet} s={s} className="mt-3" />}
 
       <div className="card-rows mt-6">
+        {dogs && <DogPicker dogs={dogs} s={s} />}
         <LocationField labels={s} named />
         <PhotoInput label={s.addPhoto} changeLabel={s.changePhoto} />
       </div>

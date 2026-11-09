@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { desc, eq, ilike, or, sql } from "drizzle-orm";
+import { getTableColumns, desc, eq, ilike, or, sql } from "drizzle-orm";
 import {
   db,
   dogs,
@@ -79,8 +79,9 @@ export default async function AdminHome({ searchParams }: PageProps<"/admin">) {
     .limit(30);
 
   const newDogs = await db
-    .select()
+    .select({ ...getTableColumns(newDogReports), guessName: dogs.name })
     .from(newDogReports)
+    .leftJoin(dogs, eq(dogs.id, newDogReports.guessDogId))
     .where(eq(newDogReports.reviewed, false))
     .orderBy(desc(newDogReports.createdAt))
     .limit(30);
@@ -204,6 +205,7 @@ export default async function AdminHome({ searchParams }: PageProps<"/admin">) {
             <span className="text-callout">New report</span>
             <ConditionLabel condition={item.r.condition} solid={urgent} />
           </p>
+          {item.r.guessName && <p className="mt-0.5 text-footnote">Might be {item.r.guessName}</p>}
           {item.r.note && <p className="mt-0.5 text-footnote">{item.r.note}</p>}
           <p className="mt-0.5 flex flex-wrap gap-x-1 text-footnote text-label-3">
             <span>

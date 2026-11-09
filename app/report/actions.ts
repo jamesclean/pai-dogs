@@ -109,7 +109,15 @@ export async function submitNewReport(_prev: ReportState, form: FormData): Promi
     return { ok: false, error: "upload" };
   }
 
-  await db.insert(newDogReports).values({ ...reportFields(form), photoId });
+  // "I think it's...": only a living dog from the records counts as a guess.
+  const guess = Number(form.get("guessDogId"));
+  const guessed = Number.isInteger(guess) && guess > 0 && guess <= 2147483647 ? await getDog(guess) : null;
+
+  await db.insert(newDogReports).values({
+    ...reportFields(form),
+    photoId,
+    guessDogId: guessed && guessed.status !== "deceased" ? guessed.id : null,
+  });
   return { ok: true };
 }
 
