@@ -36,7 +36,7 @@ export function CodeEntry({
           return (
             <div
               key={i}
-              className={`flex h-14 flex-1 items-center justify-center rounded-[14px] border bg-surface-raised font-mono text-[22px] font-medium transition-colors ${
+              className={`flex aspect-square min-w-0 flex-1 items-center justify-center rounded-[14px] border bg-surface-raised font-mono text-[22px] font-medium transition-colors ${
                 active ? "border-inverse" : "border-sep"
               }`}
             >
