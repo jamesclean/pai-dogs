@@ -5,14 +5,15 @@ import { GROUP_ICONS, GROUP_TRACK, groupItemClass } from "@/components/DogGroups
 import { Search } from "@/components/Icons";
 import { getLang, t } from "@/lib/i18n";
 import { dogGroupCounts, publicDogs } from "@/lib/data";
-import { DOG_GROUPS, type DogGroup } from "@/lib/dog-groups";
+import { DOG_GROUPS, groupOf, type DogGroup } from "@/lib/dog-groups";
 
 export const metadata = { title: "Meet our dogs" };
 
 export default async function BrowseDogs({ searchParams }: PageProps<"/dogs">) {
   const { q, show } = await searchParams;
-  const query = typeof q === "string" ? q : "";
-  const group: DogGroup = DOG_GROUPS.find((g) => g === show) ?? "community";
+  const query = typeof q === "string" ? q.trim() : "";
+  // A search covers every group until a tab narrows it.
+  const group: DogGroup | null = DOG_GROUPS.find((g) => g === show) ?? (query ? null : "community");
   const lang = await getLang();
   const s = t(lang);
   const [list, counts] = await Promise.all([publicDogs(group, query), dogGroupCounts(query)]);
@@ -20,7 +21,7 @@ export default async function BrowseDogs({ searchParams }: PageProps<"/dogs">) {
 
   function hrefFor(g: DogGroup) {
     const params = new URLSearchParams();
-    if (g !== "community") params.set("show", g);
+    if (g !== "community" || query) params.set("show", g);
     if (query) params.set("q", query);
     const qs = params.toString();
     return qs ? `/dogs?${qs}` : "/dogs";
@@ -28,7 +29,14 @@ export default async function BrowseDogs({ searchParams }: PageProps<"/dogs">) {
 
   return (
     <PublicShell lang={lang} back={{ href: "/", label: s.back }} title={s.browseDogs}>
-      <div className={GROUP_TRACK}>
+      <form>
+        <label className="search">
+          <Search className="h-[18px] w-[18px] shrink-0" />
+          <input name="q" defaultValue={query} placeholder={s.searchDogs} className="bare-input" />
+        </label>
+      </form>
+
+      <div className={`${GROUP_TRACK} mt-3`}>
         {DOG_GROUPS.map((g) => {
           const Icon = GROUP_ICONS[g];
           return (
@@ -54,13 +62,6 @@ export default async function BrowseDogs({ searchParams }: PageProps<"/dogs">) {
         })}
       </div>
 
-      <form className="mt-3">
-        {group !== "community" && <input type="hidden" name="show" value={group} />}
-        <label className="search">
-          <Search className="h-[18px] w-[18px] shrink-0" />
-          <input name="q" defaultValue={query} placeholder={s.searchDogs} className="bare-input" />
-        </label>
-      </form>
 
       <div className="mt-4 grid grid-cols-2 gap-x-2.5 gap-y-5 sm:grid-cols-3">
         {list.map((d) => (
@@ -72,6 +73,9 @@ export default async function BrowseDogs({ searchParams }: PageProps<"/dogs">) {
             </span>
             {d.area && d.status !== "deceased" && (
               <span className="block truncate px-0.5 text-footnote text-label-2">{d.area}</span>
+            )}
+            {!group && groupOf(d) !== "community" && (
+              <span className="block truncate px-0.5 text-footnote text-label-2">{labels[groupOf(d)]}</span>
             )}
             {d.homeStatus === "ask_adoption" && d.status !== "deceased" && (
               <span className="block truncate px-0.5 text-footnote text-label-2">{s.askAdoption}</span>
