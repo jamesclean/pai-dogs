@@ -48,7 +48,7 @@ export function DogForm({
       )}
 
       <Section title="Dog">
-        <PhotoInput label={dog?.photoId ? "Replace photo" : "Add a photo"} changeLabel="Change photo" />
+        {!dog && <PhotoInput label="Add a photo" changeLabel="Change photo" />}
         {dog && <Text label="Name" name="name" defaultValue={dog.name} required />}
         <Select label="Sex" name="sex" value={dog?.sex} options={[["unknown", "Unknown"], ["male", "Male"], ["female", "Female"]]} />
         <Select
@@ -72,7 +72,7 @@ export function DogForm({
         <Text label="Looks like" name="description" defaultValue={dog?.description ?? prefill?.description} placeholder="Tan, white chest" />
       </Section>
 
-      <Section title="Location" footer="Usually found at shows on the public page. GPS stays private.">
+      <Section title="Location" footer="Both show on the public pages.">
         <Text label="Usually found at" name="area" defaultValue={dog?.area ?? prefill?.area} placeholder="7-Eleven, Walking Street" />
         <HomeLocation lat={homeLat} lng={homeLng} />
       </Section>

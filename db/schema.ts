@@ -9,6 +9,7 @@ import {
   doublePrecision,
   customType,
   index,
+  uniqueIndex,
 } from "drizzle-orm/pg-core";
 
 const bytea = customType<{ data: Buffer }>({
@@ -53,6 +54,22 @@ export const dogs = pgTable("dogs", {
   createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
   updatedAt: timestamp("updated_at", { withTimezone: true }).notNull().defaultNow(),
 });
+
+// A dog's photos. dogs.photoId says which of them is the profile photo.
+export const dogPhotos = pgTable(
+  "dog_photos",
+  {
+    id: serial("id").primaryKey(),
+    dogId: integer("dog_id")
+      .notNull()
+      .references(() => dogs.id, { onDelete: "cascade" }),
+    photoId: integer("photo_id")
+      .notNull()
+      .references(() => photos.id, { onDelete: "cascade" }),
+    createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+  },
+  (t) => [uniqueIndex("dog_photos_dog_photo_idx").on(t.dogId, t.photoId)],
+);
 
 // A tag is a physical engraved QR tag. Tags are made in batches before any dog
 // exists, then linked to a dog when collared. A dog can collect several tags

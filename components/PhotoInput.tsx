@@ -4,7 +4,7 @@ import { Camera, Chevron } from "./Icons";
 
 // Resizes in the browser before upload: phone photos are 3–8 MB, rural 4G in
 // Pai is slow, and we store photos in Postgres. 1280px JPEG ≈ 150 KB.
-async function resize(file: File, max = 1280): Promise<File> {
+export async function resizePhoto(file: File, max = 1280): Promise<File> {
   const bitmap = await createImageBitmap(file);
   const scale = Math.min(1, max / Math.max(bitmap.width, bitmap.height));
   const canvas = document.createElement("canvas");
@@ -42,7 +42,7 @@ export function PhotoInput({
           if (!f || !hidden.current) return;
           setBusy(true);
           try {
-            const small = await resize(f);
+            const small = await resizePhoto(f);
             const dt = new DataTransfer();
             dt.items.add(small);
             hidden.current.files = dt.files;

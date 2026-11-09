@@ -1,6 +1,7 @@
 // A small label that appears on hover or keyboard focus. The parent needs
-// `group relative hover:z-40 focus-visible:z-40`: pressing it scales the parent,
-// and without its own z-index this label would drop behind later content.
+// `group relative z-10 hover:z-40 focus-visible:z-40`. Pressing it scales the
+// parent, and without its own z-index this label would drop behind later content.
+// The z-index is always set so hovering never changes how the button is layered.
 // Hover-only devices get it; phones keep the button or link as it is.
 export function HoverLabel({ children, className }: { children: React.ReactNode; className: string }) {
   return (

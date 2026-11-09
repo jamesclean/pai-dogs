@@ -1,17 +1,20 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { getDog, dogTags, dogSightings, dogAdoptionQuestions } from "@/lib/data";
+import { getDog, dogTags, dogSightings, dogAdoptionQuestions, dogGallery } from "@/lib/data";
+import { DogPhotos } from "@/components/DogPhotos";
 import { DogPhoto } from "@/components/DogPhoto";
 import { DOG_FORM_ID, DogForm, SituationSelect } from "@/components/DogForm";
 import { Map, type Pin } from "@/components/Map";
 import { LocationField } from "@/components/LocationField";
 import { PhotoInput } from "@/components/PhotoInput";
 import { DeleteEntryButton } from "@/components/DeleteEntryButton";
+import { DeleteProfileButton } from "@/components/DeleteProfileButton";
 import { DoneButton } from "@/components/DoneButton";
+import { MapButton } from "@/components/MapButton";
 import { SavedToast } from "@/components/SavedToast";
 import { AdminNavRow } from "@/components/AdminHeader";
 import { Heart, Tag, UpDown } from "@/components/Icons";
-import { updateDog, deleteDog, deleteSighting, retireTag, volunteerSighting, markReviewed, markAdoptionDone } from "../../../actions";
+import { addDogPhoto, setProfilePhoto, deleteDogPhoto, updateDog, deleteDog, deleteSighting, retireTag, volunteerSighting, markReviewed, markAdoptionDone } from "../../../actions";
 import { groupOf } from "@/lib/dog-groups";
 import { fmtDate, fmtDateTime, rabiesCurrent } from "@/lib/dates";
 
@@ -36,7 +39,7 @@ export default async function DogAdmin({ params, searchParams }: PageProps<"/adm
   const { saved } = await searchParams;
   const dog = Number.isInteger(id) ? await getDog(id) : null;
   if (!dog) notFound();
-  const [tagList, seen, questions] = await Promise.all([dogTags(id), dogSightings(id), dogAdoptionQuestions(id)]);
+  const [tagList, seen, questions, gallery] = await Promise.all([dogTags(id), dogSightings(id), dogAdoptionQuestions(id), dogGallery(dog)]);
   const latestAlert = seen.find((s) => s.source !== "scan" && s.condition !== "ok" && !s.reviewed);
 
   const pins: Pin[] = seen
@@ -109,6 +112,14 @@ export default async function DogAdmin({ params, searchParams }: PageProps<"/adm
         )}
       </section>
 
+      <DogPhotos
+        photoIds={gallery}
+        profileId={dog.photoId}
+        addPhoto={addDogPhoto.bind(null, dog.id)}
+        setProfile={setProfilePhoto.bind(null, dog.id)}
+        deletePhoto={deleteDogPhoto.bind(null, dog.id)}
+      />
+
       <form action={volunteerSighting.bind(null, dog.id)} className="mt-7">
         <h2 className="text-section">New sighting</h2>
         <div className="card-rows mt-2">
@@ -171,17 +182,13 @@ export default async function DogAdmin({ params, searchParams }: PageProps<"/adm
                     <span className={`text-footnote ${s.condition === "ok" ? "text-label-2" : "text-warn"}`}>
                       {CONDITION[s.condition]}
                     </span>
-                    {s.lat !== null && (
-                      <a className="text-footnote text-link" href={`https://maps.google.com/?q=${s.lat},${s.lng}`}>
-                        Map
-                      </a>
-                    )}
                   </div>
                   <p className="text-footnote text-label-2">
                     {[SOURCE[s.source], s.note, s.contact].filter(Boolean).join(" • ")}
                   </p>
                 </div>
                 <div className="flex shrink-0 gap-2">
+                  <MapButton lat={s.lat} lng={s.lng} />
                   <DeleteEntryButton action={deleteSighting.bind(null, s.id)} />
                   {!s.reviewed && <DoneButton action={markReviewed.bind(null, s.id)} />}
                 </div>
@@ -194,15 +201,12 @@ export default async function DogAdmin({ params, searchParams }: PageProps<"/adm
       <h2 className="mt-10 text-title">Details</h2>
       <DogForm dog={dog} action={updateDog.bind(null, dog.id)} submit="Save changes" />
 
-      <details className="mt-8">
-        <summary className="cursor-pointer text-center text-subhead text-bad">Delete dog…</summary>
-        <form action={deleteDog.bind(null, dog.id)} className="mt-3">
-          <button className="btn-danger w-full">Delete {dog.name}</button>
-          <p className="mt-2 text-center text-footnote text-label-3">
-            Deletes {dog.name} and every sighting. To keep the record, set the status to In memory.
-          </p>
-        </form>
-      </details>
+      <div className="mt-8">
+        <DeleteProfileButton action={deleteDog.bind(null, dog.id)} name={dog.name} />
+        <p className="mt-2 text-center text-footnote text-label-3">
+          Deletes {dog.name}&apos;s profile and every sighting. To keep the record, set Situation to In memory.
+        </p>
+      </div>
     </>
   );
 }

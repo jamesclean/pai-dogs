@@ -11,6 +11,7 @@ import {
 import { DogPhoto } from "@/components/DogPhoto";
 import { AdminHeader, SignOutButton } from "@/components/AdminHeader";
 import { DoneButton } from "@/components/DoneButton";
+import { MapButton } from "@/components/MapButton";
 import { Map, type Pin } from "@/components/Map";
 import {
   Chevron,
@@ -23,6 +24,7 @@ import {
 import { markAdoptionDone, markReviewed } from "../actions";
 import { fmtDateTime, rabiesCurrent } from "@/lib/dates";
 import { CONDITION } from "@/lib/conditions";
+import { isNearPai } from "@/lib/pai";
 
 function ConditionLabel({
   condition,
@@ -34,16 +36,9 @@ function ConditionLabel({
   const c = CONDITION[condition];
   if (!c) return <span className="text-footnote text-label-2">Looks fine</span>;
   return (
-    <span className={`pill ${solid ? "bg-warn text-on-inverse" : c[1]}`}>{c[0]}</span>
-  );
-}
-
-function MapLink({ lat, lng }: { lat: number | null; lng: number | null }) {
-  if (lat === null) return null;
-  return (
-    <a className="text-link" href={`https://maps.google.com/?q=${lat},${lng}`}>
-      • Map
-    </a>
+    <span className={`pill ${solid ? "bg-warn text-on-inverse" : c[1]}`}>
+      {c[0]}
+    </span>
   );
 }
 
@@ -54,12 +49,13 @@ export default async function AdminHome({ searchParams }: PageProps<"/admin">) {
   const list = await db
     .select({
       dog: dogs,
+      // Plain SQL: Drizzle drops table names from columns selected from one table.
       tagCode: sql<
         string | null
-      >`(select code from ${tags} where ${tags.dogId} = ${dogs.id} and not ${tags.retired} order by ${tags.assignedAt} desc limit 1)`,
+      >`(select t.code from tags t where t.dog_id = dogs.id and not t.retired order by t.assigned_at desc limit 1)`,
       lastSeen: sql<
         string | null
-      >`(select max(${sightings.createdAt}) from ${sightings} where ${sightings.dogId} = ${dogs.id})`,
+      >`(select max(s.created_at) from sightings s where s.dog_id = dogs.id)`,
     })
     .from(dogs)
     .where(
@@ -121,18 +117,22 @@ export default async function AdminHome({ searchParams }: PageProps<"/admin">) {
   }>(sql`
     select distinct on (s.dog_id) s.dog_id, d.name, s.lat, s.lng, d.status
     from ${sightings} s join ${dogs} d on d.id = s.dog_id
-    where s.lat is not null
+    where s.lat is not null and d.status <> 'deceased'
     order by s.dog_id, s.created_at desc`);
   const pins: Pin[] = [
-    ...latest.rows.map((r) => ({
-      lat: r.lat,
-      lng: r.lng,
-      label: r.name,
-      href: `/admin/dogs/${r.dog_id}`,
-      kind: (r.status === "missing" ? "alert" : "latest") as Pin["kind"],
-    })),
+    ...latest.rows
+      .filter((r) => isNearPai(r.lat, r.lng))
+      .map((r) => ({
+        lat: r.lat,
+        lng: r.lng,
+        label: r.name,
+        href: `/admin/dogs/${r.dog_id}`,
+        kind: (r.status === "missing" ? "alert" : "latest") as Pin["kind"],
+      })),
     ...newDogs
-      .filter((r) => r.lat !== null && r.lng !== null)
+      .filter(
+        (r) => r.lat !== null && r.lng !== null && isNearPai(r.lat, r.lng),
+      )
       .map((r) => ({
         lat: r.lat!,
         lng: r.lng!,
@@ -193,7 +193,9 @@ export default async function AdminHome({ searchParams }: PageProps<"/admin">) {
             className="h-11 w-11 shrink-0 rounded-[12px]"
           />
         ) : (
-          <span className={`tile h-11 w-11 rounded-[12px] text-brand ${urgent ? "bg-surface-raised" : "bg-brand-soft"}`}>
+          <span
+            className={`tile h-11 w-11 rounded-[12px] text-brand ${urgent ? "bg-surface-raised" : "bg-brand-soft"}`}
+          >
             <Megaphone className="h-[22px] w-[22px]" />
           </span>
         )}
@@ -209,7 +211,6 @@ export default async function AdminHome({ searchParams }: PageProps<"/admin">) {
                 .filter(Boolean)
                 .join(" • ")}
             </span>
-            <MapLink lat={item.r.lat} lng={item.r.lng} />
           </p>
           <div className="mt-2 flex gap-2">
             <Link
@@ -226,6 +227,7 @@ export default async function AdminHome({ searchParams }: PageProps<"/admin">) {
             </Link>
           </div>
         </div>
+        <MapButton lat={item.r.lat} lng={item.r.lng} raised={urgent} />
       </div>
     ) : (
       <div key={`s${item.r.s.id}`} className="flex items-start gap-3 py-3">
@@ -236,7 +238,9 @@ export default async function AdminHome({ searchParams }: PageProps<"/admin">) {
             className="h-11 w-11 shrink-0 rounded-[12px]"
           />
         ) : (
-          <span className={`tile h-11 w-11 rounded-[12px] text-label-2 ${urgent ? "bg-surface-raised" : "bg-fill"}`}>
+          <span
+            className={`tile h-11 w-11 rounded-[12px] text-label-2 ${urgent ? "bg-surface-raised" : "bg-fill"}`}
+          >
             <PinIcon className="h-5 w-5" />
           </span>
         )}
@@ -259,10 +263,15 @@ export default async function AdminHome({ searchParams }: PageProps<"/admin">) {
                 .filter(Boolean)
                 .join(" • ")}
             </span>
-            <MapLink lat={item.r.s.lat} lng={item.r.s.lng} />
           </p>
         </div>
-        <DoneButton action={markReviewed.bind(null, item.r.s.id)} raised={urgent} />
+        <div className="flex shrink-0 gap-2">
+          <MapButton lat={item.r.s.lat} lng={item.r.s.lng} raised={urgent} />
+          <DoneButton
+            action={markReviewed.bind(null, item.r.s.id)}
+            raised={urgent}
+          />
+        </div>
       </div>
     );
 
@@ -328,7 +337,9 @@ export default async function AdminHome({ searchParams }: PageProps<"/admin">) {
       )}
 
       <section className="mt-7">
-        <h2 className="text-section">{list.length === 1 ? "1 dog" : `${list.length} dogs`}</h2>
+        <h2 className="text-section">
+          {list.length === 1 ? "1 dog" : `${list.length} dogs`}
+        </h2>
         <div className="mt-1">
           {list.map(({ dog, tagCode, lastSeen }) => {
             const flags = [
