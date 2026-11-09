@@ -321,12 +321,15 @@ body {
   );
 }
 
-/* Hover: a 10% white layer on buttons and tappable cards. Mouse devices only.
+/* Hover: a white layer, 10% on buttons and 33% on cards. Mouse devices only.
    As a background image it sits over the fill and under the text. Rows and
    photos have no fill of their own, so they use a layer on top instead. */
 @media (hover: hover) {
   :is(.btn-primary, .btn-secondary, .btn-outline, .btn-danger, .circle-btn, .tappable):not(:disabled):hover {
     background-image: linear-gradient(rgb(255 255 255 / 0.1), rgb(255 255 255 / 0.1));
+  }
+  .card.tappable:hover {
+    background-image: linear-gradient(rgb(255 255 255 / 0.33), rgb(255 255 255 / 0.33));
   }
   .card-rows {
     overflow: clip;
@@ -338,7 +341,7 @@ body {
     content: "";
     position: absolute;
     inset: 0 -16px;
-    background: rgb(255 255 255 / 0.1);
+    background: rgb(255 255 255 / 0.33);
     pointer-events: none;
   }
   /* Rows are inset 4px from the card's top and bottom edges. */
@@ -359,7 +362,7 @@ body {
     content: "";
     position: absolute;
     inset: 0;
-    background: rgb(255 255 255 / 0.1);
+    background: rgb(255 255 255 / 0.33);
     pointer-events: none;
   }
 }
