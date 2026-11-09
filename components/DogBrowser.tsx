@@ -1,11 +1,13 @@
 "use client";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { DogPhoto } from "./DogPhoto";
+import { Map } from "./Map";
 import { GROUP_ICONS, GROUP_TRACK, groupItemClass } from "./DogGroups";
 import { Search } from "./Icons";
 import { DOG_GROUPS, groupOf, type DogGroup } from "@/lib/dog-groups";
+import { isNearPai } from "@/lib/pai";
 import type { Dict } from "@/lib/i18n";
 
 export type BrowseDog = {
@@ -15,6 +17,8 @@ export type BrowseDog = {
   status: string;
   homeStatus: string | null;
   photoId: number | null;
+  lat: number | null;
+  lng: number | null;
 };
 
 function urlFor(query: string, show: DogGroup | null) {
@@ -43,6 +47,18 @@ export function DogBrowser({ dogs, s }: { dogs: BrowseDog[]; s: Dict }) {
   const needle = query.toLowerCase();
   const matches = dogs.filter((d) => !needle || d.name.toLowerCase().includes(needle) || d.area.toLowerCase().includes(needle));
   const list = group ? matches.filter((d) => groupOf(d) === group) : matches;
+  const visible = list.map((d) => d.id).join();
+  // Rebuilt only when the dogs shown change, because a new map reloads its tiles.
+  const pins = useMemo(
+    () =>
+      list.flatMap((d) =>
+        d.lat !== null && d.lng !== null && isNearPai(d.lat, d.lng)
+          ? [{ lat: d.lat, lng: d.lng, label: d.name, href: `/dogs/${d.id}`, kind: "latest" as const }]
+          : [],
+      ),
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- list is a new array each render; visible tracks its contents
+    [visible],
+  );
   const labels = { community: s.communityDog, home: s.hasFamily, memory: s.deceased };
 
   return (
@@ -100,6 +116,8 @@ export function DogBrowser({ dogs, s }: { dogs: BrowseDog[]; s: Dict }) {
       </div>
 
       {query && <h2 className="mt-5 text-section">{s.searchResults}</h2>}
+
+      {!query && pins.length > 0 && <Map pins={pins} className="mt-4 h-52" />}
 
       <div className={`${query ? "mt-3" : "mt-4"} grid grid-cols-2 gap-x-2.5 gap-y-5 sm:grid-cols-3`}>
         {list.map((d) => (

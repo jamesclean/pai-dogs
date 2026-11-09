@@ -1,10 +1,11 @@
 import Link from "next/link";
 import { PublicShell } from "./PublicShell";
-import { DogPhoto } from "./DogPhoto";
+import { DogGallery } from "./DogGallery";
 import { ScanCard } from "./ScanCard";
 import { Alert, Chevron, Eye, Flower, HasFamily, Heart, Pin, Shield, StreetDog, Syringe } from "./Icons";
 import { getLang, t, fill } from "@/lib/i18n";
 import { isAdmin } from "@/lib/auth";
+import { dogGallery } from "@/lib/data";
 import { fmtDate, rabiesCurrent } from "@/lib/dates";
 import { config, lineUrl } from "@/lib/config";
 import type { Dog } from "@/db";
@@ -15,6 +16,7 @@ export async function DogProfile({ dog, tagCode, scanned = false }: { dog: Dog; 
   const lang = await getLang();
   const s = t(lang);
   const admin = await isAdmin();
+  const photoIds = await dogGallery(dog);
 
   const rabiesOk = rabiesCurrent(dog.rabiesVaccinatedOn);
   const contactLine = dog.caretakerLine || config.contactLine;
@@ -49,7 +51,7 @@ export async function DogProfile({ dog, tagCode, scanned = false }: { dog: Dog; 
   return (
     <PublicShell lang={lang} bottomBar={bottomBar} back={{ href: "/dogs", label: s.browseDogs }} title={dog.name} revealTitle>
       <div className="relative overflow-hidden rounded-[28px] shadow-card">
-        <DogPhoto photoId={dog.photoId} alt={dog.name} className="aspect-[358/430] w-full" />
+        <DogGallery photoIds={photoIds} alt={dog.name} ofLabel={s.photoOf} />
         <span className={`chip absolute top-4 left-4 ${dog.status === "missing" ? "text-bad" : ""}`}>
           {dog.status === "missing" ? (
             <Alert className="h-4 w-4" />
@@ -124,7 +126,7 @@ export async function DogProfile({ dog, tagCode, scanned = false }: { dog: Dog; 
       )}
 
       {dog.publicNotes && (
-        <p className="mt-2 rounded-[20px] bg-brand-soft px-4 py-3.5 text-subhead whitespace-pre-line">{dog.publicNotes}</p>
+        <p className="mt-2 rounded-[20px] bg-info-soft px-4 py-3.5 text-subhead whitespace-pre-line">{dog.publicNotes}</p>
       )}
 
       {(dog.caretakerName || contactLine) && (

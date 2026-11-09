@@ -1,12 +1,14 @@
 "use server";
 import { redirect } from "next/navigation";
 import { revalidatePath } from "next/cache";
-import { and, eq, isNull, sql } from "drizzle-orm";
-import { adoptionQuestions, db, dogs, photos, tags, sightings, newDogReports, type NewDogReport } from "@/db";
+import { and, asc, count, eq, isNull, sql } from "drizzle-orm";
+import { adoptionQuestions, db, dogPhotos, dogs, photos, tags, sightings, newDogReports, type NewDogReport } from "@/db";
 import { endSession, requireAdmin } from "@/lib/auth";
 import { savePhoto } from "@/lib/photos";
 import { newCode, normalizeCode } from "@/lib/codes";
 import { DOG_GROUPS } from "@/lib/dog-groups";
+import { getDog } from "@/lib/data";
+import { MAX_DOG_PHOTOS } from "@/lib/pai";
 
 function str(f: FormData, k: string, max = 500) {
   return String(f.get(k) ?? "").trim().slice(0, max);
@@ -95,6 +97,7 @@ export async function createDog(form: FormData) {
       homeStatus: group === "home" ? "has_home" : group === "community" && form.get("adoption") === "on" ? "ask_adoption" : null,
     })
     .returning({ id: dogs.id });
+  if (photoId) await db.insert(dogPhotos).values({ dogId: dog.id, photoId });
   if (report) {
     await db.update(newDogReports).set({ reviewed: true, dogId: dog.id }).where(eq(newDogReports.id, report.id));
   }
@@ -124,14 +127,12 @@ export async function createDog(form: FormData) {
 
 export async function updateDog(id: number, form: FormData) {
   await requireAdmin();
-  const photoId = await savePhoto(form.get("photo"));
   const fields = dogFields(form);
   const group = pick(str(form, "group"), DOG_GROUPS, "community");
   await db
     .update(dogs)
     .set({
       ...fields,
-      ...(photoId ? { photoId } : {}),
       status: group === "memory" ? "deceased" : form.get("missing") === "on" ? "missing" : "community",
       homeStatus: group === "home" ? "has_home" : group === "community" && form.get("adoption") === "on" ? "ask_adoption" : null,
       updatedAt: new Date(),
@@ -144,7 +145,14 @@ export async function updateDog(id: number, form: FormData) {
 export async function deleteDog(id: number) {
   await requireAdmin();
   await db.update(tags).set({ dogId: null, assignedAt: null, retired: true }).where(eq(tags.dogId, id));
-  await db.delete(dogs).where(eq(dogs.id, id));
+  await db.transaction(async (tx) => {
+    const gallery = await tx.select({ photoId: dogPhotos.photoId }).from(dogPhotos).where(eq(dogPhotos.dogId, id));
+    const [dog] = await tx.select({ photoId: dogs.photoId }).from(dogs).where(eq(dogs.id, id));
+    await tx.delete(dogs).where(eq(dogs.id, id));
+    const ids = new Set([...gallery.map((g) => g.photoId), ...(dog?.photoId ? [dog.photoId] : [])]);
+    for (const photoId of ids) await dropPhotoIfUnused(tx, photoId);
+  });
+  revalidatePath("/", "layout");
   redirect("/admin");
 }
 
@@ -187,23 +195,74 @@ export async function matchReport(reportId: number, dogId: number) {
   redirect(savedUrl(dogId));
 }
 
-// Removes a history entry and its map pin. Its photo goes too, unless the dog
-// or another entry still uses it.
+type Db = Pick<typeof db, "delete">;
+
+// Removes a stored photo unless a dog, gallery, entry or report still uses it.
+async function dropPhotoIfUnused(tx: Db, photoId: number) {
+  await tx.delete(photos).where(
+    and(
+      eq(photos.id, photoId),
+      sql`not exists (select 1 from ${dogs} where ${dogs.photoId} = ${photos.id})`,
+      sql`not exists (select 1 from ${dogPhotos} where ${dogPhotos.photoId} = ${photos.id})`,
+      sql`not exists (select 1 from ${sightings} where ${sightings.photoId} = ${photos.id})`,
+      sql`not exists (select 1 from ${newDogReports} where ${newDogReports.photoId} = ${photos.id})`,
+    ),
+  );
+}
+
+// Removes a history entry and its map pin, and its photo if nothing else uses it.
 export async function deleteSighting(sightingId: number) {
   await requireAdmin();
   await db.transaction(async (tx) => {
     const [gone] = await tx.delete(sightings).where(eq(sightings.id, sightingId)).returning({ photoId: sightings.photoId });
-    if (!gone?.photoId) return;
-    await tx.delete(photos).where(
-      and(
-        eq(photos.id, gone.photoId),
-        sql`not exists (select 1 from ${dogs} where ${dogs.photoId} = ${photos.id})`,
-        sql`not exists (select 1 from ${sightings} where ${sightings.photoId} = ${photos.id})`,
-        sql`not exists (select 1 from ${newDogReports} where ${newDogReports.photoId} = ${photos.id})`,
-      ),
-    );
+    if (gone?.photoId) await dropPhotoIfUnused(tx, gone.photoId);
   });
   revalidatePath("/admin", "layout");
+}
+
+export async function addDogPhoto(dogId: number, form: FormData) {
+  await requireAdmin();
+  const dog = await getDog(dogId);
+  if (!dog) return;
+  const [{ n }] = await db.select({ n: count() }).from(dogPhotos).where(eq(dogPhotos.dogId, dogId));
+  if (n >= MAX_DOG_PHOTOS) return;
+  const photoId = await savePhoto(form.get("photo"));
+  if (!photoId) return;
+  await db.insert(dogPhotos).values({ dogId, photoId });
+  // The first photo becomes the profile photo.
+  if (!dog.photoId) await db.update(dogs).set({ photoId }).where(eq(dogs.id, dogId));
+  revalidatePath("/", "layout");
+}
+
+export async function setProfilePhoto(dogId: number, photoId: number) {
+  await requireAdmin();
+  const [row] = await db
+    .select({ id: dogPhotos.id })
+    .from(dogPhotos)
+    .where(and(eq(dogPhotos.dogId, dogId), eq(dogPhotos.photoId, photoId)));
+  if (!row) return;
+  await db.update(dogs).set({ photoId, updatedAt: new Date() }).where(eq(dogs.id, dogId));
+  revalidatePath("/", "layout");
+}
+
+export async function deleteDogPhoto(dogId: number, photoId: number) {
+  await requireAdmin();
+  await db.transaction(async (tx) => {
+    await tx.delete(dogPhotos).where(and(eq(dogPhotos.dogId, dogId), eq(dogPhotos.photoId, photoId)));
+    const [dog] = await tx.select({ photoId: dogs.photoId }).from(dogs).where(eq(dogs.id, dogId));
+    if (dog?.photoId === photoId) {
+      // Deleting the profile photo: the oldest remaining photo takes over.
+      const [next] = await tx
+        .select({ photoId: dogPhotos.photoId })
+        .from(dogPhotos)
+        .where(eq(dogPhotos.dogId, dogId))
+        .orderBy(asc(dogPhotos.createdAt))
+        .limit(1);
+      await tx.update(dogs).set({ photoId: next?.photoId ?? null }).where(eq(dogs.id, dogId));
+    }
+    await dropPhotoIfUnused(tx, photoId);
+  });
+  revalidatePath("/", "layout");
 }
 
 export async function markAdoptionDone(questionId: number) {

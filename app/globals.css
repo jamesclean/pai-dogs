@@ -22,6 +22,7 @@
   --bad: #d1281f;
   --bad-soft: #fceaea;
   --link: #2f5fd0;
+  --info-soft: #e8effc;
   --line: #06c755;
   --map: #eef0f2;
   --map-street: #ffffff;
@@ -52,6 +53,7 @@
     --bad: #ff6b61;
     --bad-soft: #331512;
     --link: #6e9bff;
+    --info-soft: #17233d;
     --map: #18191c;
     --map-street: #26272b;
     --scrim: rgba(0, 0, 0, 0.55);
@@ -81,6 +83,7 @@
   --color-bad: var(--bad);
   --color-bad-soft: var(--bad-soft);
   --color-link: var(--link);
+  --color-info-soft: var(--info-soft);
   --color-line: var(--line);
   --color-map: var(--map);
   --color-map-street: var(--map-street);

@@ -1,6 +1,6 @@
 import "server-only";
-import { and, asc, count, desc, eq, ne } from "drizzle-orm";
-import { db, dogs, tags, sightings, newDogReports, adoptionQuestions } from "@/db";
+import { and, asc, count, desc, eq, ne, sql } from "drizzle-orm";
+import { db, dogs, dogPhotos, tags, sightings, newDogReports, adoptionQuestions } from "@/db";
 import { normalizeCode } from "./codes";
 
 export async function getTag(rawCode: string) {
@@ -47,9 +47,25 @@ export async function publicDogs() {
       status: dogs.status,
       homeStatus: dogs.homeStatus,
       photoId: dogs.photoId,
+      // Where it was last seen, or its home spot if nobody has seen it yet.
+      // Written as plain SQL: Drizzle drops table names from columns selected from
+      // one table, which would point these subqueries at the wrong "id".
+      lat: sql<number | null>`coalesce((select s.lat from sightings s where s.dog_id = dogs.id and s.lat is not null order by s.created_at desc limit 1), dogs.home_lat)`,
+      lng: sql<number | null>`coalesce((select s.lng from sightings s where s.dog_id = dogs.id and s.lat is not null order by s.created_at desc limit 1), dogs.home_lng)`,
     })
     .from(dogs)
     .orderBy(asc(dogs.name));
+}
+
+// A dog's photo ids, profile photo first.
+export async function dogGallery(dog: { id: number; photoId: number | null }) {
+  const rows = await db
+    .select({ photoId: dogPhotos.photoId })
+    .from(dogPhotos)
+    .where(eq(dogPhotos.dogId, dog.id))
+    .orderBy(asc(dogPhotos.createdAt));
+  const ids = rows.map((r) => r.photoId);
+  return dog.photoId === null ? ids : [dog.photoId, ...ids.filter((id) => id !== dog.photoId)];
 }
 
 export async function dogAdoptionQuestions(dogId: number) {

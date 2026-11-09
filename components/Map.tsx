@@ -1,6 +1,7 @@
 "use client";
 import { useEffect, useRef } from "react";
 import "leaflet/dist/leaflet.css";
+import { PAI } from "@/lib/pai";
 
 export type Pin = {
   lat: number;
@@ -12,7 +13,6 @@ export type Pin = {
   kind?: "home" | "ok" | "alert" | "latest" | "scan" | "newdog";
 };
 
-const PAI = { lat: 19.3588, lng: 98.4405 };
 const MEGAPHONE =
   '<svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M9 6v8H6c-.93 0-1.4 0-1.78-.1a3 3 0 0 1-2.12-2.12C2 11.4 2 10.93 2 10s0-1.4.1-1.78a3 3 0 0 1 2.12-2.12C4.6 6 5.07 6 6 6h3Z"/><path d="M9 14l.97 4.82a1.66 1.66 0 0 1-1.63 2.18c-.78 0-1.46-.55-1.62-1.31L5.5 14"/><path d="M9 6h1c1.3 0 2.56-.42 3.6-1.2l2.15-1.61a.95.95 0 0 1 1.46.46c.34 1.14.79 3.08.79 6.35s-.45 5.21-.79 6.35a.95.95 0 0 1-1.46.46L13.6 15.2A6 6 0 0 0 10 14H9V6Z"/></svg>';
 

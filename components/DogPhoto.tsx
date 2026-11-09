@@ -1,6 +1,16 @@
 import { Paw } from "./Icons";
 
-export function DogPhoto({ photoId, alt, className = "" }: { photoId: number | null; alt: string; className?: string }) {
+export function DogPhoto({
+  photoId,
+  alt,
+  className = "",
+  loading,
+}: {
+  photoId: number | null;
+  alt: string;
+  className?: string;
+  loading?: "eager" | "lazy";
+}) {
   if (!photoId)
     return (
       <div className={`flex items-center justify-center bg-fill text-label-3 ${className}`}>
@@ -8,5 +18,5 @@ export function DogPhoto({ photoId, alt, className = "" }: { photoId: number | n
       </div>
     );
   // eslint-disable-next-line @next/next/no-img-element
-  return <img src={`/photos/${photoId}`} alt={alt} className={`object-cover ${className}`} />;
+  return <img src={`/photos/${photoId}`} alt={alt} loading={loading} className={`object-cover ${className}`} />;
 }
