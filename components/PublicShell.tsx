@@ -4,7 +4,7 @@ import { LangToggle } from "./LangToggle";
 import { HeaderGlass } from "./HeaderGlass";
 import { HoverLabel } from "./HoverLabel";
 import { RevealTitle } from "./RevealTitle";
-import { ChevronLeft, Login, Paw } from "./Icons";
+import { ChevronLeft, Admin, Paw } from "./Icons";
 import type { Lang } from "@/lib/i18n";
 
 export { Paw };
@@ -66,7 +66,7 @@ export function PublicShell({
           <Logo />
           {adminLabel && (
             <Link href="/admin" aria-label={adminLabel} className="circle-btn group relative z-10 hover:z-40 focus-visible:z-40">
-              <Login className="h-5 w-5" />
+              <Admin className="h-5 w-5" />
               <HoverLabel className="top-full right-0 mt-2">{adminLabel}</HoverLabel>
             </Link>
           )}
