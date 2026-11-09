@@ -1,13 +1,13 @@
 import { signOut } from "@/app/admin/actions";
 import { BackButton } from "./PublicShell";
-import { Logout } from "./Icons";
+import { MeetDogs } from "./Icons";
 import { HoverLabel } from "./HoverLabel";
 
 export function SignOutButton() {
   return (
     <form action={signOut}>
       <button aria-label="Log out of admin" className="circle-btn group relative z-10 hover:z-40 focus-visible:z-40">
-        <Logout className="h-5 w-5" />
+        <MeetDogs className="h-5 w-5" />
         <HoverLabel className="top-full right-0 mt-2">Log out of admin</HoverLabel>
       </button>
     </form>

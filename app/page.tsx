@@ -12,7 +12,7 @@ export default async function Home() {
 
   const secondary = [
     { href: "/report", image: "/home/megaphone.webp", title: s.reportDog },
-    { href: "/lookup", image: "/home/collar.webp", title: s.lookUp, sub: s.lookUpSub },
+    { href: "/lookup", image: "/home/collar.webp", title: s.lookUp, sub: s.lookUpSub, badge: s.comingSoon },
   ];
 
   return (
@@ -33,7 +33,7 @@ export default async function Home() {
         </Link>
 
         <div className="mt-2.5 grid grid-cols-2 gap-2.5">
-          {secondary.map(({ href, image, title, sub }) => (
+          {secondary.map(({ href, image, title, sub, badge }) => (
             <Link
               key={href}
               href={href}
@@ -43,6 +43,7 @@ export default async function Home() {
               <img src={image} alt="" width={360} height={360} className="h-[84px] w-auto self-start" />
               <span className="mt-3 block text-section">{title}</span>
               {sub && <span className="mt-0.5 block text-footnote text-label-2">{sub}</span>}
+              {badge && <span className="pill mt-2 self-start bg-fill text-label-2">{badge}</span>}
             </Link>
           ))}
         </div>
