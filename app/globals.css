@@ -246,7 +246,7 @@ body {
 }
 .fan-card {
   rotate: var(--fan-tilt, 0deg);
-  transition: translate 700ms ease-in-out, scale 700ms ease-in-out, --fade-from 700ms ease-in-out, --fade-to 700ms ease-in-out;
+  transition: translate 300ms ease-in-out, scale 300ms ease-in-out, --fade-from 300ms ease-in-out, --fade-to 300ms ease-in-out;
 }
 .fan-left {
   --fan-tilt: -15deg;
@@ -254,7 +254,7 @@ body {
   mask-image: linear-gradient(to right, transparent var(--fade-from), black var(--fade-to));
 }
 .fan-centre {
-  --fan-out: 0 -26px;
+  --fan-out: 0 -34px;
   --fan-grow: 1.04;
 }
 .fan-right {
