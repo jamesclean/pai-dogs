@@ -5,6 +5,9 @@ import { MegaphoneArt } from "@/components/MegaphoneArt";
 import { Chat, Paw, Phone } from "@/components/Icons";
 import { getLang, t, fill } from "@/lib/i18n";
 import { totalDogCount } from "@/lib/data";
+import { isAdmin } from "@/lib/auth";
+import { CrewInbox } from "@/components/CrewInbox";
+import { CrewGlance } from "@/components/CrewGlance";
 import { config, lineUrl } from "@/lib/config";
 
 // Side cards first, so the centre card sits on top of them.
@@ -17,15 +20,24 @@ const meetDogs = [
 export default async function Home() {
   const lang = await getLang();
   const s = t(lang);
-  const n = await totalDogCount();
+  const [n, crew] = await Promise.all([totalDogCount(), isAdmin()]);
 
   const secondary = [
     { href: "/report", art: <MegaphoneArt />, title: s.reportDog },
-    { href: "/lookup", art: <CollarArt />, title: s.lookUp, sub: s.lookUpSub, badge: s.comingSoon },
+    // Tag lookup already works for crew, so they don't see Coming soon.
+    { href: "/lookup", art: <CollarArt />, title: s.lookUp, sub: s.lookUpSub, badge: crew ? undefined : s.comingSoon },
   ];
 
   return (
-    <PublicShell lang={lang} adminLabel={s.logInToAdmin}>
+    <PublicShell lang={lang} adminLabel={s.logInToAdmin} crew={crew}>
+      {/* Signed in, Home is the crew's view of everything: what needs doing first,
+          then the rest of the platform, then the public cards as the way onward. */}
+      {crew && (
+        <div className="mb-8 flex flex-col gap-7">
+          <CrewInbox />
+          <CrewGlance />
+        </div>
+      )}
       {/* Clip at the screen edge so the outer dog cards can't add sideways scrolling. */}
       <nav className="-mx-4 overflow-x-clip px-4">
         <Link

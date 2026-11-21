@@ -12,8 +12,9 @@ Each dog wears an **international-orange collar** (#FF4F00) with a **stainless
 slide-on tag** carrying a laser-engraved QR code. Scanning opens `/d/<CODE>`:
 the dog's public page (photo, name, area, sterilization + rabies status,
 caretaker with LINE button, "I saw this dog" / "Needs help" reports with GPS
-and photo). Volunteers use `/admin` (shared password) for the report inbox,
-last-seen map, dog editor, and tag batches (CSV + print sheet for the engraver).
+and photo). Volunteers sign in (shared password) and Home becomes the crew view: report inbox,
+last-seen map, At a glance, then the public cards. `/admin` is the dog list; the crew menu holds
+Add a dog, Tag batches (CSV + print sheet for the engraver) and Sign out.
 Inspiration: wearescanme.com (Koh Samui).
 
 See README.md for features and deployment, SOURCING.md for tag and collar suppliers.
@@ -32,8 +33,8 @@ See README.md for features and deployment, SOURCING.md for tag and collar suppli
 - Public pages are Thai/English (cookie `lang`, falls back to Accept-Language).
   Strings live in `lib/i18n.ts`; Thai needs a native-speaker check.
   The admin UI is English only.
-- Crew messaging lives inside the app: form submissions with contact details, waiting in the
-  Dogs tab. No outside alerts. The crew doesn't use Telegram, and LINE Notify is dead.
+- Crew messaging lives inside the app: form submissions with contact details, waiting at the
+  top of the crew's Home. No outside alerts. The crew doesn't use Telegram, and LINE Notify is dead.
 - Collars and tags are optional. Every dog has a page at `/dogs/<id>`; a tag shows the same
   page at `/d/<CODE>`.
 - `status` (community, missing, deceased) and `homeStatus` (Family dog, Ask about adoption) are

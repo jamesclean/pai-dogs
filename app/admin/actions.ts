@@ -121,7 +121,7 @@ export async function createDog(form: FormData) {
       reviewed: true,
     });
   }
-  revalidatePath("/admin", "layout");
+  revalidatePath("/", "layout");
   redirect(savedUrl(dog.id));
 }
 
@@ -176,8 +176,8 @@ export async function volunteerSighting(dogId: number, form: FormData) {
 export async function dismissNewDog(reportId: number) {
   await requireAdmin();
   await db.update(newDogReports).set({ reviewed: true }).where(eq(newDogReports.id, reportId));
-  revalidatePath("/admin", "layout");
-  redirect("/admin");
+  revalidatePath("/", "layout");
+  redirect("/");
 }
 
 // The reported dog is one we already know: its report joins that dog's history.
@@ -191,7 +191,7 @@ export async function matchReport(reportId: number, dogId: number) {
       .returning();
     if (report) await tx.insert(sightings).values(sightingFromReport(report, dogId));
   });
-  revalidatePath("/admin", "layout");
+  revalidatePath("/", "layout");
   redirect(savedUrl(dogId));
 }
 
@@ -217,7 +217,7 @@ export async function deleteSighting(sightingId: number) {
     const [gone] = await tx.delete(sightings).where(eq(sightings.id, sightingId)).returning({ photoId: sightings.photoId });
     if (gone?.photoId) await dropPhotoIfUnused(tx, gone.photoId);
   });
-  revalidatePath("/admin", "layout");
+  revalidatePath("/", "layout");
 }
 
 export async function addDogPhoto(dogId: number, form: FormData) {
@@ -268,13 +268,13 @@ export async function deleteDogPhoto(dogId: number, photoId: number) {
 export async function markAdoptionDone(questionId: number) {
   await requireAdmin();
   await db.update(adoptionQuestions).set({ reviewed: true }).where(eq(adoptionQuestions.id, questionId));
-  revalidatePath("/admin", "layout");
+  revalidatePath("/", "layout");
 }
 
 export async function markReviewed(sightingId: number) {
   await requireAdmin();
   await db.update(sightings).set({ reviewed: true }).where(eq(sightings.id, sightingId));
-  revalidatePath("/admin", "layout");
+  revalidatePath("/", "layout");
 }
 
 export async function linkTag(code: string, form: FormData) {

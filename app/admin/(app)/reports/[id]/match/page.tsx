@@ -20,7 +20,7 @@ export default async function MatchReport({ params, searchParams }: PageProps<"/
   const query = typeof q === "string" ? q.trim() : "";
   const [report] = Number.isInteger(id) && id > 0 ? await db.select().from(newDogReports).where(eq(newDogReports.id, id)) : [];
   if (!report) notFound();
-  if (report.reviewed) redirect("/admin");
+  if (report.reviewed) redirect("/");
 
   const rows = await db
     .select()
@@ -49,7 +49,7 @@ export default async function MatchReport({ params, searchParams }: PageProps<"/
 
   return (
     <>
-      <AdminNavRow back={{ href: "/admin", label: "Dogs" }} />
+      <AdminNavRow back={{ href: "/", label: "Home" }} />
       <h1 className="pt-2 text-title">Already in our records</h1>
 
       <div className="card mt-4 flex items-start gap-3 p-4">

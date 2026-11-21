@@ -21,7 +21,7 @@ export default async function NewDog({ searchParams }: PageProps<"/admin/dogs/ne
 
   return (
     <>
-      <AdminNavRow back={{ href: "/admin", label: "Dogs" }} />
+      <AdminNavRow back={{ href: "/", label: "Home" }} />
       <h1 className="pt-2 text-title">New dog</h1>
       {code && (
         <p className="mt-1 text-subhead text-label-2">

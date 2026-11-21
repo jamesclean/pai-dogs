@@ -1,5 +1,5 @@
 import { redirect } from "next/navigation";
-import { checkPassword, startSession } from "@/lib/auth";
+import { checkPassword, isAdmin, startSession } from "@/lib/auth";
 import { config } from "@/lib/config";
 import { allow } from "@/lib/ratelimit";
 import { Paw } from "@/components/Icons";
@@ -13,10 +13,11 @@ async function login(formData: FormData) {
   if (!checkPassword(String(formData.get("password") ?? ""))) redirect("/admin/login?error=1");
   await startSession();
   const next = String(formData.get("next") ?? "");
-  redirect(next.startsWith("/") && !next.startsWith("//") ? next : "/admin");
+  redirect(next.startsWith("/") && !next.startsWith("//") ? next : "/");
 }
 
 export default async function LoginPage({ searchParams }: PageProps<"/admin/login">) {
+  if (await isAdmin()) redirect("/");
   const { error, next } = await searchParams;
   return (
     <>

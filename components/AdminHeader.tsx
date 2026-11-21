@@ -1,18 +1,4 @@
-import { signOut } from "@/app/admin/actions";
 import { BackButton } from "./PublicShell";
-import { MeetDogs } from "./Icons";
-import { HoverLabel } from "./HoverLabel";
-
-export function SignOutButton() {
-  return (
-    <form action={signOut}>
-      <button aria-label="Go back to meet our dogs" className="circle-btn group relative z-10 hover:z-40 focus-visible:z-40">
-        <MeetDogs className="h-5 w-5" />
-        <HoverLabel className="top-full right-0 mt-2">Go back to meet our dogs</HoverLabel>
-      </button>
-    </form>
-  );
-}
 
 // Title on the left, one action on the right; or a back button row.
 export function AdminHeader({ title, right }: { title: string; right?: React.ReactNode }) {

@@ -220,6 +220,16 @@ body {
   animation: sheet-in 220ms ease-out;
 }
 
+/* The crew menu drops from its button. */
+@keyframes menu-in {
+  from { transform: scale(0.96); opacity: 0; }
+  to { transform: none; opacity: 1; }
+}
+.menu-in {
+  transform-origin: top right;
+  animation: menu-in 160ms ease-out;
+}
+
 /* One pulse of the Figma loop, which plays three of these in 2.4s. */
 @keyframes ray-pulse {
   0%, 100% { transform: scale(1); }
