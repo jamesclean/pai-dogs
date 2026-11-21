@@ -14,13 +14,14 @@ const log = (...a) => console.log(...a);
 // Volunteer phone
 const vol = await browser.newContext({ ...devices["iPhone 13"], geolocation: { latitude: 19.3592, longitude: 98.4421 }, permissions: ["geolocation"] });
 const p = await vol.newPage();
-p.on("pageerror", (e) => log("PAGEERROR", e.message));
+p.on("pageerror", (e) => log("PAGEERROR", p.url(), e.message));
 await p.goto(B + "/admin");
 log("redirected to", p.url());
 await p.fill("input[name=password]", "nope"); await p.click("button");
 await p.waitForURL(/error=1/); log("bad pw ok");
 await p.fill("input[name=password]", "woof"); await p.click("button");
-await p.waitForURL(B + "/admin");
+await p.waitForURL(B + "/");
+log("crew home after sign in:", await p.isVisible("text=At a glance"));
 await p.goto(B + "/admin/tags");
 await p.fill("input[name=name]", "test-batch");
 await p.fill("input[name=count]", "12");
@@ -115,12 +116,12 @@ const r = await q.request.get(B + "/admin/tags-csv/test-batch"); log("csv unauth
 await q.goto(B + "/admin"); log("public /admin ->", q.url());
 await q.goto(B + "/d/ZZZZZ"); log("unknown code 404 text:", await q.isVisible("text=couldn't find"));
 
-// Volunteer sees report
-await p.goto(B + "/admin");
+// Volunteer sees report on crew Home
+await p.goto(B + "/");
 await p.waitForLoadState("networkidle");
 await p.waitForTimeout(800);
 log("inbox shows report:", await p.isVisible("text=Limping on back left leg"));
-await p.screenshot({ path: S + "/shots/admin-home.png", fullPage: true });
+await p.screenshot({ path: S + "/shots/crew-home.png", fullPage: true });
 log("inbox shows new report:", await p.isVisible("text=New report"));
 await p.click("button:has-text('Mark done')");
 await p.waitForTimeout(800);
@@ -134,7 +135,7 @@ await p.waitForURL(/dogs\/\d+\?saved=/);
 log("dog from report:", await p.isVisible("h1:has-text('Khao')"));
 // The report joined Khao's history and is still open, because it was urgent.
 await p.click("button:has-text('Mark done')"); await p.waitForTimeout(800);
-await p.goto(B + "/admin"); await p.waitForTimeout(500);
+await p.goto(B + "/"); await p.waitForTimeout(500);
 log("inbox cleared:", !(await p.isVisible("text=Reports to check")));
 await p.goto(dogUrl);
 await p.waitForLoadState("networkidle"); await p.waitForTimeout(800);
@@ -156,4 +157,11 @@ await p.goto(dogUrl + "?saved=1"); await p.waitForLoadState("networkidle"); awai
 await p.screenshot({ path: S + "/shots/admin-dog-top.png" });
 await p.evaluate(() => window.scrollTo(0, document.body.scrollHeight * 0.6)); await p.waitForTimeout(300);
 await p.screenshot({ path: S + "/shots/admin-dog-form.png" });
+// Crew menu, and signing out from it
+await p.goto(B + "/"); await p.click("button[aria-label='Crew menu']");
+await p.waitForSelector("#crew-menu");
+await p.screenshot({ path: S + "/shots/crew-menu.png" });
+await p.click("#crew-menu button:has-text('Sign out')");
+await p.waitForURL(B + "/"); await p.waitForTimeout(500);
+log("signed out to public Home:", !(await p.isVisible("text=At a glance")) && (await p.isVisible("a[aria-label='Log in to admin']")));
 await browser.close();

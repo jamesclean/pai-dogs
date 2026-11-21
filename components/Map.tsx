@@ -60,8 +60,9 @@ export function Map({ pins, className = "h-56" }: { pins: Pin[]; className?: str
         }
         pts.push([p.lat, p.lng]);
       }
-      if (pts.length === 1) map.setView(pts[0], 16);
-      else if (pts.length > 1) map.fitBounds(pts, { padding: [30, 30], maxZoom: 17 });
+      // No animation: a refresh can remove the map mid-zoom, which makes Leaflet throw.
+      if (pts.length === 1) map.setView(pts[0], 16, { animate: false });
+      else if (pts.length > 1) map.fitBounds(pts, { padding: [30, 30], maxZoom: 17, animate: false });
     })();
     return () => {
       cancelled = true;

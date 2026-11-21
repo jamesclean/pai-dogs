@@ -4,6 +4,7 @@ import { LangToggle } from "./LangToggle";
 import { HeaderGlass } from "./HeaderGlass";
 import { HoverLabel } from "./HoverLabel";
 import { RevealTitle } from "./RevealTitle";
+import { CrewMenu } from "./CrewMenu";
 import { ChevronLeft, Admin, Paw } from "./Icons";
 import type { Lang } from "@/lib/i18n";
 
@@ -29,6 +30,7 @@ export function BackButton({ href, label }: { href: string; label: string }) {
 // top as you scroll; otherwise the logo sits at the top. `revealTitle` is for a page
 // with its own large title: the bar shows the title once the page scrolls.
 // `bottomBar` floats over the content with a fade, like the Figma screens.
+// On Home, `crew` swaps the sign-in button for the crew menu.
 export function PublicShell({
   lang,
   children,
@@ -37,6 +39,7 @@ export function PublicShell({
   title,
   revealTitle = false,
   adminLabel,
+  crew = false,
 }: {
   lang: Lang;
   children: React.ReactNode;
@@ -45,6 +48,7 @@ export function PublicShell({
   title?: string;
   revealTitle?: boolean;
   adminLabel?: string;
+  crew?: boolean;
 }) {
   return (
     <>
@@ -64,8 +68,10 @@ export function PublicShell({
       ) : (
         <header className="mx-auto flex w-full max-w-xl items-center justify-between px-4 pt-[max(env(safe-area-inset-top),12px)] pb-4">
           <Logo />
-          {adminLabel && (
-            <Link href="/admin" aria-label={adminLabel} className="stable-layer circle-btn group relative z-10 hover:z-40 focus-visible:z-40">
+          {crew ? (
+            <CrewMenu />
+          ) : adminLabel && (
+            <Link href="/admin/login" aria-label={adminLabel} className="stable-layer circle-btn group relative z-10 hover:z-40 focus-visible:z-40">
               <Admin className="h-5 w-5" />
               <HoverLabel className="top-full right-0 mt-2">{adminLabel}</HoverLabel>
             </Link>

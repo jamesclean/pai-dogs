@@ -8,7 +8,7 @@ report a sighting or an injury.
 ## What's in it
 
 **Public (Thai / English, picks from the phone's language)**
-- `/`: home with Report a dog sighting, Meet our dogs and Look up a dog. The admin login is the icon at the top right.
+- `/`: home with Report a dog sighting, Meet our dogs and Look up a dog. The crew sign in is the icon at the top right.
 - `/d/K7M2X`: dog page reached from the tag. Shows a missing banner if the dog is marked missing.
   A card asks once to "Add Mali to the map": if the person shares their location, the scan
   becomes a quiet sighting on the volunteers' map (no inbox item, at most one per dog every 5 minutes).
@@ -19,14 +19,18 @@ report a sighting or an injury.
 - `/lookup`: scan instructions, plus a box to type a tag code if the QR is scratched.
 - `/report`: "Report a dog sighting" when you don't know which dog it is. Volunteers add it or match it to a dog in the records.
 
-**Volunteers (`/admin`, one shared password)**
-- Inbox of public reports and new-dog reports. Mark reports done; turn a new-dog report into a dog with "Add dog" (photo and GPS carry over).
-- Map of each dog's last known position (scans included), and a dog list with search and health flags (not sterilized, rabies due).
+**Volunteers (one shared password, sign in at `/admin/login`)**
+- Signed in, Home (`/`) becomes the crew view: Needs help and Reports to check at the top, then a map of
+  each dog's last known position (scans included), then At a glance (dogs and missing, rabies due, tag batches),
+  then the public cards. A Crew chip and the crew menu (Add a dog, Tag batches, Sign out) sit at the top right.
+- Mark reports done; turn a new-dog report into a dog with "Add dog" (photo and GPS carry over), or match it to a dog.
+- `/admin`: the dog list with search and health flags (not sterilized, rabies due). `/admin?due=rabies` lists the
+  living dogs whose rabies shot is due.
 - Dog page: edit details and photo, log your own sighting with GPS, sighting history on a map, tags.
 - Tags: generate a batch of unique codes, then download a CSV for the engraver or print a QR sheet.
 - Scan a blank tag while signed in and it offers "Add new dog" or a replacement tag for an existing dog.
 
-Reports wait in the Dogs tab, with a count on the tab. There are no outside alerts.
+Reports wait at the top of the crew's Home. There are no outside alerts.
 
 ## How tags work
 

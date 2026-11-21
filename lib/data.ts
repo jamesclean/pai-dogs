@@ -1,6 +1,6 @@
 import "server-only";
-import { and, asc, count, desc, eq, ne, sql } from "drizzle-orm";
-import { db, dogs, dogPhotos, tags, sightings, newDogReports, adoptionQuestions } from "@/db";
+import { asc, count, desc, eq, sql } from "drizzle-orm";
+import { db, dogs, dogPhotos, tags, sightings, adoptionQuestions } from "@/db";
 import { normalizeCode } from "./codes";
 
 export async function getTag(rawCode: string) {
@@ -75,16 +75,4 @@ export async function dogAdoptionQuestions(dogId: number) {
     .where(eq(adoptionQuestions.dogId, dogId))
     .orderBy(desc(adoptionQuestions.createdAt))
     .limit(20);
-}
-
-// Everything waiting for a volunteer, for the count on the Dogs tab.
-export async function inboxCount() {
-  const [[a], [b], [c], [d], [e]] = await Promise.all([
-    db.select({ n: count() }).from(sightings).where(eq(sightings.reviewed, false)),
-    db.select({ n: count() }).from(newDogReports).where(eq(newDogReports.reviewed, false)),
-    db.select({ n: count() }).from(adoptionQuestions).where(eq(adoptionQuestions.reviewed, false)),
-    db.select({ n: count() }).from(sightings).where(and(eq(sightings.reviewed, false), ne(sightings.condition, "ok"))),
-    db.select({ n: count() }).from(newDogReports).where(and(eq(newDogReports.reviewed, false), ne(newDogReports.condition, "ok"))),
-  ]);
-  return { total: a.n + b.n + c.n, needsHelp: d.n + e.n };
 }
